@@ -1,0 +1,873 @@
+{
+  "matrix_version": "1.0.0",
+  "status": "functional_baseline",
+  "last_reviewed": "2026-08-31",
+  "global_constraints": {
+    "maximum_primary_cards": 6,
+    "maximum_prioritized_findings": 5,
+    "minimum_geographic_cell_n": 10,
+    "public_professional_ranking_allowed": false,
+    "combined_mixed_profile_score_allowed": false,
+    "patient_level_drilldown_allowed": false,
+    "failed_upload_replaces_active_dataset": false
+  },
+  "finding_rules": [
+    {
+      "rule_id": "wait_worsening",
+      "indicator_id": "wait_p75_days",
+      "expression": "current > previous * 1.10",
+      "authority_class": "simulated_demonstration",
+      "rule_status": "active",
+      "minimum_valid_n": 30,
+      "minimum_completeness_pct": 95,
+      "severity": "high",
+      "review_action_es": "Revisar demanda, capacidad, priorización y calidad del dato.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "referral_growth",
+      "indicator_id": "referral_growth_pct",
+      "expression": "value > 15",
+      "authority_class": "simulated_demonstration",
+      "rule_status": "active",
+      "minimum_valid_n": 30,
+      "minimum_completeness_pct": 95,
+      "severity": "medium",
+      "review_action_es": "Revisar origen, prestación, estacionalidad y capacidad disponible.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "ges_below_reference",
+      "indicator_id": "ges_compliance_pct",
+      "expression": "value < configured_applicable_target",
+      "authority_class": "ministerial_reference",
+      "rule_status": "conditional",
+      "minimum_valid_n": 1,
+      "minimum_completeness_pct": 95,
+      "severity": "critical",
+      "review_action_es": "Revisar garantías afectadas y plan de recuperación; no inferir incumplimiento oficial con datos simulados.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "new_no_show_above_reference",
+      "indicator_id": "new_no_show_pct",
+      "expression": "value > configured_applicable_target",
+      "authority_class": "ministerial_reference",
+      "rule_status": "conditional",
+      "minimum_valid_n": 30,
+      "minimum_completeness_pct": 95,
+      "severity": "high",
+      "review_action_es": "Revisar confirmación, recordatorios, accesibilidad y programación.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "followup_no_show_above_reference",
+      "indicator_id": "followup_no_show_pct",
+      "expression": "value > configured_applicable_target",
+      "authority_class": "ministerial_reference",
+      "rule_status": "conditional",
+      "minimum_valid_n": 30,
+      "minimum_completeness_pct": 95,
+      "severity": "high",
+      "review_action_es": "Revisar continuidad, recordatorios y necesidad del control.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "surgery_suspension_above_reference",
+      "indicator_id": "elective_surgery_suspension_pct",
+      "expression": "value > configured_applicable_target",
+      "authority_class": "ministerial_reference",
+      "rule_status": "conditional",
+      "minimum_valid_n": 30,
+      "minimum_completeness_pct": 95,
+      "severity": "critical",
+      "review_action_es": "Revisar causas, evitabilidad y proceso responsable.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "ambulatory_surgery_below_reference",
+      "indicator_id": "ambulatory_major_surgery_pct",
+      "expression": "value < configured_applicable_target",
+      "authority_class": "ministerial_reference",
+      "rule_status": "conditional",
+      "minimum_valid_n": 30,
+      "minimum_completeness_pct": 95,
+      "severity": "high",
+      "review_action_es": "Revisar procedimientos elegibles y barreras de ambulatorización.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "emergency_bed_below_reference",
+      "indicator_id": "emergency_bed_lt12h_pct",
+      "expression": "value < configured_applicable_target",
+      "authority_class": "ministerial_reference",
+      "rule_status": "deferred",
+      "minimum_valid_n": 30,
+      "minimum_completeness_pct": 95,
+      "severity": "critical",
+      "review_action_es": "Revisar flujo de camas; regla diferida hasta contar con fuente válida.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "upload_acceptance_low",
+      "indicator_id": "accepted_record_pct",
+      "expression": "value < 95",
+      "authority_class": "project_quality",
+      "rule_status": "active",
+      "minimum_valid_n": 1,
+      "minimum_completeness_pct": 1,
+      "severity": "critical",
+      "review_action_es": "Corregir el archivo de origen antes de interpretar indicadores.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "critical_completeness_low",
+      "indicator_id": "critical_field_completeness_pct",
+      "expression": "value < 95",
+      "authority_class": "project_quality",
+      "rule_status": "active",
+      "minimum_valid_n": 1,
+      "minimum_completeness_pct": 1,
+      "severity": "high",
+      "review_action_es": "Corregir campos críticos y recalcular el tablero.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "pertinence_drop",
+      "indicator_id": "referral_pertinence_pct",
+      "expression": "current < previous - 5 percentage_points",
+      "authority_class": "simulated_demonstration",
+      "rule_status": "active",
+      "minimum_valid_n": 30,
+      "minimum_completeness_pct": 95,
+      "severity": "medium",
+      "review_action_es": "Auditar motivos agregados y coordinar retroalimentación con derivadores.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "discharge_below_local_target",
+      "indicator_id": "discharge_rate_pct",
+      "expression": "value < configured_local_target",
+      "authority_class": "local_target_required",
+      "rule_status": "conditional",
+      "minimum_valid_n": 30,
+      "minimum_completeness_pct": 95,
+      "severity": "medium",
+      "review_action_es": "Revisar mezcla de casos, criterios y documentación de altas.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "teleconsult_below_reference",
+      "indicator_id": "teleconsult_timely_closure_pct",
+      "expression": "value < configured_applicable_target",
+      "authority_class": "ministerial_reference",
+      "rule_status": "conditional",
+      "minimum_valid_n": 30,
+      "minimum_completeness_pct": 95,
+      "severity": "high",
+      "review_action_es": "Revisar flujo de pendientes y tiempos de respuesta.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "waitlist_growth",
+      "indicator_id": "surgical_waitlist_open_count",
+      "expression": "current > previous * 1.10",
+      "authority_class": "simulated_demonstration",
+      "rule_status": "active",
+      "minimum_valid_n": 30,
+      "minimum_completeness_pct": 95,
+      "severity": "high",
+      "review_action_es": "Revisar entradas, resolución, antigüedad y capacidad quirúrgica.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "surgery_wait_worsening",
+      "indicator_id": "surgery_wait_p75_days",
+      "expression": "current > previous * 1.10",
+      "authority_class": "simulated_demonstration",
+      "rule_status": "active",
+      "minimum_valid_n": 30,
+      "minimum_completeness_pct": 95,
+      "severity": "high",
+      "review_action_es": "Revisar antigüedad, prioridad, procedimiento y capacidad quirúrgica.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "waitlist_resolution_below_local_target",
+      "indicator_id": "surgical_waitlist_resolution_pct",
+      "expression": "value < configured_local_target",
+      "authority_class": "local_target_required",
+      "rule_status": "conditional",
+      "minimum_valid_n": 30,
+      "minimum_completeness_pct": 95,
+      "severity": "high",
+      "review_action_es": "Revisar balance entre ingresos y resolución por procedimiento.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "professional_schedule_drop",
+      "indicator_id": "clinical_schedule_completion_pct",
+      "expression": "current < previous - 10 percentage_points",
+      "authority_class": "simulated_non_punitive",
+      "rule_status": "non_punitive",
+      "minimum_valid_n": 10,
+      "minimum_completeness_pct": 95,
+      "severity": "medium",
+      "review_action_es": "Revisar programación, ausencias, soporte y contexto; no atribuir desempeño individual automáticamente.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "professional_surgical_schedule_drop",
+      "indicator_id": "surgical_schedule_completion_pct",
+      "expression": "current < previous - 10 percentage_points",
+      "authority_class": "simulated_non_punitive",
+      "rule_status": "non_punitive",
+      "minimum_valid_n": 10,
+      "minimum_completeness_pct": 95,
+      "severity": "medium",
+      "review_action_es": "Revisar programación y causas sistémicas; no atribuir responsabilidad automáticamente.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    },
+    {
+      "rule_id": "professional_documentation_low",
+      "indicator_id": "professional_documentation_completeness_pct",
+      "expression": "value < 95",
+      "authority_class": "project_quality_non_punitive",
+      "rule_status": "non_punitive",
+      "minimum_valid_n": 10,
+      "minimum_completeness_pct": 1,
+      "severity": "medium",
+      "review_action_es": "Completar o corregir campos obligatorios del perfil simulado.",
+      "suppress_when": [
+        "indicator_not_applicable",
+        "target_not_configured_when_required",
+        "minimum_n_not_met",
+        "completeness_not_met"
+      ]
+    }
+  ],
+  "role_views": [
+    {
+      "role_id": "director",
+      "display_name_es": "Directivo — Director",
+      "indicator_profile": "institutional",
+      "primary_indicator_ids": [
+        "referrals_total",
+        "wait_p75_days",
+        "ges_compliance_pct",
+        "new_no_show_pct",
+        "elective_surgery_suspension_pct",
+        "accepted_record_pct"
+      ],
+      "cadence": "monthly_quarterly",
+      "questions": [
+        {
+          "question_id": "institutional_access",
+          "question_es": "¿Dónde se concentran las mayores desviaciones de acceso?",
+          "indicator_ids": [
+            "wait_p75_days",
+            "new_no_show_pct",
+            "followup_no_show_pct"
+          ],
+          "finding_rule_ids": [
+            "wait_worsening",
+            "new_no_show_above_reference",
+            "followup_no_show_above_reference"
+          ],
+          "review_action_es": "Priorizar revisión institucional y servicios afectados."
+        },
+        {
+          "question_id": "institutional_guarantees",
+          "question_es": "¿Existen señales de riesgo en garantías y cirugía?",
+          "indicator_ids": [
+            "ges_compliance_pct",
+            "elective_surgery_suspension_pct",
+            "ambulatory_major_surgery_pct"
+          ],
+          "finding_rule_ids": [
+            "ges_below_reference",
+            "surgery_suspension_above_reference",
+            "ambulatory_surgery_below_reference"
+          ],
+          "review_action_es": "Solicitar verificación y plan de gestión al responsable correspondiente."
+        },
+        {
+          "question_id": "network_demand",
+          "question_es": "¿Qué territorios y derivadores concentran la demanda?",
+          "indicator_ids": [
+            "referrals_total",
+            "referral_growth_pct",
+            "top3_referrer_share_pct"
+          ],
+          "finding_rule_ids": [
+            "referral_growth"
+          ],
+          "review_action_es": "Coordinar prioridades de red y capacidad institucional."
+        },
+        {
+          "question_id": "data_confidence",
+          "question_es": "¿La evidencia permite tomar una decisión?",
+          "indicator_ids": [
+            "accepted_record_pct",
+            "critical_field_completeness_pct"
+          ],
+          "finding_rule_ids": [
+            "upload_acceptance_low",
+            "critical_completeness_low"
+          ],
+          "review_action_es": "Corregir la fuente antes de interpretar hallazgos."
+        }
+      ]
+    },
+    {
+      "role_id": "medical_director",
+      "display_name_es": "Directivo — Director Médico",
+      "indicator_profile": "institutional",
+      "primary_indicator_ids": [
+        "referral_growth_pct",
+        "wait_p75_days",
+        "discharge_rate_pct",
+        "referral_pertinence_pct",
+        "ges_compliance_pct",
+        "surgical_waitlist_resolution_pct"
+      ],
+      "cadence": "weekly_monthly",
+      "questions": [
+        {
+          "question_id": "clinical_demand",
+          "question_es": "¿Qué especialidades presentan mayor presión asistencial?",
+          "indicator_ids": [
+            "referral_growth_pct",
+            "wait_p75_days"
+          ],
+          "finding_rule_ids": [
+            "referral_growth",
+            "wait_worsening"
+          ],
+          "review_action_es": "Priorizar revisión clínico-operacional por especialidad."
+        },
+        {
+          "question_id": "clinical_resolution",
+          "question_es": "¿Los servicios resuelven y dan altas?",
+          "indicator_ids": [
+            "discharge_rate_pct"
+          ],
+          "finding_rule_ids": [
+            "discharge_below_local_target"
+          ],
+          "review_action_es": "Revisar mezcla de casos y criterios documentados de alta."
+        },
+        {
+          "question_id": "referral_quality",
+          "question_es": "¿Dónde disminuye la pertinencia de derivación?",
+          "indicator_ids": [
+            "referral_pertinence_pct"
+          ],
+          "finding_rule_ids": [
+            "pertinence_drop"
+          ],
+          "review_action_es": "Auditar motivos agregados y retroalimentar a la red."
+        },
+        {
+          "question_id": "clinical_risk",
+          "question_es": "¿Dónde se concentran señales GES o de lista quirúrgica?",
+          "indicator_ids": [
+            "ges_compliance_pct",
+            "surgical_waitlist_resolution_pct"
+          ],
+          "finding_rule_ids": [
+            "ges_below_reference",
+            "waitlist_resolution_below_local_target"
+          ],
+          "review_action_es": "Activar revisión con el servicio responsable."
+        }
+      ]
+    },
+    {
+      "role_id": "service_chief_clinical",
+      "display_name_es": "Jefe de Servicio — Clínico",
+      "indicator_profile": "clinical_outpatient",
+      "primary_indicator_ids": [
+        "referrals_total",
+        "wait_p75_days",
+        "new_no_show_pct",
+        "followup_no_show_pct",
+        "discharge_rate_pct",
+        "referral_pertinence_pct"
+      ],
+      "cadence": "weekly_monthly",
+      "questions": [
+        {
+          "question_id": "service_demand",
+          "question_es": "¿Cómo cambia la demanda del servicio?",
+          "indicator_ids": [
+            "referrals_total",
+            "referral_growth_pct"
+          ],
+          "finding_rule_ids": [
+            "referral_growth"
+          ],
+          "review_action_es": "Revisar origen, prestación y capacidad del servicio."
+        },
+        {
+          "question_id": "service_access",
+          "question_es": "¿Cómo evolucionan la espera y la inasistencia?",
+          "indicator_ids": [
+            "wait_p75_days",
+            "new_no_show_pct",
+            "followup_no_show_pct"
+          ],
+          "finding_rule_ids": [
+            "wait_worsening",
+            "new_no_show_above_reference",
+            "followup_no_show_above_reference"
+          ],
+          "review_action_es": "Revisar agenda, priorización, confirmación y accesibilidad."
+        },
+        {
+          "question_id": "service_resolution",
+          "question_es": "¿El servicio resuelve y documenta continuidad?",
+          "indicator_ids": [
+            "discharge_rate_pct",
+            "contrareference_pct"
+          ],
+          "finding_rule_ids": [
+            "discharge_below_local_target"
+          ],
+          "review_action_es": "Revisar altas elegibles y contrarreferencia."
+        },
+        {
+          "question_id": "service_referrals",
+          "question_es": "¿Las derivaciones son pertinentes y de dónde provienen?",
+          "indicator_ids": [
+            "referral_pertinence_pct",
+            "top3_referrer_share_pct"
+          ],
+          "finding_rule_ids": [
+            "pertinence_drop"
+          ],
+          "review_action_es": "Coordinar retroalimentación con principales derivadores."
+        },
+        {
+          "question_id": "service_teleconsult",
+          "question_es": "¿Las teleconsultas elegibles se cierran oportunamente?",
+          "indicator_ids": [
+            "teleconsult_timely_closure_pct"
+          ],
+          "finding_rule_ids": [
+            "teleconsult_below_reference"
+          ],
+          "review_action_es": "Revisar pendientes y flujo de respuesta."
+        }
+      ]
+    },
+    {
+      "role_id": "service_chief_surgical",
+      "display_name_es": "Jefe de Servicio — Quirúrgico",
+      "indicator_profile": "surgical",
+      "primary_indicator_ids": [
+        "surgical_waitlist_open_count",
+        "surgery_wait_p75_days",
+        "elective_major_surgery_count",
+        "ambulatory_major_surgery_pct",
+        "elective_surgery_suspension_pct",
+        "surgical_waitlist_resolution_pct"
+      ],
+      "cadence": "weekly_monthly",
+      "questions": [
+        {
+          "question_id": "surgical_demand",
+          "question_es": "¿Cómo evolucionan el tamaño y la antigüedad de la lista?",
+          "indicator_ids": [
+            "surgical_waitlist_open_count",
+            "surgery_wait_p75_days"
+          ],
+          "finding_rule_ids": [
+            "waitlist_growth",
+            "surgery_wait_worsening"
+          ],
+          "review_action_es": "Revisar ingresos, antigüedad, prioridad y capacidad."
+        },
+        {
+          "question_id": "surgical_output",
+          "question_es": "¿Qué volumen y mezcla de cirugías se completan?",
+          "indicator_ids": [
+            "elective_major_surgery_count",
+            "ambulatory_major_surgery_pct"
+          ],
+          "finding_rule_ids": [
+            "ambulatory_surgery_below_reference"
+          ],
+          "review_action_es": "Revisar procedimientos elegibles y barreras."
+        },
+        {
+          "question_id": "surgical_suspension",
+          "question_es": "¿Qué magnitud tienen las suspensiones?",
+          "indicator_ids": [
+            "elective_surgery_suspension_pct"
+          ],
+          "finding_rule_ids": [
+            "surgery_suspension_above_reference"
+          ],
+          "review_action_es": "Revisar causas, evitabilidad y proceso responsable."
+        },
+        {
+          "question_id": "surgical_resolution",
+          "question_es": "¿La resolución compensa el ingreso de nuevos casos?",
+          "indicator_ids": [
+            "surgical_waitlist_resolution_pct"
+          ],
+          "finding_rule_ids": [
+            "waitlist_resolution_below_local_target"
+          ],
+          "review_action_es": "Revisar balance por procedimiento y origen."
+        },
+        {
+          "question_id": "or_use",
+          "question_es": "¿Existe información válida de utilización de pabellón?",
+          "indicator_ids": [
+            "operating_room_utilization_pct"
+          ],
+          "finding_rule_ids": [],
+          "review_action_es": "Mostrar solo cuando el contrato de horas esté validado."
+        }
+      ]
+    },
+    {
+      "role_id": "professional_clinical",
+      "display_name_es": "Profesional — Clínico",
+      "indicator_profile": "professional_clinical",
+      "primary_indicator_ids": [
+        "clinical_activity_completed",
+        "clinical_schedule_completion_pct",
+        "new_consultation_share_pct",
+        "discharge_rate_pct",
+        "professional_documentation_completeness_pct",
+        "professional_no_show_context_pct"
+      ],
+      "cadence": "bounded_simulated_snapshot",
+      "questions": [
+        {
+          "question_id": "professional_clinical_activity",
+          "question_es": "¿Qué actividad clínica fue programada y completada?",
+          "indicator_ids": [
+            "clinical_activity_completed",
+            "clinical_schedule_completion_pct"
+          ],
+          "finding_rule_ids": [
+            "professional_schedule_drop"
+          ],
+          "review_action_es": "Revisar contexto de programación y soporte sin ranking."
+        },
+        {
+          "question_id": "professional_clinical_mix",
+          "question_es": "¿Cuál es la mezcla de consultas nuevas, controles y altas?",
+          "indicator_ids": [
+            "new_consultation_share_pct",
+            "discharge_rate_pct"
+          ],
+          "finding_rule_ids": [],
+          "review_action_es": "Interpretar con mezcla de casos y contexto del servicio."
+        },
+        {
+          "question_id": "professional_clinical_quality",
+          "question_es": "¿La documentación simulada está completa?",
+          "indicator_ids": [
+            "professional_documentation_completeness_pct"
+          ],
+          "finding_rule_ids": [
+            "professional_documentation_low"
+          ],
+          "review_action_es": "Completar campos obligatorios."
+        },
+        {
+          "question_id": "professional_clinical_context",
+          "question_es": "¿Qué inasistencia, prestaciones y orígenes contextualizan la actividad?",
+          "indicator_ids": [
+            "professional_no_show_context_pct",
+            "clinical_activity_completed"
+          ],
+          "finding_rule_ids": [],
+          "review_action_es": "Usar contexto agregado; no atribuir causalidad individual."
+        }
+      ]
+    },
+    {
+      "role_id": "professional_surgical",
+      "display_name_es": "Profesional — Quirúrgico",
+      "indicator_profile": "professional_surgical",
+      "primary_indicator_ids": [
+        "surgical_activity_completed",
+        "surgical_schedule_completion_pct",
+        "professional_ambulatory_surgery_pct",
+        "professional_documentation_completeness_pct",
+        "professional_suspension_context_pct"
+      ],
+      "cadence": "bounded_simulated_snapshot",
+      "questions": [
+        {
+          "question_id": "professional_surgical_activity",
+          "question_es": "¿Qué actividad quirúrgica fue programada y completada?",
+          "indicator_ids": [
+            "surgical_activity_completed",
+            "surgical_schedule_completion_pct"
+          ],
+          "finding_rule_ids": [
+            "professional_surgical_schedule_drop"
+          ],
+          "review_action_es": "Revisar programación y causas sistémicas sin ranking."
+        },
+        {
+          "question_id": "professional_surgical_mix",
+          "question_es": "¿Cuál es la mezcla de procedimientos y ambulatorización?",
+          "indicator_ids": [
+            "professional_ambulatory_surgery_pct"
+          ],
+          "finding_rule_ids": [],
+          "review_action_es": "Interpretar según elegibilidad y complejidad."
+        },
+        {
+          "question_id": "professional_surgical_quality",
+          "question_es": "¿La documentación simulada está completa?",
+          "indicator_ids": [
+            "professional_documentation_completeness_pct"
+          ],
+          "finding_rule_ids": [
+            "professional_documentation_low"
+          ],
+          "review_action_es": "Completar campos obligatorios."
+        },
+        {
+          "question_id": "professional_surgical_context",
+          "question_es": "¿Qué suspensiones, orígenes y procedimientos contextualizan la actividad?",
+          "indicator_ids": [
+            "professional_suspension_context_pct"
+          ],
+          "finding_rule_ids": [],
+          "review_action_es": "Mostrar como contexto; no atribuir responsabilidad individual."
+        }
+      ]
+    },
+    {
+      "role_id": "professional_mixed",
+      "display_name_es": "Profesional — Mixto",
+      "indicator_profile": "professional_mixed",
+      "primary_indicator_ids": [],
+      "cadence": "bounded_simulated_snapshot",
+      "composition_rule": "Render professional_clinical and professional_surgical as separate lenses; permit a count summary but prohibit a combined performance score.",
+      "questions": []
+    }
+  ],
+  "map_contracts": [
+    {
+      "role_id": "director",
+      "question_es": "¿Dónde se concentra la demanda institucional y qué territorios empeoran?",
+      "required_filters": [
+        "period",
+        "service",
+        "specialty",
+        "prestation"
+      ],
+      "bubble_size": "referrals_total",
+      "bubble_color_options": [
+        "referral_growth_pct",
+        "wait_p75_days"
+      ],
+      "allowed_detail": [
+        "origin_establishment",
+        "service",
+        "specialty"
+      ],
+      "decision_use": "Priorización institucional y coordinación de red."
+    },
+    {
+      "role_id": "medical_director",
+      "question_es": "¿Qué orígenes envían qué especialidades, prestaciones o grupos diagnósticos?",
+      "required_filters": [
+        "period",
+        "service",
+        "specialty",
+        "prestation",
+        "ges_status"
+      ],
+      "bubble_size": "referrals_total",
+      "bubble_color_options": [
+        "referral_pertinence_pct",
+        "ges_compliance_pct",
+        "wait_p75_days"
+      ],
+      "allowed_detail": [
+        "origin_establishment",
+        "specialty",
+        "prestation",
+        "diagnostic_group"
+      ],
+      "decision_use": "Gobernanza clínica y vigilancia epidemiológica agregada."
+    },
+    {
+      "role_id": "service_chief_clinical",
+      "question_es": "¿Qué establecimientos determinan la demanda, espera y pertinencia del servicio?",
+      "required_filters": [
+        "period",
+        "service",
+        "specialty",
+        "prestation"
+      ],
+      "bubble_size": "referrals_total",
+      "bubble_color_options": [
+        "wait_p75_days",
+        "referral_pertinence_pct"
+      ],
+      "allowed_detail": [
+        "origin_establishment",
+        "prestation"
+      ],
+      "decision_use": "Retroalimentación a derivadores y planificación del servicio."
+    },
+    {
+      "role_id": "service_chief_surgical",
+      "question_es": "¿Qué orígenes y procedimientos determinan la lista quirúrgica?",
+      "required_filters": [
+        "period",
+        "service",
+        "specialty",
+        "procedure"
+      ],
+      "bubble_size": "surgical_waitlist_open_count",
+      "bubble_color_options": [
+        "surgery_wait_p75_days"
+      ],
+      "allowed_detail": [
+        "origin_establishment",
+        "procedure"
+      ],
+      "decision_use": "Gestión de lista, priorización y capacidad quirúrgica."
+    },
+    {
+      "role_id": "professional_clinical",
+      "question_es": "¿Qué orígenes y prestaciones contextualizan la actividad clínica simulada?",
+      "required_filters": [
+        "period",
+        "simulated_profile",
+        "prestation"
+      ],
+      "bubble_size": "clinical_activity_completed",
+      "bubble_color_options": [
+        "professional_no_show_context_pct"
+      ],
+      "allowed_detail": [
+        "origin_establishment",
+        "prestation"
+      ],
+      "decision_use": "Retroalimentación contextual no punitiva."
+    },
+    {
+      "role_id": "professional_surgical",
+      "question_es": "¿Qué orígenes y procedimientos contextualizan la actividad quirúrgica simulada?",
+      "required_filters": [
+        "period",
+        "simulated_profile",
+        "procedure"
+      ],
+      "bubble_size": "surgical_activity_completed",
+      "bubble_color_options": [
+        "professional_suspension_context_pct"
+      ],
+      "allowed_detail": [
+        "origin_establishment",
+        "procedure"
+      ],
+      "decision_use": "Retroalimentación contextual no punitiva."
+    }
+  ]
+}

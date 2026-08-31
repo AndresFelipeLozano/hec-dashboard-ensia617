@@ -1,0 +1,931 @@
+{
+  "catalog_version": "1.0.0",
+  "status": "functional_baseline",
+  "last_reviewed": "2026-08-31",
+  "formula_policy": "All percentages are multiplied by 100 and return null when the validated denominator is zero.",
+  "target_policy": {
+    "ministerial_reference": "A published reference that is displayed only after applicability is validated.",
+    "local": "A service or institutional target that must be configured and approved before alerting.",
+    "project_quality": "A transparent prototype data-quality threshold.",
+    "none": "Descriptive indicator without a performance target."
+  },
+  "indicators": [
+    {
+      "indicator_id": "referrals_total",
+      "display_name_es": "Derivaciones recibidas",
+      "definition": "Número de derivaciones únicas recibidas en el período.",
+      "numerator": "count_distinct(referral_id)",
+      "denominator": null,
+      "unit": "count",
+      "polarity": "context",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "clinical_outpatient",
+        "surgical"
+      ],
+      "target": {
+        "type": "none",
+        "value": null,
+        "operator": null,
+        "authority": null,
+        "applicability": "not_applicable"
+      },
+      "data_status": "mvp_core",
+      "minimum_valid_n": 1,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "origin",
+        "prestation",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "referral_growth_pct",
+      "display_name_es": "Variación de derivaciones",
+      "definition": "Cambio porcentual de derivaciones respecto del período comparable anterior.",
+      "numerator": "current_referrals - previous_referrals",
+      "denominator": "previous_referrals",
+      "unit": "percentage",
+      "polarity": "context",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "clinical_outpatient",
+        "surgical"
+      ],
+      "target": {
+        "type": "none",
+        "value": null,
+        "operator": null,
+        "authority": null,
+        "applicability": "not_applicable"
+      },
+      "data_status": "mvp_core",
+      "minimum_valid_n": 30,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "origin",
+        "prestation",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "wait_median_days",
+      "display_name_es": "Mediana de espera",
+      "definition": "Mediana de días entre la fecha de entrada y la atención o fecha de corte.",
+      "numerator": "median(wait_days)",
+      "denominator": null,
+      "unit": "days",
+      "polarity": "lower_is_better",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "clinical_outpatient",
+        "surgical"
+      ],
+      "target": {
+        "type": "local",
+        "value": null,
+        "operator": null,
+        "authority": "HEC",
+        "applicability": "pending_validation"
+      },
+      "data_status": "mvp_core",
+      "minimum_valid_n": 30,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "origin",
+        "prestation",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "wait_p75_days",
+      "display_name_es": "Percentil 75 de espera",
+      "definition": "Percentil 75 de días de espera; representa la cola de mayor demora sin depender del máximo.",
+      "numerator": "percentile(wait_days, 0.75)",
+      "denominator": null,
+      "unit": "days",
+      "polarity": "lower_is_better",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "clinical_outpatient",
+        "surgical"
+      ],
+      "target": {
+        "type": "local",
+        "value": null,
+        "operator": null,
+        "authority": "HEC",
+        "applicability": "pending_validation"
+      },
+      "data_status": "mvp_core",
+      "minimum_valid_n": 30,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "origin",
+        "prestation",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "new_no_show_pct",
+      "display_name_es": "Inasistencia de consultas nuevas",
+      "definition": "Proporción de consultas nuevas programadas en que el paciente no asistió.",
+      "numerator": "new_no_show_count",
+      "denominator": "scheduled_new_consultations",
+      "unit": "percentage",
+      "polarity": "lower_is_better",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "clinical_outpatient"
+      ],
+      "target": {
+        "type": "ministerial_reference",
+        "value": 12.0,
+        "operator": "<=",
+        "authority": "MINSAL COMGES 2026",
+        "applicability": "pending_service_validation"
+      },
+      "data_status": "mvp_core",
+      "minimum_valid_n": 30,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "followup_no_show_pct",
+      "display_name_es": "Inasistencia de controles",
+      "definition": "Proporción de consultas de seguimiento programadas en que el paciente no asistió.",
+      "numerator": "followup_no_show_count",
+      "denominator": "scheduled_followup_consultations",
+      "unit": "percentage",
+      "polarity": "lower_is_better",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "clinical_outpatient"
+      ],
+      "target": {
+        "type": "ministerial_reference",
+        "value": 10.0,
+        "operator": "<=",
+        "authority": "MINSAL COMGES 2026",
+        "applicability": "pending_service_validation"
+      },
+      "data_status": "mvp_core",
+      "minimum_valid_n": 30,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "discharge_rate_pct",
+      "display_name_es": "Tasa de altas",
+      "definition": "Altas clínicas documentadas sobre consultas completadas elegibles según contrato local.",
+      "numerator": "documented_discharges",
+      "denominator": "eligible_completed_consultations",
+      "unit": "percentage",
+      "polarity": "higher_is_better",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "clinical_outpatient",
+        "professional_clinical"
+      ],
+      "target": {
+        "type": "local",
+        "value": null,
+        "operator": null,
+        "authority": "HEC",
+        "applicability": "pending_validation"
+      },
+      "data_status": "conditional",
+      "minimum_valid_n": 30,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "referral_pertinence_pct",
+      "display_name_es": "Pertinencia de derivación",
+      "definition": "Derivaciones evaluadas como pertinentes sobre derivaciones con pertinencia registrada.",
+      "numerator": "pertinent_referrals",
+      "denominator": "referrals_with_pertinence_assessment",
+      "unit": "percentage",
+      "polarity": "higher_is_better",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "clinical_outpatient"
+      ],
+      "target": {
+        "type": "local",
+        "value": null,
+        "operator": null,
+        "authority": "HEC",
+        "applicability": "pending_validation"
+      },
+      "data_status": "conditional",
+      "minimum_valid_n": 30,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "origin",
+        "prestation",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "contrareference_pct",
+      "display_name_es": "Contrarreferencia documentada",
+      "definition": "Egresos elegibles con contrarreferencia documentada sobre egresos elegibles.",
+      "numerator": "documented_contrareferences",
+      "denominator": "eligible_discharges",
+      "unit": "percentage",
+      "polarity": "higher_is_better",
+      "applicable_indicator_profiles": [
+        "clinical_outpatient"
+      ],
+      "target": {
+        "type": "local",
+        "value": null,
+        "operator": null,
+        "authority": "HEC",
+        "applicability": "pending_validation"
+      },
+      "data_status": "conditional",
+      "minimum_valid_n": 30,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "ges_compliance_pct",
+      "display_name_es": "Cumplimiento GES",
+      "definition": "Garantías GES cumplidas dentro del plazo sobre garantías exigibles del período.",
+      "numerator": "ges_guarantees_met",
+      "denominator": "ges_guarantees_due",
+      "unit": "percentage",
+      "polarity": "higher_is_better",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "clinical_outpatient",
+        "surgical"
+      ],
+      "target": {
+        "type": "ministerial_reference",
+        "value": 100.0,
+        "operator": ">=",
+        "authority": "MINSAL COMGES 2026",
+        "applicability": "pending_service_validation"
+      },
+      "data_status": "conditional",
+      "minimum_valid_n": 1,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "origin",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "teleconsult_timely_closure_pct",
+      "display_name_es": "Cierre oportuno de teleconsultas",
+      "definition": "Teleconsultas elegibles cerradas dentro del plazo aplicable sobre teleconsultas elegibles.",
+      "numerator": "timely_closed_teleconsultations",
+      "denominator": "eligible_teleconsultations",
+      "unit": "percentage",
+      "polarity": "higher_is_better",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "clinical_outpatient"
+      ],
+      "target": {
+        "type": "ministerial_reference",
+        "value": 85.0,
+        "operator": ">=",
+        "authority": "MINSAL COMGES 2026",
+        "applicability": "eligible_workflows_only"
+      },
+      "data_status": "conditional",
+      "minimum_valid_n": 30,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "accepted_record_pct",
+      "display_name_es": "Registros aceptados",
+      "definition": "Filas aceptadas por la validación sobre filas recibidas en la carga.",
+      "numerator": "accepted_rows",
+      "denominator": "submitted_rows",
+      "unit": "percentage",
+      "polarity": "higher_is_better",
+      "applicable_indicator_profiles": [
+        "data_quality",
+        "institutional"
+      ],
+      "target": {
+        "type": "project_quality",
+        "value": 95.0,
+        "operator": ">=",
+        "authority": "Prototype governance",
+        "applicability": "all_uploads"
+      },
+      "data_status": "mvp_core",
+      "minimum_valid_n": 1,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "critical_field_completeness_pct",
+      "display_name_es": "Completitud de campos críticos",
+      "definition": "Registros con todos los campos críticos completos sobre registros aceptados.",
+      "numerator": "rows_with_complete_critical_fields",
+      "denominator": "accepted_rows",
+      "unit": "percentage",
+      "polarity": "higher_is_better",
+      "applicable_indicator_profiles": [
+        "data_quality",
+        "institutional",
+        "clinical_outpatient",
+        "surgical"
+      ],
+      "target": {
+        "type": "project_quality",
+        "value": 95.0,
+        "operator": ">=",
+        "authority": "Prototype governance",
+        "applicability": "all_datasets"
+      },
+      "data_status": "mvp_core",
+      "minimum_valid_n": 1,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "top3_referrer_share_pct",
+      "display_name_es": "Concentración en tres derivadores",
+      "definition": "Proporción de derivaciones aportadas por los tres establecimientos con mayor volumen.",
+      "numerator": "referrals_from_top_3_origins",
+      "denominator": "all_referrals",
+      "unit": "percentage",
+      "polarity": "context",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "clinical_outpatient",
+        "surgical"
+      ],
+      "target": {
+        "type": "none",
+        "value": null,
+        "operator": null,
+        "authority": null,
+        "applicability": "not_applicable"
+      },
+      "data_status": "mvp_core",
+      "minimum_valid_n": 30,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "surgical_waitlist_open_count",
+      "display_name_es": "Lista de espera quirúrgica activa",
+      "definition": "Casos quirúrgicos abiertos a la fecha de corte.",
+      "numerator": "count_distinct(open_waitlist_case_id)",
+      "denominator": null,
+      "unit": "count",
+      "polarity": "lower_is_better",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "surgical"
+      ],
+      "target": {
+        "type": "local",
+        "value": null,
+        "operator": null,
+        "authority": "HEC",
+        "applicability": "pending_validation"
+      },
+      "data_status": "mvp_core",
+      "minimum_valid_n": 1,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "origin",
+        "procedure",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "surgery_wait_p75_days",
+      "display_name_es": "Percentil 75 de espera quirúrgica",
+      "definition": "Percentil 75 de días de espera de casos quirúrgicos según el filtro aplicado.",
+      "numerator": "percentile(surgery_wait_days, 0.75)",
+      "denominator": null,
+      "unit": "days",
+      "polarity": "lower_is_better",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "surgical"
+      ],
+      "target": {
+        "type": "local",
+        "value": null,
+        "operator": null,
+        "authority": "HEC",
+        "applicability": "pending_validation"
+      },
+      "data_status": "mvp_core",
+      "minimum_valid_n": 30,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "origin",
+        "procedure",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "elective_major_surgery_count",
+      "display_name_es": "Cirugías mayores electivas",
+      "definition": "Número de cirugías mayores electivas completadas en el período.",
+      "numerator": "count_distinct(completed_elective_major_surgery_id)",
+      "denominator": null,
+      "unit": "count",
+      "polarity": "context",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "surgical"
+      ],
+      "target": {
+        "type": "none",
+        "value": null,
+        "operator": null,
+        "authority": null,
+        "applicability": "not_applicable"
+      },
+      "data_status": "mvp_core",
+      "minimum_valid_n": 1,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "procedure",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "ambulatory_major_surgery_pct",
+      "display_name_es": "Cirugía mayor ambulatoria",
+      "definition": "Cirugías mayores ambulatorias sobre cirugías mayores electivas aplicables.",
+      "numerator": "ambulatory_major_surgeries",
+      "denominator": "applicable_elective_major_surgeries",
+      "unit": "percentage",
+      "polarity": "higher_is_better",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "surgical"
+      ],
+      "target": {
+        "type": "ministerial_reference",
+        "value": 50.0,
+        "operator": ">=",
+        "authority": "MINSAL COMGES 2026",
+        "applicability": "applicable_services_and_procedures_only"
+      },
+      "data_status": "mvp_core",
+      "minimum_valid_n": 30,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "elective_surgery_suspension_pct",
+      "display_name_es": "Suspensión de cirugía electiva",
+      "definition": "Cirugías mayores electivas suspendidas sobre cirugías mayores electivas programadas.",
+      "numerator": "suspended_elective_major_surgeries",
+      "denominator": "scheduled_elective_major_surgeries",
+      "unit": "percentage",
+      "polarity": "lower_is_better",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "surgical"
+      ],
+      "target": {
+        "type": "ministerial_reference",
+        "value": 6.5,
+        "operator": "<=",
+        "authority": "MINSAL COMGES 2026",
+        "applicability": "pending_service_validation"
+      },
+      "data_status": "mvp_core",
+      "minimum_valid_n": 30,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "surgical_waitlist_resolution_pct",
+      "display_name_es": "Resolución de lista quirúrgica",
+      "definition": "Casos resueltos durante el período sobre la carga resoluble definida por contrato local.",
+      "numerator": "resolved_waitlist_cases",
+      "denominator": "locally_defined_resolvable_caseload",
+      "unit": "percentage",
+      "polarity": "higher_is_better",
+      "applicable_indicator_profiles": [
+        "institutional",
+        "surgical"
+      ],
+      "target": {
+        "type": "local",
+        "value": null,
+        "operator": null,
+        "authority": "HEC",
+        "applicability": "pending_validation"
+      },
+      "data_status": "conditional",
+      "minimum_valid_n": 30,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "operating_room_utilization_pct",
+      "display_name_es": "Utilización de pabellón",
+      "definition": "Horas de pabellón utilizadas sobre horas disponibles validadas, con exclusiones documentadas.",
+      "numerator": "validated_used_or_hours",
+      "denominator": "validated_available_or_hours",
+      "unit": "percentage",
+      "polarity": "higher_is_better",
+      "applicable_indicator_profiles": [
+        "surgical"
+      ],
+      "target": {
+        "type": "local",
+        "value": null,
+        "operator": null,
+        "authority": "HEC",
+        "applicability": "pending_validation"
+      },
+      "data_status": "deferred",
+      "minimum_valid_n": 1,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "emergency_bed_lt12h_pct",
+      "display_name_es": "Acceso a cama antes de 12 horas",
+      "definition": "Pacientes elegibles de emergencia que acceden a cama antes de 12 horas sobre pacientes elegibles con indicación de hospitalización.",
+      "numerator": "eligible_patients_bed_lt12h",
+      "denominator": "eligible_patients_requiring_admission",
+      "unit": "percentage",
+      "polarity": "higher_is_better",
+      "applicable_indicator_profiles": [
+        "institutional"
+      ],
+      "target": {
+        "type": "ministerial_reference",
+        "value": 85.0,
+        "operator": ">=",
+        "authority": "MINSAL COMGES 2026",
+        "applicability": "deferred_until_valid_input"
+      },
+      "data_status": "deferred",
+      "minimum_valid_n": 30,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "clinical_activity_completed",
+      "display_name_es": "Actividad clínica completada",
+      "definition": "Consultas o prestaciones clínicas completadas por el perfil simulado.",
+      "numerator": "count_distinct(completed_clinical_activity_id)",
+      "denominator": null,
+      "unit": "count",
+      "polarity": "context",
+      "applicable_indicator_profiles": [
+        "professional_clinical"
+      ],
+      "target": {
+        "type": "none",
+        "value": null,
+        "operator": null,
+        "authority": null,
+        "applicability": "not_applicable"
+      },
+      "data_status": "mvp_simulated",
+      "minimum_valid_n": 1,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "professional_profile",
+        "service",
+        "specialty",
+        "origin",
+        "prestation",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "clinical_schedule_completion_pct",
+      "display_name_es": "Cumplimiento de actividad clínica programada",
+      "definition": "Actividad clínica completada sobre actividad clínica programada elegible.",
+      "numerator": "completed_scheduled_clinical_activity",
+      "denominator": "eligible_scheduled_clinical_activity",
+      "unit": "percentage",
+      "polarity": "higher_is_better",
+      "applicable_indicator_profiles": [
+        "professional_clinical"
+      ],
+      "target": {
+        "type": "none",
+        "value": null,
+        "operator": null,
+        "authority": null,
+        "applicability": "not_applicable"
+      },
+      "data_status": "mvp_simulated",
+      "minimum_valid_n": 10,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "new_consultation_share_pct",
+      "display_name_es": "Proporción de consultas nuevas",
+      "definition": "Consultas nuevas completadas sobre consultas médicas completadas.",
+      "numerator": "completed_new_consultations",
+      "denominator": "completed_medical_consultations",
+      "unit": "percentage",
+      "polarity": "context",
+      "applicable_indicator_profiles": [
+        "professional_clinical"
+      ],
+      "target": {
+        "type": "local",
+        "value": null,
+        "operator": null,
+        "authority": "HEC",
+        "applicability": "pending_validation"
+      },
+      "data_status": "mvp_simulated",
+      "minimum_valid_n": 10,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "professional_documentation_completeness_pct",
+      "display_name_es": "Completitud de documentación",
+      "definition": "Prestaciones del perfil con campos obligatorios completos sobre prestaciones elegibles.",
+      "numerator": "activities_with_complete_required_fields",
+      "denominator": "eligible_activities",
+      "unit": "percentage",
+      "polarity": "higher_is_better",
+      "applicable_indicator_profiles": [
+        "professional_clinical",
+        "professional_surgical"
+      ],
+      "target": {
+        "type": "project_quality",
+        "value": 95.0,
+        "operator": ">=",
+        "authority": "Prototype governance",
+        "applicability": "simulated_professional_profiles"
+      },
+      "data_status": "mvp_simulated",
+      "minimum_valid_n": 10,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "professional_no_show_context_pct",
+      "display_name_es": "Contexto de inasistencia",
+      "definition": "Inasistencias sobre actividad programada del perfil; se presenta como contexto y no como atribución profesional.",
+      "numerator": "profile_no_show_count",
+      "denominator": "profile_scheduled_activity",
+      "unit": "percentage",
+      "polarity": "context",
+      "applicable_indicator_profiles": [
+        "professional_clinical"
+      ],
+      "target": {
+        "type": "none",
+        "value": null,
+        "operator": null,
+        "authority": null,
+        "applicability": "not_applicable"
+      },
+      "data_status": "mvp_simulated",
+      "minimum_valid_n": 10,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "surgical_activity_completed",
+      "display_name_es": "Actividad quirúrgica completada",
+      "definition": "Procedimientos quirúrgicos completados por el perfil simulado.",
+      "numerator": "count_distinct(completed_surgical_activity_id)",
+      "denominator": null,
+      "unit": "count",
+      "polarity": "context",
+      "applicable_indicator_profiles": [
+        "professional_surgical"
+      ],
+      "target": {
+        "type": "none",
+        "value": null,
+        "operator": null,
+        "authority": null,
+        "applicability": "not_applicable"
+      },
+      "data_status": "mvp_simulated",
+      "minimum_valid_n": 1,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "professional_profile",
+        "service",
+        "specialty",
+        "origin",
+        "procedure",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "surgical_schedule_completion_pct",
+      "display_name_es": "Cumplimiento de actividad quirúrgica programada",
+      "definition": "Procedimientos completados sobre procedimientos programados elegibles.",
+      "numerator": "completed_scheduled_surgical_activity",
+      "denominator": "eligible_scheduled_surgical_activity",
+      "unit": "percentage",
+      "polarity": "higher_is_better",
+      "applicable_indicator_profiles": [
+        "professional_surgical"
+      ],
+      "target": {
+        "type": "none",
+        "value": null,
+        "operator": null,
+        "authority": null,
+        "applicability": "not_applicable"
+      },
+      "data_status": "mvp_simulated",
+      "minimum_valid_n": 10,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "professional_ambulatory_surgery_pct",
+      "display_name_es": "Cirugía ambulatoria del perfil",
+      "definition": "Cirugías ambulatorias del perfil sobre cirugías mayores electivas aplicables del perfil.",
+      "numerator": "profile_ambulatory_major_surgeries",
+      "denominator": "profile_applicable_elective_major_surgeries",
+      "unit": "percentage",
+      "polarity": "context",
+      "applicable_indicator_profiles": [
+        "professional_surgical"
+      ],
+      "target": {
+        "type": "none",
+        "value": null,
+        "operator": null,
+        "authority": null,
+        "applicability": "not_applicable"
+      },
+      "data_status": "mvp_simulated",
+      "minimum_valid_n": 10,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    },
+    {
+      "indicator_id": "professional_suspension_context_pct",
+      "display_name_es": "Contexto de suspensiones",
+      "definition": "Suspensiones asociadas a la programación del perfil sobre procedimientos programados; no implica responsabilidad individual.",
+      "numerator": "profile_suspended_surgeries",
+      "denominator": "profile_scheduled_surgeries",
+      "unit": "percentage",
+      "polarity": "context",
+      "applicable_indicator_profiles": [
+        "professional_surgical"
+      ],
+      "target": {
+        "type": "none",
+        "value": null,
+        "operator": null,
+        "authority": null,
+        "applicability": "not_applicable"
+      },
+      "data_status": "mvp_simulated",
+      "minimum_valid_n": 10,
+      "required_completeness_pct": 95,
+      "supported_dimensions": [
+        "institution",
+        "service",
+        "specialty",
+        "period"
+      ]
+    }
+  ]
+}
