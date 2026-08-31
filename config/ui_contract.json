@@ -1,0 +1,475 @@
+{
+  "contract_version": "1.0.0",
+  "status": "approved_day_1_design_baseline",
+  "last_reviewed": "2026-08-31",
+  "language": "es-CL",
+  "application_title_es": "Tablero de apoyo a decisiones por rol — Hospital El Carmen",
+  "global_layout": {
+    "shell_order": [
+      "academic_and_simulated_data_banner",
+      "role_and_scope_header",
+      "filter_bar",
+      "data_context_bar",
+      "primary_kpi_cards",
+      "prioritized_findings",
+      "analysis_sections",
+      "provenance_and_interpretation"
+    ],
+    "maximum_primary_cards": 6,
+    "maximum_prioritized_findings": 5,
+    "always_show": [
+      "selected_role",
+      "data_period",
+      "data_provenance",
+      "simulation_status"
+    ],
+    "comparison_contract": [
+      "current_value",
+      "prior_comparable_value_when_available",
+      "reference_or_target_when_applicable"
+    ],
+    "reference_target_explanation_required": true,
+    "denominator_semantics_must_remain_visible_after_filtering": true
+  },
+  "navigation_flow": {
+    "landing_page": "landing",
+    "branches": [
+      {
+        "selection_es": "Directivo",
+        "role_ids": ["director", "medical_director"]
+      },
+      {
+        "selection_es": "Jefe de Servicio",
+        "dashboard_types": ["clinical", "surgical"],
+        "role_ids": ["service_chief_clinical", "service_chief_surgical"],
+        "next_steps": [
+          "mvp_enabled_organizational_unit",
+          "optional_analytical_specialty_when_available"
+        ],
+        "service_catalog_ref": "config/services.json"
+      },
+      {
+        "selection_es": "Profesional",
+        "role_ids": [
+          "professional_clinical",
+          "professional_surgical",
+          "professional_mixed"
+        ],
+        "mixed_profile_behavior": {
+          "separate_lens_role_ids": [
+            "professional_clinical",
+            "professional_surgical"
+          ],
+          "combined_performance_score_allowed": false
+        }
+      }
+    ]
+  },
+  "shared_components": {
+    "academic_banner": {
+      "label_es": "Prototipo académico — datos operacionales simulados",
+      "persistent": true
+    },
+    "context_bar": {
+      "fields": [
+        "selected_role",
+        "selected_scope",
+        "active_period",
+        "data_source_mode",
+        "snapshot_timestamp",
+        "record_count",
+        "validation_status"
+      ]
+    },
+    "finding_card": {
+      "required_fields": [
+        "observation_es",
+        "interpretation_boundary_es",
+        "review_action_es"
+      ]
+    },
+    "indicator_metadata": {
+      "catalog_ref": "config/indicators.json",
+      "required_display_fields": [
+        "definition",
+        "period",
+        "unit",
+        "denominator_when_applicable",
+        "comparison_basis",
+        "target_status",
+        "data_quality_status"
+      ]
+    },
+    "map": {
+      "contract_ref": "config/role_matrix.json#map_contracts",
+      "official_coordinate_source": "public_deis_establishment_reference",
+      "minimum_geographic_cell_n": 10,
+      "suppress_geographic_cells_below_minimum": true,
+      "accessible_table_required": true
+    }
+  },
+  "view_contracts": [
+    {
+      "role_id": "director",
+      "page_title_es": "Visión institucional — Director",
+      "decision_purpose_es": "Priorizar desviaciones institucionales de acceso, garantías, cirugía, red y calidad del dato.",
+      "required_selectors": ["period"],
+      "optional_filters": ["service", "specialty", "prestation"],
+      "primary_indicator_ids": [
+        "referrals_total",
+        "wait_p75_days",
+        "ges_compliance_pct",
+        "new_no_show_pct",
+        "elective_surgery_suspension_pct",
+        "accepted_record_pct"
+      ],
+      "prioritized_findings_limit": 5,
+      "sections": [
+        "primary_kpi_cards",
+        "prioritized_findings",
+        "institutional_access_trend",
+        "service_risk_comparison",
+        "referral_map",
+        "accessible_map_table",
+        "interpretation_and_provenance"
+      ],
+      "chart_contracts": [
+        {
+          "chart_id": "institutional_access_trend",
+          "type": "line",
+          "indicator_ids": ["referrals_total", "wait_p75_days"]
+        },
+        {
+          "chart_id": "service_risk_comparison",
+          "type": "service_bar",
+          "indicator_ids": [
+            "ges_compliance_pct",
+            "elective_surgery_suspension_pct"
+          ]
+        }
+      ],
+      "map_role_reference": "director",
+      "explanatory_text_requirements": [
+        "Aclarar que las señales simuladas no establecen desempeño oficial de HEC.",
+        "Explicar la aplicabilidad de cada referencia antes de compararla."
+      ],
+      "unavailable_state_behavior": "Mostrar «No disponible» y su motivo; nunca convertir datos ausentes, inaplicables o con denominador cero en cero.",
+      "simulated_data_badge_requirement": true
+    },
+    {
+      "role_id": "medical_director",
+      "page_title_es": "Visión clínico-operacional — Director Médico",
+      "decision_purpose_es": "Identificar presión asistencial, resolución, pertinencia y señales agregadas GES o quirúrgicas.",
+      "required_selectors": ["period"],
+      "optional_filters": ["service", "specialty", "prestation", "ges_status"],
+      "primary_indicator_ids": [
+        "referral_growth_pct",
+        "wait_p75_days",
+        "discharge_rate_pct",
+        "referral_pertinence_pct",
+        "ges_compliance_pct",
+        "surgical_waitlist_resolution_pct"
+      ],
+      "prioritized_findings_limit": 5,
+      "sections": [
+        "primary_kpi_cards",
+        "prioritized_findings",
+        "specialty_pressure_trend",
+        "clinical_resolution_comparison",
+        "clinical_network_map",
+        "accessible_map_table",
+        "interpretation_and_provenance"
+      ],
+      "chart_contracts": [
+        {
+          "chart_id": "specialty_pressure_trend",
+          "type": "line",
+          "indicator_ids": ["referral_growth_pct", "wait_p75_days"]
+        },
+        {
+          "chart_id": "clinical_resolution_comparison",
+          "type": "grouped_bar",
+          "indicator_ids": ["discharge_rate_pct", "referral_pertinence_pct"]
+        }
+      ],
+      "map_role_reference": "medical_director",
+      "explanatory_text_requirements": [
+        "Separar observaciones de interpretaciones causales.",
+        "Explicar que las referencias ministeriales son condicionales hasta validar su aplicabilidad."
+      ],
+      "unavailable_state_behavior": "Mostrar «No disponible» e identificar la condición fallida de aplicabilidad, muestra, completitud o denominador.",
+      "simulated_data_badge_requirement": true
+    },
+    {
+      "role_id": "service_chief_clinical",
+      "page_title_es": "Gestión del servicio clínico",
+      "decision_purpose_es": "Revisar demanda, acceso, resolución, pertinencia y continuidad del servicio seleccionado.",
+      "required_selectors": ["period", "clinical_service_unit"],
+      "optional_filters": ["analytical_specialty", "prestation", "origin_establishment"],
+      "primary_indicator_ids": [
+        "referrals_total",
+        "wait_p75_days",
+        "new_no_show_pct",
+        "followup_no_show_pct",
+        "discharge_rate_pct",
+        "referral_pertinence_pct"
+      ],
+      "prioritized_findings_limit": 5,
+      "sections": [
+        "primary_kpi_cards",
+        "prioritized_findings",
+        "access_trend",
+        "referral_composition",
+        "clinical_referral_map",
+        "accessible_map_table",
+        "interpretation_and_provenance"
+      ],
+      "chart_contracts": [
+        {
+          "chart_id": "access_trend",
+          "type": "line",
+          "indicator_ids": ["referrals_total", "wait_p75_days", "new_no_show_pct"]
+        },
+        {
+          "chart_id": "referral_composition",
+          "type": "bar",
+          "indicator_ids": ["referral_pertinence_pct", "discharge_rate_pct"]
+        }
+      ],
+      "map_role_reference": "service_chief_clinical",
+      "explanatory_text_requirements": [
+        "Mantener visible el servicio y la especialidad opcional seleccionados.",
+        "Explicar cualquier cambio de denominador causado por filtros."
+      ],
+      "unavailable_state_behavior": "Conservar el contexto y explicar por qué un indicador o sección no está disponible.",
+      "simulated_data_badge_requirement": true
+    },
+    {
+      "role_id": "service_chief_surgical",
+      "page_title_es": "Gestión del servicio quirúrgico",
+      "decision_purpose_es": "Revisar tamaño y antigüedad de lista, producción, ambulatorización, suspensiones y resolución.",
+      "required_selectors": ["period", "surgical_service_unit"],
+      "optional_filters": ["analytical_specialty", "procedure", "origin_establishment"],
+      "primary_indicator_ids": [
+        "surgical_waitlist_open_count",
+        "surgery_wait_p75_days",
+        "elective_major_surgery_count",
+        "ambulatory_major_surgery_pct",
+        "elective_surgery_suspension_pct",
+        "surgical_waitlist_resolution_pct"
+      ],
+      "prioritized_findings_limit": 5,
+      "sections": [
+        "primary_kpi_cards",
+        "prioritized_findings",
+        "waitlist_trend",
+        "surgical_output_mix",
+        "surgical_referral_map",
+        "accessible_map_table",
+        "interpretation_and_provenance"
+      ],
+      "chart_contracts": [
+        {
+          "chart_id": "waitlist_trend",
+          "type": "line",
+          "indicator_ids": ["surgical_waitlist_open_count", "surgery_wait_p75_days"]
+        },
+        {
+          "chart_id": "surgical_output_mix",
+          "type": "grouped_bar",
+          "indicator_ids": [
+            "elective_major_surgery_count",
+            "ambulatory_major_surgery_pct",
+            "elective_surgery_suspension_pct"
+          ]
+        }
+      ],
+      "map_role_reference": "service_chief_surgical",
+      "explanatory_text_requirements": [
+        "Explicar elegibilidad y complejidad antes de interpretar ambulatorización.",
+        "No atribuir causalidad de suspensiones sin evidencia validada."
+      ],
+      "unavailable_state_behavior": "Conservar el contexto e identificar el contrato, denominador o condición de calidad faltante.",
+      "simulated_data_badge_requirement": true
+    },
+    {
+      "role_id": "professional_clinical",
+      "page_title_es": "Retroalimentación clínica del perfil simulado",
+      "decision_purpose_es": "Entregar contexto clínico no punitivo sobre actividad, programación, mezcla, documentación e inasistencia.",
+      "required_selectors": ["period", "simulated_profile"],
+      "optional_filters": ["service", "specialty", "prestation"],
+      "primary_indicator_ids": [
+        "clinical_activity_completed",
+        "clinical_schedule_completion_pct",
+        "new_consultation_share_pct",
+        "discharge_rate_pct",
+        "professional_documentation_completeness_pct",
+        "professional_no_show_context_pct"
+      ],
+      "prioritized_findings_limit": 5,
+      "sections": [
+        "primary_kpi_cards",
+        "prioritized_findings",
+        "clinical_activity_trend",
+        "clinical_activity_mix",
+        "professional_clinical_map",
+        "accessible_map_table",
+        "interpretation_and_provenance"
+      ],
+      "chart_contracts": [
+        {
+          "chart_id": "clinical_activity_trend",
+          "type": "line",
+          "indicator_ids": ["clinical_activity_completed", "clinical_schedule_completion_pct"]
+        },
+        {
+          "chart_id": "clinical_activity_mix",
+          "type": "bar",
+          "indicator_ids": ["new_consultation_share_pct", "discharge_rate_pct"]
+        }
+      ],
+      "map_role_reference": "professional_clinical",
+      "explanatory_text_requirements": [
+        "Indicar que el perfil y la actividad son simulados.",
+        "Prohibir ranking e interpretación causal o punitiva individual."
+      ],
+      "unavailable_state_behavior": "Mostrar indisponibilidad con su motivo y mantener el contexto no punitivo.",
+      "simulated_data_badge_requirement": true
+    },
+    {
+      "role_id": "professional_surgical",
+      "page_title_es": "Retroalimentación quirúrgica del perfil simulado",
+      "decision_purpose_es": "Entregar contexto quirúrgico no punitivo sobre actividad, programación, ambulatorización, documentación y suspensiones.",
+      "required_selectors": ["period", "simulated_profile"],
+      "optional_filters": ["service", "specialty", "procedure"],
+      "primary_indicator_ids": [
+        "surgical_activity_completed",
+        "surgical_schedule_completion_pct",
+        "professional_ambulatory_surgery_pct",
+        "professional_documentation_completeness_pct",
+        "professional_suspension_context_pct"
+      ],
+      "prioritized_findings_limit": 5,
+      "sections": [
+        "primary_kpi_cards",
+        "prioritized_findings",
+        "surgical_activity_trend",
+        "surgical_activity_mix",
+        "professional_surgical_map",
+        "accessible_map_table",
+        "interpretation_and_provenance"
+      ],
+      "chart_contracts": [
+        {
+          "chart_id": "surgical_activity_trend",
+          "type": "line",
+          "indicator_ids": ["surgical_activity_completed", "surgical_schedule_completion_pct"]
+        },
+        {
+          "chart_id": "surgical_activity_mix",
+          "type": "bar",
+          "indicator_ids": [
+            "professional_ambulatory_surgery_pct",
+            "professional_suspension_context_pct"
+          ]
+        }
+      ],
+      "map_role_reference": "professional_surgical",
+      "explanatory_text_requirements": [
+        "Indicar que el perfil y la actividad son simulados.",
+        "Prohibir ranking y atribución individual de responsabilidad."
+      ],
+      "unavailable_state_behavior": "Mostrar indisponibilidad con su motivo y mantener el contexto no punitivo.",
+      "simulated_data_badge_requirement": true
+    },
+    {
+      "role_id": "professional_mixed",
+      "page_title_es": "Retroalimentación mixta del perfil simulado",
+      "decision_purpose_es": "Presentar actividad clínica y quirúrgica en lentes separados sin puntaje combinado.",
+      "required_selectors": ["period", "simulated_profile"],
+      "optional_filters": ["service", "specialty"],
+      "primary_indicator_ids": [],
+      "prioritized_findings_limit": 5,
+      "sections": ["clinical_lens", "surgical_lens", "separate_interpretation_and_provenance"],
+      "chart_contracts": [
+        {
+          "chart_id": "clinical_lens",
+          "type": "composed_role_view",
+          "role_reference": "professional_clinical"
+        },
+        {
+          "chart_id": "surgical_lens",
+          "type": "composed_role_view",
+          "role_reference": "professional_surgical"
+        }
+      ],
+      "map_role_reference": null,
+      "separate_lens_role_ids": ["professional_clinical", "professional_surgical"],
+      "combined_performance_score_allowed": false,
+      "explanatory_text_requirements": [
+        "Mantener separados denominadores, tarjetas, hallazgos, gráficos y mapas clínicos y quirúrgicos.",
+        "Se permite un resumen de conteos, pero no un puntaje combinado de desempeño."
+      ],
+      "unavailable_state_behavior": "Informar disponibilidad por lente; un lente no disponible no debe ocultar el otro.",
+      "simulated_data_badge_requirement": true
+    }
+  ],
+  "upload_view": {
+    "page_title_es": "Carga y validación de datos",
+    "downloadable_template_entry_point": true,
+    "accepted_file_type": "xlsx",
+    "excel_file_upload": true,
+    "schema_validation_required": true,
+    "quarantine_or_rejection_behavior": "Los archivos y filas inválidos quedan fuera del conjunto activo y reciben mensajes de validación accionables.",
+    "validation_summary_required": true,
+    "explicit_valid_dataset_activation_required": true,
+    "failed_upload_replaces_active_dataset": false,
+    "prior_valid_session_dataset_preserved_after_failure": true,
+    "persistence_after_session_termination": false
+  },
+  "data_quality_view": {
+    "page_title_es": "Calidad y estado del conjunto de datos",
+    "indicator_ids": ["accepted_record_pct", "critical_field_completeness_pct"],
+    "validation_summary_fields": [
+      "rejected_row_count",
+      "missing_critical_fields",
+      "invalid_codes",
+      "invalid_dates",
+      "duplicate_identifiers",
+      "unmatched_deis_origin_codes",
+      "validation_timestamp",
+      "active_dataset_status"
+    ],
+    "zero_is_not_a_missing_value_substitute": true
+  },
+  "accessibility_requirements": {
+    "color_only_meaning_allowed": false,
+    "chart_textual_equivalent_required": true,
+    "map_textual_equivalent_required": true,
+    "map_accessible_table_required": true,
+    "keyboard_operable_controls_required": true,
+    "visible_focus_required": true,
+    "plain_language_status_labels_required": true
+  },
+  "privacy_requirements": {
+    "law_21719_cross_cutting_constraint": true,
+    "minimum_geographic_cell_n": 10,
+    "patient_identifiers_allowed": false,
+    "employee_identifiers_allowed": false,
+    "patient_addresses_allowed": false,
+    "patient_level_drilldown_allowed": false,
+    "public_professional_ranking_allowed": false,
+    "punitive_professional_composite_score_allowed": false,
+    "session_data_persistence_allowed": false
+  },
+  "interpretation_requirements": {
+    "deterministic_indicators_required": true,
+    "deterministic_findings_required": true,
+    "finding_required_elements": ["observation", "interpretation_boundary", "review_action"],
+    "target_applicability_explanation_required": true,
+    "simulated_data_disclaimer_required": true,
+    "unavailable_values_must_not_render_as_zero": true,
+    "filters_must_not_silently_change_denominator_meaning": true,
+    "causal_claims_from_descriptive_signals_allowed": false
+  }
+}
