@@ -1,0 +1,791 @@
+{
+  "catalog_version": "1.1.0",
+  "status": "approved_hierarchical_prototype_catalog",
+  "last_reviewed": "2026-08-31",
+  "institution": "Hospital El Carmen Dr. Luis Valentín Ferrada",
+  "selector_model": {
+    "first_level": "dashboard_type",
+    "second_level": "organizational_unit",
+    "third_level": "analytical_specialty_when_applicable",
+    "third_level_behavior": "Show only when the selected unit contains analytical specialties."
+  },
+  "sources": [
+    {
+      "source_id": "official_org_chart_2023",
+      "title": "Organigrama HEC 2023 II",
+      "publisher": "Hospital El Carmen Dr. Luis Valentín Ferrada",
+      "year": 2023,
+      "authority_scope": "departments_and_organizational_units",
+      "url": "https://www.hospitalelcarmen.cl/hec/wp-content/uploads/2023/08/ORGANIGRAMA-2023-II.pdf"
+    },
+    {
+      "source_id": "public_account_2026",
+      "title": "Cuenta Pública Participativa 2026",
+      "publisher": "Hospital El Carmen Dr. Luis Valentín Ferrada",
+      "year": 2026,
+      "authority_scope": "activity_and_analytical_specialties",
+      "relevant_pages": [
+        14,
+        23,
+        26,
+        29
+      ]
+    },
+    {
+      "source_id": "institutional_context_team_validated",
+      "title": "HEC team institutional context",
+      "year": 2026,
+      "authority_scope": "current_local_granularity_pending_final_team_signoff"
+    }
+  ],
+  "scope_rules": {
+    "mvp_profiles": [
+      "clinical_outpatient",
+      "surgical"
+    ],
+    "registered_but_deferred_profiles": [
+      "critical_care_deferred",
+      "emergency_deferred",
+      "inpatient_deferred",
+      "surgical_inpatient_deferred",
+      "operating_room_support"
+    ],
+    "reason": "Deferred units require distinct, validated indicator contracts outside the ten-day MVP."
+  },
+  "departments": [
+    {
+      "department_id": "adult_medicine",
+      "display_name": "Departamento de Medicina del Adulto",
+      "dashboard_type": "clinical"
+    },
+    {
+      "department_id": "pediatric",
+      "display_name": "Departamento Pediátrico",
+      "dashboard_type": "mixed"
+    },
+    {
+      "department_id": "ambulatory",
+      "display_name": "Departamento de Atención Ambulatoria",
+      "dashboard_type": "clinical"
+    },
+    {
+      "department_id": "mental_health",
+      "display_name": "Departamento de Salud Mental",
+      "dashboard_type": "clinical"
+    },
+    {
+      "department_id": "surgical_areas",
+      "display_name": "Departamento de Áreas Quirúrgicas",
+      "dashboard_type": "surgical"
+    },
+    {
+      "department_id": "pavilion",
+      "display_name": "Departamento de Pabellón",
+      "dashboard_type": "surgical"
+    },
+    {
+      "department_id": "gyne_ob",
+      "display_name": "Departamento de Ginecología y Obstetricia",
+      "dashboard_type": "surgical"
+    },
+    {
+      "department_id": "clinical_support",
+      "display_name": "Departamento de Apoyo Clínico",
+      "dashboard_type": "clinical"
+    }
+  ],
+  "organizational_units": [
+    {
+      "unit_id": "medicina_interna",
+      "display_name": "Medicina Interna",
+      "parent_department_id": "adult_medicine",
+      "dashboard_type": "clinical",
+      "indicator_profile": "clinical_outpatient",
+      "mvp_enabled": true,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "geriatria",
+      "display_name": "Geriatría",
+      "parent_department_id": "adult_medicine",
+      "dashboard_type": "clinical",
+      "indicator_profile": "clinical_outpatient",
+      "mvp_enabled": true,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "alivio_dolor_cuidados_paliativos",
+      "display_name": "Alivio del Dolor y Cuidados Paliativos",
+      "parent_department_id": "adult_medicine",
+      "dashboard_type": "clinical",
+      "indicator_profile": "clinical_outpatient",
+      "mvp_enabled": true,
+      "unit_level": "unit",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "hospitalizacion_domiciliaria",
+      "display_name": "Hospitalización Domiciliaria",
+      "parent_department_id": "adult_medicine",
+      "dashboard_type": "clinical",
+      "indicator_profile": "inpatient_deferred",
+      "mvp_enabled": false,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "uci_adulto",
+      "display_name": "Cuidado Intensivo Adulto (UCI)",
+      "parent_department_id": "adult_medicine",
+      "dashboard_type": "clinical",
+      "indicator_profile": "critical_care_deferred",
+      "mvp_enabled": false,
+      "unit_level": "unit",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "uti_adulto",
+      "display_name": "Tratamiento Intermedio Adulto (UTI)",
+      "parent_department_id": "adult_medicine",
+      "dashboard_type": "clinical",
+      "indicator_profile": "critical_care_deferred",
+      "mvp_enabled": false,
+      "unit_level": "unit",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "cardiologia_upccv",
+      "display_name": "Cardiología y Paciente Crítico Cardiovascular (UPCCV)",
+      "parent_department_id": "adult_medicine",
+      "dashboard_type": "clinical",
+      "indicator_profile": "critical_care_deferred",
+      "mvp_enabled": false,
+      "unit_level": "unit",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "emergencia_infantil",
+      "display_name": "Emergencia Infantil",
+      "parent_department_id": "pediatric",
+      "dashboard_type": "clinical",
+      "indicator_profile": "emergency_deferred",
+      "mvp_enabled": false,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "pediatria",
+      "display_name": "Pediatría",
+      "parent_department_id": "pediatric",
+      "dashboard_type": "clinical",
+      "indicator_profile": "clinical_outpatient",
+      "mvp_enabled": true,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "upc_pediatrica",
+      "display_name": "Paciente Crítico Pediátrico (UPC Pediátrica)",
+      "parent_department_id": "pediatric",
+      "dashboard_type": "clinical",
+      "indicator_profile": "critical_care_deferred",
+      "mvp_enabled": false,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "neonatologia_upc_neonatal",
+      "display_name": "Neonatología y UPC Neonatal",
+      "parent_department_id": "pediatric",
+      "dashboard_type": "clinical",
+      "indicator_profile": "critical_care_deferred",
+      "mvp_enabled": false,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "especialidades_pediatricas",
+      "display_name": "Especialidades Pediátricas",
+      "parent_department_id": "pediatric",
+      "dashboard_type": "clinical",
+      "indicator_profile": "clinical_outpatient",
+      "mvp_enabled": true,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "especialidades_medicas_adulto",
+      "display_name": "Especialidades Médicas Adulto",
+      "parent_department_id": "ambulatory",
+      "dashboard_type": "clinical",
+      "indicator_profile": "clinical_outpatient",
+      "mvp_enabled": true,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "psiquiatria_adulto",
+      "display_name": "Psiquiatría Adulto",
+      "parent_department_id": "mental_health",
+      "dashboard_type": "clinical",
+      "indicator_profile": "clinical_outpatient",
+      "mvp_enabled": true,
+      "unit_level": "unit",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "psiquiatria_infantil",
+      "display_name": "Psiquiatría Infantil",
+      "parent_department_id": "mental_health",
+      "dashboard_type": "clinical",
+      "indicator_profile": "clinical_outpatient",
+      "mvp_enabled": true,
+      "unit_level": "unit",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "hospital_dia",
+      "display_name": "Hospital de Día",
+      "parent_department_id": "mental_health",
+      "dashboard_type": "clinical",
+      "indicator_profile": "clinical_outpatient",
+      "mvp_enabled": true,
+      "unit_level": "unit",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "medicina_fisica_rehabilitacion",
+      "display_name": "Medicina Física y Rehabilitación",
+      "parent_department_id": "clinical_support",
+      "dashboard_type": "clinical",
+      "indicator_profile": "clinical_outpatient",
+      "mvp_enabled": true,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "nefrologia_dialisis",
+      "display_name": "Nefrología y Diálisis",
+      "parent_department_id": "clinical_support",
+      "dashboard_type": "clinical",
+      "indicator_profile": "clinical_outpatient",
+      "mvp_enabled": true,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "emergencia_adulto",
+      "display_name": "Emergencia Adulto",
+      "parent_department_id": "adult_medicine",
+      "dashboard_type": "clinical",
+      "indicator_profile": "emergency_deferred",
+      "mvp_enabled": false,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "hospitalizacion_quirurgica",
+      "display_name": "Hospitalización Quirúrgica",
+      "parent_department_id": "surgical_areas",
+      "dashboard_type": "surgical",
+      "indicator_profile": "surgical_inpatient_deferred",
+      "mvp_enabled": false,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "cirugia_adulto",
+      "display_name": "Cirugía Adulto",
+      "parent_department_id": "surgical_areas",
+      "dashboard_type": "surgical",
+      "indicator_profile": "surgical",
+      "mvp_enabled": true,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "urologia",
+      "display_name": "Urología",
+      "parent_department_id": "surgical_areas",
+      "dashboard_type": "surgical",
+      "indicator_profile": "surgical",
+      "mvp_enabled": true,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "otorrinolaringologia",
+      "display_name": "Otorrinolaringología",
+      "parent_department_id": "surgical_areas",
+      "dashboard_type": "surgical",
+      "indicator_profile": "surgical",
+      "mvp_enabled": true,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "traumatologia",
+      "display_name": "Traumatología",
+      "parent_department_id": "surgical_areas",
+      "dashboard_type": "surgical",
+      "indicator_profile": "surgical",
+      "mvp_enabled": true,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "cirugia_infantil",
+      "display_name": "Cirugía Infantil",
+      "parent_department_id": "pediatric",
+      "dashboard_type": "surgical",
+      "indicator_profile": "surgical",
+      "mvp_enabled": true,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "pabellon",
+      "display_name": "Pabellón",
+      "parent_department_id": "pavilion",
+      "dashboard_type": "surgical",
+      "indicator_profile": "operating_room_support",
+      "mvp_enabled": false,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "anestesia",
+      "display_name": "Anestesia",
+      "parent_department_id": "pavilion",
+      "dashboard_type": "surgical",
+      "indicator_profile": "operating_room_support",
+      "mvp_enabled": false,
+      "unit_level": "unit",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "ginecologia",
+      "display_name": "Ginecología",
+      "parent_department_id": "gyne_ob",
+      "dashboard_type": "surgical",
+      "indicator_profile": "surgical",
+      "mvp_enabled": true,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "obstetricia",
+      "display_name": "Obstetricia",
+      "parent_department_id": "gyne_ob",
+      "dashboard_type": "surgical",
+      "indicator_profile": "surgical",
+      "mvp_enabled": true,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    },
+    {
+      "unit_id": "emergencia_gineco_obstetrica",
+      "display_name": "Emergencia Gineco-obstétrica",
+      "parent_department_id": "gyne_ob",
+      "dashboard_type": "surgical",
+      "indicator_profile": "emergency_deferred",
+      "mvp_enabled": false,
+      "unit_level": "service",
+      "source_id": "official_org_chart_2023"
+    }
+  ],
+  "analytical_specialties": [
+    {
+      "specialty_id": "broncopulmonar_adulto",
+      "display_name": "Broncopulmonar Adulto",
+      "parent_unit_id": "especialidades_medicas_adulto",
+      "dashboard_type": "clinical",
+      "source_pages": [
+        26
+      ],
+      "source_ids": [
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "cardiologia_adulto",
+      "display_name": "Cardiología Adulto",
+      "parent_unit_id": "especialidades_medicas_adulto",
+      "dashboard_type": "clinical",
+      "source_pages": [
+        26,
+        29
+      ],
+      "source_ids": [
+        "official_org_chart_2023",
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "diabetologia",
+      "display_name": "Diabetología",
+      "parent_unit_id": "especialidades_medicas_adulto",
+      "dashboard_type": "clinical",
+      "source_pages": [
+        26,
+        29
+      ],
+      "source_ids": [
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "endocrinologia",
+      "display_name": "Endocrinología",
+      "parent_unit_id": "especialidades_medicas_adulto",
+      "dashboard_type": "clinical",
+      "source_pages": [
+        26,
+        29
+      ],
+      "source_ids": [
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "gastroenterologia_adulto",
+      "display_name": "Gastroenterología Adulto",
+      "parent_unit_id": "especialidades_medicas_adulto",
+      "dashboard_type": "clinical",
+      "source_pages": [
+        26,
+        29
+      ],
+      "source_ids": [
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "geriatria",
+      "display_name": "Geriatría",
+      "parent_unit_id": "geriatria",
+      "dashboard_type": "clinical",
+      "source_pages": [
+        26,
+        29
+      ],
+      "source_ids": [
+        "official_org_chart_2023",
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "medicina_interna",
+      "display_name": "Medicina Interna",
+      "parent_unit_id": "medicina_interna",
+      "dashboard_type": "clinical",
+      "source_pages": [
+        26,
+        29
+      ],
+      "source_ids": [
+        "official_org_chart_2023",
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "medicina_fisica_rehabilitacion",
+      "display_name": "Medicina Física y Rehabilitación",
+      "parent_unit_id": "medicina_fisica_rehabilitacion",
+      "dashboard_type": "clinical",
+      "source_pages": [
+        14,
+        26,
+        29
+      ],
+      "source_ids": [
+        "official_org_chart_2023",
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "nefrologia",
+      "display_name": "Nefrología",
+      "parent_unit_id": "nefrologia_dialisis",
+      "dashboard_type": "clinical",
+      "source_pages": [
+        26,
+        29
+      ],
+      "source_ids": [
+        "official_org_chart_2023",
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "neurologia_adulto",
+      "display_name": "Neurología Adulto",
+      "parent_unit_id": "especialidades_medicas_adulto",
+      "dashboard_type": "clinical",
+      "source_pages": [
+        26,
+        29
+      ],
+      "source_ids": [
+        "public_account_2026",
+        "institutional_context_team_validated"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "oncologia",
+      "display_name": "Oncología",
+      "parent_unit_id": "especialidades_medicas_adulto",
+      "dashboard_type": "clinical",
+      "source_pages": [
+        26,
+        29
+      ],
+      "source_ids": [
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "psiquiatria_adulto",
+      "display_name": "Psiquiatría Adulto",
+      "parent_unit_id": "psiquiatria_adulto",
+      "dashboard_type": "clinical",
+      "source_pages": [
+        26,
+        29
+      ],
+      "source_ids": [
+        "official_org_chart_2023",
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "pediatria",
+      "display_name": "Pediatría",
+      "parent_unit_id": "pediatria",
+      "dashboard_type": "clinical",
+      "source_pages": [
+        29
+      ],
+      "source_ids": [
+        "official_org_chart_2023",
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "neurologia_infantil",
+      "display_name": "Neurología Infantil",
+      "parent_unit_id": "especialidades_pediatricas",
+      "dashboard_type": "clinical",
+      "source_pages": [],
+      "source_ids": [
+        "institutional_context_team_validated"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "psiquiatria_infantil",
+      "display_name": "Psiquiatría Infantil",
+      "parent_unit_id": "psiquiatria_infantil",
+      "dashboard_type": "clinical",
+      "source_pages": [],
+      "source_ids": [
+        "official_org_chart_2023"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "cirugia_general",
+      "display_name": "Cirugía General",
+      "parent_unit_id": "cirugia_adulto",
+      "dashboard_type": "surgical",
+      "source_pages": [
+        26
+      ],
+      "source_ids": [
+        "official_org_chart_2023",
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "cirugia_digestiva",
+      "display_name": "Cirugía Digestiva",
+      "parent_unit_id": "cirugia_adulto",
+      "dashboard_type": "surgical",
+      "source_pages": [
+        23,
+        26
+      ],
+      "source_ids": [
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "cirugia_plastica",
+      "display_name": "Cirugía Plástica",
+      "parent_unit_id": "cirugia_adulto",
+      "dashboard_type": "surgical",
+      "source_pages": [
+        26
+      ],
+      "source_ids": [
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "cirugia_vascular_periferica",
+      "display_name": "Cirugía Vascular Periférica",
+      "parent_unit_id": "cirugia_adulto",
+      "dashboard_type": "surgical",
+      "source_pages": [
+        26
+      ],
+      "source_ids": [
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "coloproctologia",
+      "display_name": "Coloproctología",
+      "parent_unit_id": "cirugia_adulto",
+      "dashboard_type": "surgical",
+      "source_pages": [
+        26
+      ],
+      "source_ids": [
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "urologia",
+      "display_name": "Urología",
+      "parent_unit_id": "urologia",
+      "dashboard_type": "surgical",
+      "source_pages": [
+        26,
+        29
+      ],
+      "source_ids": [
+        "official_org_chart_2023",
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "otorrinolaringologia",
+      "display_name": "Otorrinolaringología",
+      "parent_unit_id": "otorrinolaringologia",
+      "dashboard_type": "surgical",
+      "source_pages": [
+        23,
+        26
+      ],
+      "source_ids": [
+        "official_org_chart_2023",
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "traumatologia",
+      "display_name": "Traumatología",
+      "parent_unit_id": "traumatologia",
+      "dashboard_type": "surgical",
+      "source_pages": [
+        26,
+        29
+      ],
+      "source_ids": [
+        "official_org_chart_2023",
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "cirugia_pediatrica",
+      "display_name": "Cirugía Pediátrica",
+      "parent_unit_id": "cirugia_infantil",
+      "dashboard_type": "surgical",
+      "source_pages": [],
+      "source_ids": [
+        "official_org_chart_2023"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "ginecologia",
+      "display_name": "Ginecología",
+      "parent_unit_id": "ginecologia",
+      "dashboard_type": "surgical",
+      "source_pages": [
+        14,
+        26,
+        29
+      ],
+      "source_ids": [
+        "official_org_chart_2023",
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    },
+    {
+      "specialty_id": "obstetricia",
+      "display_name": "Obstetricia",
+      "parent_unit_id": "obstetricia",
+      "dashboard_type": "surgical",
+      "source_pages": [
+        14,
+        26,
+        29
+      ],
+      "source_ids": [
+        "official_org_chart_2023",
+        "public_account_2026"
+      ],
+      "mvp_enabled": true
+    }
+  ],
+  "professional_profiles": [
+    {
+      "profile_id": "clinical",
+      "display_name": "Clínico",
+      "combined_score_allowed": false
+    },
+    {
+      "profile_id": "surgical",
+      "display_name": "Quirúrgico",
+      "combined_score_allowed": false
+    },
+    {
+      "profile_id": "mixed",
+      "display_name": "Mixto",
+      "combined_score_allowed": false,
+      "requires_separate_lenses": true
+    }
+  ],
+  "privacy_rules": {
+    "minimum_geographic_cell_n": 10,
+    "patient_addresses_allowed": false,
+    "employee_identifiers_allowed": false,
+    "patient_level_map_drilldown_allowed": false
+  }
+}
