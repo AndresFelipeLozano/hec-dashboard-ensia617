@@ -1,0 +1,193 @@
+{
+  "contract_version": "1.0.0",
+  "status": "approved_day_2_data_contract",
+  "last_reviewed": "2026-08-31",
+  "language": "es-CL",
+  "workbook": {
+    "filename": "plantilla_carga_hec_v1.xlsx",
+    "required_sheets": [
+      "METADATOS",
+      "DERIVACIONES",
+      "CIRUGIAS",
+      "ACTIVIDAD_PROF"
+    ],
+    "informational_sheets": [
+      "INSTRUCCIONES",
+      "CATALOGOS"
+    ],
+    "date_format": "YYYY-MM-DD",
+    "empty_row_policy": "ignore_when_all_cells_are_blank",
+    "unknown_sheet_policy": "warn",
+    "unknown_column_policy": "reject_workbook",
+    "missing_required_sheet_policy": "reject_workbook",
+    "missing_required_column_policy": "reject_workbook"
+  },
+  "dataset_policy": {
+    "allowed_source_modes": [
+      "simulado"
+    ],
+    "session_only": true,
+    "persist_uploaded_workbooks": false,
+    "real_patient_identifiers_allowed": false,
+    "real_employee_identifiers_allowed": false,
+    "patient_addresses_allowed": false,
+    "patient_level_drilldown_allowed": false,
+    "professional_profiles_are_simulated": true,
+    "unavailable_or_inapplicable_values_render_as_zero": false
+  },
+  "validation_policy": {
+    "structural_error_action": "reject_candidate",
+    "row_error_action": "quarantine_row",
+    "minimum_accepted_record_pct_for_activation": 95,
+    "minimum_accepted_rows_per_data_sheet": 1,
+    "critical_fields_must_be_complete_in_accepted_rows": true,
+    "duplicates_are_quarantined": true,
+    "invalid_dates_are_quarantined": true,
+    "invalid_codes_are_quarantined": true,
+    "unmatched_deis_origin_codes_are_quarantined": true
+  },
+  "activation_policy": {
+    "candidate_is_separate_from_active": true,
+    "explicit_activation_required": true,
+    "failed_validation_replaces_active_dataset": false,
+    "activation_is_atomic": true,
+    "activation_storage": "streamlit_session_state",
+    "session_state_is_durable_security_storage": false
+  },
+  "reference_data": {
+    "deis_snapshot_file": "data/reference/deis_establishments_ssmc_snapshot.csv",
+    "deis_manifest_file": "data/reference/deis_snapshot_manifest.json",
+    "origin_code_field": "origin_establishment_code",
+    "minimum_geographic_cell_size": 10,
+    "coordinate_policy": "official_establishment_coordinates_only"
+  },
+  "metadata_keys": [
+    {
+      "key": "contract_version",
+      "required": true,
+      "expected_value": "1.0.0"
+    },
+    {
+      "key": "dataset_id",
+      "required": true,
+      "type": "identifier"
+    },
+    {
+      "key": "dataset_name",
+      "required": true,
+      "type": "string"
+    },
+    {
+      "key": "source_mode",
+      "required": true,
+      "allowed_values": [
+        "simulado"
+      ]
+    },
+    {
+      "key": "period_start",
+      "required": true,
+      "type": "date"
+    },
+    {
+      "key": "period_end",
+      "required": true,
+      "type": "date"
+    },
+    {
+      "key": "generated_at_utc",
+      "required": true,
+      "type": "datetime"
+    },
+    {
+      "key": "simulation_notice_es",
+      "required": true,
+      "expected_value": "Datos operacionales y perfiles profesionales completamente simulados."
+    },
+    {
+      "key": "deis_snapshot_id",
+      "required": true,
+      "type": "identifier"
+    }
+  ],
+  "sheets": {
+    "DERIVACIONES": {
+      "primary_key": "referral_id",
+      "service_dashboard_type": "clinical",
+      "columns": [
+        {"name": "referral_id", "type": "identifier", "required": true, "critical": true, "unique": true},
+        {"name": "period_date", "type": "date", "required": true, "critical": true},
+        {"name": "service_id", "type": "service_id", "required": true, "critical": true},
+        {"name": "specialty_id", "type": "specialty_id", "required": false, "critical": false},
+        {"name": "origin_establishment_code", "type": "deis_code", "required": true, "critical": true},
+        {"name": "referral_type", "type": "enum", "required": true, "critical": true, "allowed_values": ["new", "followup", "teleconsult"]},
+        {"name": "status", "type": "enum", "required": true, "critical": true, "allowed_values": ["waiting", "completed", "discharged", "rejected"]},
+        {"name": "wait_days", "type": "integer", "required": true, "critical": true, "minimum": 0},
+        {"name": "scheduled_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "no_show_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "pertinence_assessment", "type": "enum", "required": true, "critical": true, "allowed_values": ["pertinent", "not_pertinent", "not_assessed"]},
+        {"name": "contrareference_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "ges_applicable_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "ges_due_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "ges_met_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "teleconsult_timely_closed_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "documentation_complete_flag", "type": "boolean", "required": true, "critical": true}
+      ]
+    },
+    "CIRUGIAS": {
+      "primary_key": "surgery_case_id",
+      "service_dashboard_type": "surgical",
+      "columns": [
+        {"name": "surgery_case_id", "type": "identifier", "required": true, "critical": true, "unique": true},
+        {"name": "period_date", "type": "date", "required": true, "critical": true},
+        {"name": "service_id", "type": "service_id", "required": true, "critical": true},
+        {"name": "specialty_id", "type": "specialty_id", "required": false, "critical": false},
+        {"name": "origin_establishment_code", "type": "deis_code", "required": true, "critical": true},
+        {"name": "procedure_code", "type": "identifier", "required": true, "critical": true},
+        {"name": "status", "type": "enum", "required": true, "critical": true, "allowed_values": ["waitlisted", "completed", "resolved", "suspended"]},
+        {"name": "wait_days", "type": "integer", "required": true, "critical": true, "minimum": 0},
+        {"name": "elective_major_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "ambulatory_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "scheduled_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "or_hours_used", "type": "number", "required": true, "critical": true, "minimum": 0},
+        {"name": "or_hours_available", "type": "number", "required": true, "critical": true, "minimum": 0},
+        {"name": "documentation_complete_flag", "type": "boolean", "required": true, "critical": true}
+      ]
+    },
+    "ACTIVIDAD_PROF": {
+      "primary_key": "activity_id",
+      "columns": [
+        {"name": "activity_id", "type": "identifier", "required": true, "critical": true, "unique": true},
+        {"name": "period_date", "type": "date", "required": true, "critical": true},
+        {"name": "simulated_profile_key", "type": "identifier", "required": true, "critical": true},
+        {"name": "profile_type", "type": "enum", "required": true, "critical": true, "allowed_values": ["clinical", "surgical", "mixed"]},
+        {"name": "lens", "type": "enum", "required": true, "critical": true, "allowed_values": ["clinical", "surgical"]},
+        {"name": "service_id", "type": "service_id", "required": true, "critical": true},
+        {"name": "specialty_id", "type": "specialty_id", "required": false, "critical": false},
+        {"name": "origin_establishment_code", "type": "deis_code", "required": true, "critical": true},
+        {"name": "activity_code", "type": "identifier", "required": true, "critical": true},
+        {"name": "scheduled_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "completed_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "no_show_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "suspended_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "new_consultation_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "discharge_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "ambulatory_major_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "documentation_complete_flag", "type": "boolean", "required": true, "critical": true}
+      ]
+    }
+  },
+  "cross_field_rules": [
+    "period_date must fall within metadata period_start and period_end",
+    "specialty_id, when present, must belong to service_id",
+    "service_id must be MVP-enabled and match the sheet or professional lens",
+    "origin_establishment_code must exist in the packaged DEIS snapshot",
+    "no_show_flag requires scheduled_flag",
+    "ges_met_flag requires ges_due_flag",
+    "ambulatory_flag requires elective_major_flag",
+    "or_hours_used cannot exceed or_hours_available",
+    "clinical professional rows cannot be marked suspended or ambulatory major",
+    "surgical professional rows cannot be marked no-show, new consultation, or discharge",
+    "mixed profiles are represented through separate clinical and surgical rows"
+  ]
+}

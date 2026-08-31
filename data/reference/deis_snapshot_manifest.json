@@ -1,0 +1,37 @@
+{
+  "snapshot_id": "deis_ssmc_2026-08-25_etl-0.1.0",
+  "status": "packaged_public_reference",
+  "created_at_utc": "2026-08-31T11:42:42.449233+00:00",
+  "scope": "vigentes_del_servicio_de_salud_metropolitano_central",
+  "source_authority": "DEIS, Ministerio de Salud de Chile",
+  "source_cut": "2026-08-25",
+  "upstream_etl_version": "0.1.0",
+  "upstream_validation": {
+    "pass": 45,
+    "warn": 3,
+    "fail": 0
+  },
+  "source_files": [
+    {
+      "role": "curated_master",
+      "filename": "establecimientos_curated.csv",
+      "sha256": "ef1275e3de19ea04a8b087ddd36c1f0a059618a0a927f6fb5f829c7fb5390742"
+    },
+    {
+      "role": "validated_hec_service_selection",
+      "filename": "hec_servicio_salud_vigentes.csv",
+      "sha256": "b0c4073e8e40b1885f2193203ff245897c546717aabf85a7388ac23610e4cbc4"
+    },
+    {
+      "role": "upstream_curated_manifest",
+      "filename": "curated_manifest.json",
+      "sha256": "a81ddc37a0b7280fead29dc43a04a088f9cc4e9b7a0edd65cb141d0e61dd1e4e"
+    }
+  ],
+  "rows": 55,
+  "unique_establishment_codes": 55,
+  "rows_with_coordinates": 55,
+  "output_file": "deis_establishments_ssmc_snapshot.csv",
+  "output_sha256": "8adb98345fc7f0d92b30590f348209f916dfc1af2c025ca1ac52d159da708e85",
+  "privacy_boundary": "Contains establishment-level public reference data only; no patient or employee data."
+}

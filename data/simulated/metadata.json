@@ -1,0 +1,17 @@
+{
+  "contract_version": "1.0.0",
+  "dataset_id": "hec-sim-day2-v1",
+  "dataset_name": "Demostración HEC — Día 2",
+  "source_mode": "simulado",
+  "period_start": "2026-01-01",
+  "period_end": "2026-06-30",
+  "generated_at_utc": "2026-08-31T12:00:00Z",
+  "simulation_notice_es": "Datos operacionales y perfiles profesionales completamente simulados.",
+  "deis_snapshot_id": "deis_ssmc_2026-08-25_etl-0.1.0",
+  "seed": 617,
+  "row_counts": {
+    "DERIVACIONES": 240,
+    "CIRUGIAS": 144,
+    "ACTIVIDAD_PROF": 216
+  }
+}
