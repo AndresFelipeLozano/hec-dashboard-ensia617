@@ -180,10 +180,13 @@ def build_professional_activity(
         scheduled = rng.random() < 0.91
         completed = scheduled and rng.random() < 0.88
         clinical = lens == "clinical"
+        elective_applicable = (
+            (not clinical) and completed and rng.random() < 0.82
+        )
         rows.append(
             {
                 "activity_id": f"SIM-ACT-{index:05d}",
-                "period_date": MONTHS[(index - 1) % len(MONTHS)],
+                "period_date": MONTHS[((index - 1) // 4) % len(MONTHS)],
                 "simulated_profile_key": profile_key,
                 "profile_type": profile_type,
                 "lens": lens,
@@ -201,7 +204,10 @@ def build_professional_activity(
                 "suspended_flag": yes_no((not clinical) and scheduled and not completed and rng.random() < 0.55),
                 "new_consultation_flag": yes_no(clinical and rng.random() < 0.42),
                 "discharge_flag": yes_no(clinical and completed and rng.random() < 0.16),
-                "ambulatory_major_flag": yes_no((not clinical) and completed and rng.random() < 0.46),
+                "elective_major_applicable_flag": yes_no(elective_applicable),
+                "ambulatory_major_flag": yes_no(
+                    elective_applicable and rng.random() < 0.46
+                ),
                 "documentation_complete_flag": yes_no(rng.random() < 0.96),
             }
         )
@@ -220,9 +226,9 @@ def main() -> int:
     write_csv("cirugias_simuladas.csv", surgeries)
     write_csv("actividad_profesional_simulada.csv", professional)
     metadata = {
-        "contract_version": "1.0.0",
-        "dataset_id": "hec-sim-day2-v1",
-        "dataset_name": "Demostración HEC — Día 2",
+        "contract_version": "1.1.0",
+        "dataset_id": "hec-sim-day3-v1",
+        "dataset_name": "Demostración HEC — Día 3",
         "source_mode": "simulado",
         "period_start": "2026-01-01",
         "period_end": "2026-06-30",

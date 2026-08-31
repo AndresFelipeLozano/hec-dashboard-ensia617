@@ -755,15 +755,29 @@ def validate_tables(
                                 lens,
                             )
                         )
+                    if normalized["ambulatory_major_flag"] and not normalized[
+                        "elective_major_applicable_flag"
+                    ]:
+                        row_issues.append(
+                            ValidationIssue(
+                                "ROW_FLAG_CONTRADICTION",
+                                "error",
+                                "ambulatory_major_flag requires elective_major_applicable_flag",
+                                sheet_name,
+                                row_number,
+                                "ambulatory_major_flag",
+                            )
+                        )
                     if lens == "clinical" and (
                         normalized["suspended_flag"]
+                        or normalized["elective_major_applicable_flag"]
                         or normalized["ambulatory_major_flag"]
                     ):
                         row_issues.append(
                             ValidationIssue(
                                 "ROW_CLINICAL_FLAG_CONTRADICTION",
                                 "error",
-                                "Clinical rows cannot be suspended or ambulatory-major",
+                                "Clinical rows cannot be suspended, elective-major applicable, or ambulatory-major",
                                 sheet_name,
                                 row_number,
                             )

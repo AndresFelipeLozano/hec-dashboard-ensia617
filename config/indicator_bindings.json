@@ -1,0 +1,51 @@
+{
+  "binding_version": "1.0.0",
+  "status": "approved_day_3_executable_bindings",
+  "last_reviewed": "2026-08-31",
+  "rounding": {
+    "percentage_decimals": 2,
+    "days_decimals": 2,
+    "count_decimals": 0
+  },
+  "result_statuses": [
+    "available",
+    "insufficient_n",
+    "zero_denominator",
+    "pending_definition",
+    "deferred",
+    "not_applicable"
+  ],
+  "bindings": [
+    {"indicator_id": "referrals_total", "implementation": "referrals_count", "source": "DERIVACIONES", "availability": "active"},
+    {"indicator_id": "referral_growth_pct", "implementation": "referral_growth", "source": "DERIVACIONES", "availability": "active"},
+    {"indicator_id": "wait_median_days", "implementation": "referral_wait_median", "source": "DERIVACIONES", "availability": "active"},
+    {"indicator_id": "wait_p75_days", "implementation": "referral_wait_p75", "source": "DERIVACIONES", "availability": "active"},
+    {"indicator_id": "new_no_show_pct", "implementation": "referral_no_show_new", "source": "DERIVACIONES", "availability": "active"},
+    {"indicator_id": "followup_no_show_pct", "implementation": "referral_no_show_followup", "source": "DERIVACIONES", "availability": "active"},
+    {"indicator_id": "discharge_rate_pct", "implementation": "referral_discharge", "source": "DERIVACIONES", "availability": "active", "prototype_basis_es": "Egresos documentados sobre consultas nuevas o de control completadas; elegibilidad local pendiente de validación."},
+    {"indicator_id": "referral_pertinence_pct", "implementation": "referral_pertinence", "source": "DERIVACIONES", "availability": "active"},
+    {"indicator_id": "contrareference_pct", "implementation": "referral_contrareference", "source": "DERIVACIONES", "availability": "active"},
+    {"indicator_id": "ges_compliance_pct", "implementation": "referral_ges", "source": "DERIVACIONES", "availability": "active"},
+    {"indicator_id": "teleconsult_timely_closure_pct", "implementation": "referral_teleconsult", "source": "DERIVACIONES", "availability": "active"},
+    {"indicator_id": "accepted_record_pct", "implementation": "quality_accepted", "source": "VALIDATION_REPORT", "availability": "active"},
+    {"indicator_id": "critical_field_completeness_pct", "implementation": "quality_completeness", "source": "VALIDATION_REPORT", "availability": "active"},
+    {"indicator_id": "top3_referrer_share_pct", "implementation": "referral_top3_origins", "source": "DERIVACIONES", "availability": "active"},
+    {"indicator_id": "surgical_waitlist_open_count", "implementation": "surgery_waitlist_open", "source": "CIRUGIAS", "availability": "active"},
+    {"indicator_id": "surgery_wait_p75_days", "implementation": "surgery_wait_p75", "source": "CIRUGIAS", "availability": "active"},
+    {"indicator_id": "elective_major_surgery_count", "implementation": "surgery_elective_completed", "source": "CIRUGIAS", "availability": "active"},
+    {"indicator_id": "ambulatory_major_surgery_pct", "implementation": "surgery_ambulatory", "source": "CIRUGIAS", "availability": "active"},
+    {"indicator_id": "elective_surgery_suspension_pct", "implementation": "surgery_suspension", "source": "CIRUGIAS", "availability": "active"},
+    {"indicator_id": "surgical_waitlist_resolution_pct", "implementation": "pending", "source": "CIRUGIAS", "availability": "pending_definition", "reason_es": "No disponible: falta aprobar la definición local de carga quirúrgica resoluble."},
+    {"indicator_id": "operating_room_utilization_pct", "implementation": "deferred", "source": "CIRUGIAS", "availability": "deferred", "reason_es": "No disponible: indicador diferido hasta validar horas y exclusiones de pabellón."},
+    {"indicator_id": "emergency_bed_lt12h_pct", "implementation": "deferred", "source": null, "availability": "deferred", "reason_es": "No disponible: el MVP no incorpora el insumo validado de acceso a cama de emergencia."},
+    {"indicator_id": "clinical_activity_completed", "implementation": "prof_clinical_completed", "source": "ACTIVIDAD_PROF", "availability": "active"},
+    {"indicator_id": "clinical_schedule_completion_pct", "implementation": "prof_clinical_schedule", "source": "ACTIVIDAD_PROF", "availability": "active"},
+    {"indicator_id": "new_consultation_share_pct", "implementation": "prof_clinical_new_share", "source": "ACTIVIDAD_PROF", "availability": "active"},
+    {"indicator_id": "professional_documentation_completeness_pct", "implementation": "prof_documentation", "source": "ACTIVIDAD_PROF", "availability": "active"},
+    {"indicator_id": "professional_no_show_context_pct", "implementation": "prof_clinical_no_show", "source": "ACTIVIDAD_PROF", "availability": "active"},
+    {"indicator_id": "surgical_activity_completed", "implementation": "prof_surgical_completed", "source": "ACTIVIDAD_PROF", "availability": "active"},
+    {"indicator_id": "surgical_schedule_completion_pct", "implementation": "prof_surgical_schedule", "source": "ACTIVIDAD_PROF", "availability": "active"},
+    {"indicator_id": "professional_ambulatory_surgery_pct", "implementation": "prof_surgical_ambulatory", "source": "ACTIVIDAD_PROF", "availability": "active"},
+    {"indicator_id": "professional_suspension_context_pct", "implementation": "prof_surgical_suspension", "source": "ACTIVIDAD_PROF", "availability": "active"}
+  ]
+}

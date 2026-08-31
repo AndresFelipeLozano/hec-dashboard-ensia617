@@ -1,4 +1,4 @@
-# Day 2 data ingestion contract
+# Day 2 data ingestion contract with Day 3 extension
 
 ## Purpose
 
@@ -31,7 +31,8 @@ episodes or activities, never people. The deterministic generator uses seed
 
 The normative machine-readable definition is
 `config/data_contract.json`. The delivered workbook is
-`templates/plantilla_carga_hec_v1.xlsx`.
+`templates/plantilla_carga_hec_v1.xlsx`. Day 3 raises the contract to version
+`1.1.0` without changing the sheet set or privacy boundary.
 
 | Sheet | Status | Rule |
 |---|---|---|
@@ -39,7 +40,7 @@ The normative machine-readable definition is
 | `METADATOS` | Required | Exact key/value contract, data period, simulation notice, and DEIS snapshot ID |
 | `DERIVACIONES` | Required | Exact ordered columns from the contract; clinical MVP service scope |
 | `CIRUGIAS` | Required | Exact ordered columns from the contract; surgical MVP service scope |
-| `ACTIVIDAD_PROF` | Required | Explicit `profile_type` and `lens`; mixed profiles use separate rows |
+| `ACTIVIDAD_PROF` | Required | Explicit `profile_type` and `lens`; mixed profiles use separate rows; `elective_major_applicable_flag` defines the professional ambulatory-surgery denominator |
 | `CATALOGOS` | Informational | Approved unit, specialty, and DEIS establishment codes |
 
 Dates use ISO `YYYY-MM-DD`. Boolean fields accept `SI` or `NO`. The validator
@@ -100,6 +101,7 @@ contract version. Row validation checks:
 - MVP-enabled service codes;
 - specialty-to-service parent relationships;
 - professional lens-to-service consistency;
+- explicit surgical professional applicability before ambulatory-major status;
 - origin codes against the packaged DEIS snapshot;
 - flag consistency for attendance, GES, ambulatory surgery, professional
   activity, and operating-room hours.
@@ -136,6 +138,8 @@ path.
 - Professional profiles are fictional keys and cannot be used for public
   ranking or punitive scoring.
 - A mixed profile is represented by separate clinical and surgical rows.
+- Clinical professional rows cannot enter the elective-major denominator;
+  `ambulatory_major_flag` requires `elective_major_applicable_flag`.
 - DEIS coordinates identify establishments only.
 - Geographic outputs must suppress cells below 10 records.
 - Missing, inapplicable, and denominator-zero results remain unavailable; they

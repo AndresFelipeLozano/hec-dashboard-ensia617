@@ -9,6 +9,7 @@ from .data_ingestion import (
     validate_tables,
     validate_workbook,
 )
+from .indicator_engine import IndicatorContext, IndicatorEngine, IndicatorResult
 
 __all__ = [
     "CandidateDataset",
@@ -18,4 +19,7 @@ __all__ = [
     "load_workbook_tables",
     "validate_tables",
     "validate_workbook",
+    "IndicatorContext",
+    "IndicatorEngine",
+    "IndicatorResult",
 ]

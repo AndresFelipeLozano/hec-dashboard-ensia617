@@ -1,6 +1,6 @@
 {
-  "contract_version": "1.0.0",
-  "status": "approved_day_2_data_contract",
+  "contract_version": "1.1.0",
+  "status": "approved_day_3_data_contract_extension",
   "last_reviewed": "2026-08-31",
   "language": "es-CL",
   "workbook": {
@@ -65,7 +65,7 @@
     {
       "key": "contract_version",
       "required": true,
-      "expected_value": "1.0.0"
+      "expected_value": "1.1.0"
     },
     {
       "key": "dataset_id",
@@ -172,6 +172,7 @@
         {"name": "suspended_flag", "type": "boolean", "required": true, "critical": true},
         {"name": "new_consultation_flag", "type": "boolean", "required": true, "critical": true},
         {"name": "discharge_flag", "type": "boolean", "required": true, "critical": true},
+        {"name": "elective_major_applicable_flag", "type": "boolean", "required": true, "critical": true},
         {"name": "ambulatory_major_flag", "type": "boolean", "required": true, "critical": true},
         {"name": "documentation_complete_flag", "type": "boolean", "required": true, "critical": true}
       ]
@@ -186,7 +187,8 @@
     "ges_met_flag requires ges_due_flag",
     "ambulatory_flag requires elective_major_flag",
     "or_hours_used cannot exceed or_hours_available",
-    "clinical professional rows cannot be marked suspended or ambulatory major",
+    "ambulatory_major_flag requires elective_major_applicable_flag",
+    "clinical professional rows cannot be marked suspended, elective-major applicable, or ambulatory major",
     "surgical professional rows cannot be marked no-show, new consultation, or discharge",
     "mixed profiles are represented through separate clinical and surgical rows"
   ]
