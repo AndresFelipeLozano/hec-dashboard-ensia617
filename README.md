@@ -6,14 +6,17 @@ Hospital El Carmen Dr. Luis Valentín Ferrada, Maipú.
 
 ## Current phase
 
-The Day 1 architecture baseline, Day 2 data foundation, and Day 3 indicator
-engine are complete. The repository now contains the normalized Excel
+The Day 1 architecture baseline, Day 2 data foundation, Day 3 indicator
+engine, and Day 4 Streamlit shell are complete. The repository now contains the normalized Excel
 contract, verified upload template, deterministic simulated operational and
 professional data, a traceable public DEIS establishment snapshot, row
 quarantine, explicit in-memory candidate activation, and 31 executable or
-explicitly unavailable indicator bindings.
+explicitly unavailable indicator bindings. The role-based shell adds dynamic
+navigation, session-only upload validation, explicit activation, data-quality
+status, and KPI cards backed directly by the approved indicator engine.
 
-The Streamlit application implementation has not started yet.
+Final charts, MapLibre georeferencing, the accessible map table, and
+deterministic prioritized findings remain scheduled for Day 5.
 
 ## Data disclaimer
 
@@ -38,9 +41,21 @@ an HIS, EHR, ERP, CDSS, production integration engine, or official HEC system.
 - [DEIS reference provenance](data/reference/deis_snapshot_manifest.json)
 - Deterministic simulated data under `data/simulated/`
 
-The packaged demonstration contains 240 simulated referrals, 144 simulated
-surgical cases, and 216 simulated professional activities. The DEIS snapshot
+The remediated packaged demonstration `hec-sim-day4r-v2` contains 3,400
+simulated referrals, 2,200 simulated surgical cases, and 3,360 simulated
+professional activities, for 8,960 accepted rows. Its deterministic profile
+catalog covers all 15 clinical and 11 surgical MVP analytical specialties plus
+one mixed Cirugía Pediátrica professional with separate clinical and surgical
+lenses under the same identity and specialty. The coverage matrix keeps
+applicable default role/service/specialty/profile indicators above their
+approved minimum sample sizes in both Q1 and Q2. The DEIS snapshot
 contains 55 unique establishments from the validated HEC service context.
+
+Professional selectors use readable specialty/profile labels from
+`config/professional_profiles.json`; internal `SIM-*` identifiers are never the
+sole primary label. Organizational units without an approved analytical
+specialty are intentionally excluded from professional selection while
+remaining available to compatible service-chief views.
 
 ## Indicator engine
 
@@ -53,6 +68,16 @@ denominators, valid sample sizes, target-applicability state, and explanatory
 unavailability reasons. It does not use `eval`, generated formulas, AI, or
 implicit zero substitution.
 
+## Run the Streamlit shell locally
+
+Install the pinned dependencies into the existing environment and start the app:
+
+    ./.venv/bin/python -m pip install -r requirements.txt
+    ./.venv/bin/python -m streamlit run app.py
+
+The role selector personalizes an academic demonstration; it is not production
+authentication. Uploaded XLSX candidates remain only in Streamlit session state.
+
 ## Contract validation
 
 Run the standard-library validator with:
@@ -61,7 +86,10 @@ Run the standard-library validator with:
     ./.venv/bin/python scripts/validate_data_contract.py \
       --workbook templates/plantilla_carga_hec_v1.xlsx
     ./.venv/bin/python scripts/calculate_indicators.py
+    ./.venv/bin/python scripts/audit_day4_coverage.py
 
 Run the test suite with:
 
     ./.venv/bin/python -m unittest discover -s tests -p 'test_*.py' -q
+
+The suite includes pure integration, regression, and Streamlit AppTest coverage.

@@ -105,8 +105,8 @@ Every dashboard below uses this order: header; role/service context; filters; KP
 | Order | Region | Contract |
 |---:|---|---|
 | 1 | Header | “Retroalimentación clínica del perfil simulado”; persistent simulated-data badge |
-| 2 | Role/service context | “Profesional — Clínico”; simulated profile, service/specialty context, period |
-| 3 | Filters | Period and simulated profile required; service, specialty, and prestation optional |
+| 2 | Role/service context | “Profesional — Clínico”; explicit analytical specialty, readable simulated profile, organizational parent, period |
+| 3 | Filters | Period, analytical specialty, and compatible simulated profile required; prestation optional |
 | 4 | KPI card row | clinical_activity_completed; clinical_schedule_completion_pct; new_consultation_share_pct; discharge_rate_pct; professional_documentation_completeness_pct; professional_no_show_context_pct |
 | 5 | Prioritized findings | Up to five non-punitive scheduling or documentation findings and contextual observations |
 | 6 | Main chart | Clinical activity and schedule completion trend |
@@ -122,8 +122,8 @@ Every dashboard below uses this order: header; role/service context; filters; KP
 | Order | Region | Contract |
 |---:|---|---|
 | 1 | Header | “Retroalimentación quirúrgica del perfil simulado”; persistent simulated-data badge |
-| 2 | Role/service context | “Profesional — Quirúrgico”; simulated profile, service/specialty context, period |
-| 3 | Filters | Period and simulated profile required; service, specialty, and procedure optional |
+| 2 | Role/service context | “Profesional — Quirúrgico”; explicit analytical specialty, readable simulated profile, organizational parent, period |
+| 3 | Filters | Period, analytical specialty, and compatible simulated profile required; procedure optional |
 | 4 | KPI card row | surgical_activity_completed; surgical_schedule_completion_pct; professional_ambulatory_surgery_pct; professional_documentation_completeness_pct; professional_suspension_context_pct |
 | 5 | Prioritized findings | Up to five non-punitive scheduling or documentation findings and contextual observations |
 | 6 | Main chart | Surgical activity and schedule completion trend |
@@ -138,16 +138,16 @@ Every dashboard below uses this order: header; role/service context; filters; KP
 
 | Order | Region | Contract |
 |---:|---|---|
-| 1 | Header | “Retroalimentación mixta del perfil simulado”; persistent simulated-data badge |
-| 2 | Role/service context | “Profesional — Mixto”; period and simulated profile |
-| 3 | Filters | Shared period/profile selector; lens-specific compatible filters |
+| 1 | Header | “Retroalimentación mixta del perfil simulado”; persistent simulated-data badge and explicit Cirugía Pediátrica context |
+| 2 | Role/service context | “Profesional — Mixto”; Cirugía Pediátrica, one readable simulated profile, Cirugía Infantil parent unit, period |
+| 3 | Filters | Shared period/specialty/profile plus an explicit lens selector: actividad ambulatoria/clínica or quirúrgica/procedimental |
 | 4 | KPI card row | No combined KPI row. Clinical lens uses the six professional_clinical IDs; surgical lens separately uses the five professional_surgical IDs. |
 | 5 | Prioritized findings | Separate lists per lens, each capped at five; no combined severity or performance result |
 | 6 | Main chart | Clinical lens trend, using the professional_clinical chart contract |
 | 7 | Secondary chart | Surgical lens trend, using the professional_surgical chart contract |
 | 8 | Georeferenced map | Separate clinical and surgical maps; never merge incompatible measures |
 | 9 | Accessible map table | Separate synchronized tables with independent suppression and denominators |
-| 10 | Interpretation note | “Los lentes clínico y quirúrgico no forman un puntaje combinado.” |
+| 10 | Interpretation note | “Los lentes pertenecen al mismo perfil de Cirugía Pediátrica y no forman un puntaje combinado.” |
 | 11 | Data provenance | Shared dataset provenance plus independent lens scope and quality status |
 | 12 | Empty/unavailable/error | Report each lens independently; an unavailable lens does not hide or alter the other |
 

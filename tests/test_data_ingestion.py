@@ -35,7 +35,7 @@ class DataIngestionTests(unittest.TestCase):
             validation_timestamp_utc="2026-08-31T12:00:00+00:00",
         )
         self.assertTrue(report.activatable)
-        self.assertEqual(report.accepted_row_count, 600)
+        self.assertEqual(report.accepted_row_count, 8960)
         self.assertEqual(report.rejected_row_count, 0)
         self.assertEqual(report.accepted_record_pct, 100.0)
         self.assertEqual(report.critical_field_completeness_pct, 100.0)
@@ -46,7 +46,7 @@ class DataIngestionTests(unittest.TestCase):
             REPO_ROOT,
         )
         self.assertTrue(report.activatable)
-        self.assertEqual(report.accepted_row_count, 600)
+        self.assertEqual(report.accepted_row_count, 8960)
         self.assertEqual(report.rejected_row_count, 0)
 
     def test_unmatched_deis_code_is_quarantined_actionably(self):
@@ -70,6 +70,96 @@ class DataIngestionTests(unittest.TestCase):
         self.assertTrue(report.activatable)
         self.assertEqual(report.rejected_row_count, 1)
         self.assertIn("ROW_DUPLICATE_ID", {issue.code for issue in report.issues})
+
+    def test_professional_row_from_another_specialty_is_quarantined(self):
+        tables = copy.deepcopy(self.tables)
+        header = tables["ACTIVIDAD_PROF"][0]
+        profile_column = header.index("simulated_profile_key")
+        specialty_column = header.index("specialty_id")
+        row = next(
+            item
+            for item in tables["ACTIVIDAD_PROF"][1:]
+            if item[profile_column]
+            == "SIM-PROF-C-BRONCOPULMONAR-ADULTO-A"
+        )
+        row[specialty_column] = "cardiologia_adulto"
+        report = validate_tables(tables, REPO_ROOT)
+        self.assertEqual(report.rejected_row_count, 1)
+        self.assertIn(
+            "ROW_PROFILE_SCOPE_MISMATCH", {issue.code for issue in report.issues}
+        )
+
+    def test_unknown_simulated_professional_profile_is_quarantined(self):
+        tables = copy.deepcopy(self.tables)
+        header = tables["ACTIVIDAD_PROF"][0]
+        profile_column = header.index("simulated_profile_key")
+        tables["ACTIVIDAD_PROF"][1][profile_column] = "SIM-PROF-UNKNOWN"
+        report = validate_tables(tables, REPO_ROOT)
+        self.assertEqual(report.rejected_row_count, 1)
+        self.assertIn(
+            "ROW_UNKNOWN_PROFESSIONAL_PROFILE",
+            {issue.code for issue in report.issues},
+        )
+
+    def test_mixed_professional_row_from_pediatrics_is_quarantined(self):
+        tables = copy.deepcopy(self.tables)
+        header = tables["ACTIVIDAD_PROF"][0]
+        profile_column = header.index("simulated_profile_key")
+        lens_column = header.index("lens")
+        service_column = header.index("service_id")
+        specialty_column = header.index("specialty_id")
+        row = next(
+            item
+            for item in tables["ACTIVIDAD_PROF"][1:]
+            if item[profile_column] == "SIM-PROF-M-PEDIATRICO-A"
+            and item[lens_column] == "clinical"
+        )
+        row[service_column] = "pediatria"
+        row[specialty_column] = "pediatria"
+        report = validate_tables(tables, REPO_ROOT)
+        self.assertEqual(report.rejected_row_count, 1)
+        self.assertIn(
+            "ROW_PROFILE_SCOPE_MISMATCH", {issue.code for issue in report.issues}
+        )
+
+    def test_mixed_professional_activity_class_must_match_lens(self):
+        tables = copy.deepcopy(self.tables)
+        header = tables["ACTIVIDAD_PROF"][0]
+        profile_column = header.index("simulated_profile_key")
+        lens_column = header.index("lens")
+        activity_column = header.index("activity_code")
+        row = next(
+            item
+            for item in tables["ACTIVIDAD_PROF"][1:]
+            if item[profile_column] == "SIM-PROF-M-PEDIATRICO-A"
+            and item[lens_column] == "clinical"
+        )
+        row[activity_column] = "PROC-CIR"
+        report = validate_tables(tables, REPO_ROOT)
+        self.assertEqual(report.rejected_row_count, 1)
+        self.assertIn(
+            "ROW_MIXED_ACTIVITY_CLASS_MISMATCH",
+            {issue.code for issue in report.issues},
+        )
+
+    def test_outpatient_exception_does_not_admit_another_surgical_scope(self):
+        tables = copy.deepcopy(self.tables)
+        header = tables["DERIVACIONES"][0]
+        service_column = header.index("service_id")
+        specialty_column = header.index("specialty_id")
+        row = next(
+            item
+            for item in tables["DERIVACIONES"][1:]
+            if item[service_column] == "cirugia_infantil"
+            and item[specialty_column] == "cirugia_pediatrica"
+        )
+        row[service_column] = "cirugia_adulto"
+        row[specialty_column] = "cirugia_general"
+        report = validate_tables(tables, REPO_ROOT)
+        self.assertEqual(report.rejected_row_count, 1)
+        self.assertIn(
+            "ROW_SERVICE_LENS_MISMATCH", {issue.code for issue in report.issues}
+        )
 
     def test_unknown_sheet_warns_without_blocking_activation(self):
         tables = copy.deepcopy(self.tables)

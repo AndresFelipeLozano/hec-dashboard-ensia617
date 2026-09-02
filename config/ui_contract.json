@@ -1,7 +1,7 @@
 {
-  "contract_version": "1.0.0",
-  "status": "approved_day_1_design_baseline",
-  "last_reviewed": "2026-08-31",
+  "contract_version": "1.1.0",
+  "status": "approved_day_4_professional_context_remediation",
+  "last_reviewed": "2026-09-01",
   "language": "es-CL",
   "application_title_es": "Tablero de apoyo a decisiones por rol — Hospital El Carmen",
   "global_layout": {
@@ -55,11 +55,18 @@
           "professional_surgical",
           "professional_mixed"
         ],
+        "next_steps": [
+          "compatible_analytical_specialty",
+          "readable_simulated_professional_profile"
+        ],
+        "professional_profile_catalog_ref": "config/professional_profiles.json",
         "mixed_profile_behavior": {
           "separate_lens_role_ids": [
             "professional_clinical",
             "professional_surgical"
           ],
+          "single_specialty_across_lenses": true,
+          "same_professional_identity_across_lenses": true,
           "combined_performance_score_allowed": false
         }
       }
@@ -296,8 +303,8 @@
       "role_id": "professional_clinical",
       "page_title_es": "Retroalimentación clínica del perfil simulado",
       "decision_purpose_es": "Entregar contexto clínico no punitivo sobre actividad, programación, mezcla, documentación e inasistencia.",
-      "required_selectors": ["period", "simulated_profile"],
-      "optional_filters": ["service", "specialty", "prestation"],
+      "required_selectors": ["period", "specialty", "simulated_profile"],
+      "optional_filters": ["service", "prestation"],
       "primary_indicator_ids": [
         "clinical_activity_completed",
         "clinical_schedule_completion_pct",
@@ -340,8 +347,8 @@
       "role_id": "professional_surgical",
       "page_title_es": "Retroalimentación quirúrgica del perfil simulado",
       "decision_purpose_es": "Entregar contexto quirúrgico no punitivo sobre actividad, programación, ambulatorización, documentación y suspensiones.",
-      "required_selectors": ["period", "simulated_profile"],
-      "optional_filters": ["service", "specialty", "procedure"],
+      "required_selectors": ["period", "specialty", "simulated_profile"],
+      "optional_filters": ["service", "procedure"],
       "primary_indicator_ids": [
         "surgical_activity_completed",
         "surgical_schedule_completion_pct",
@@ -386,8 +393,8 @@
       "role_id": "professional_mixed",
       "page_title_es": "Retroalimentación mixta del perfil simulado",
       "decision_purpose_es": "Presentar actividad clínica y quirúrgica en lentes separados sin puntaje combinado.",
-      "required_selectors": ["period", "simulated_profile"],
-      "optional_filters": ["service", "specialty"],
+      "required_selectors": ["period", "specialty", "simulated_profile", "professional_lens"],
+      "optional_filters": ["service"],
       "primary_indicator_ids": [],
       "prioritized_findings_limit": 5,
       "sections": ["clinical_lens", "surgical_lens", "separate_interpretation_and_provenance"],
@@ -407,6 +414,7 @@
       "separate_lens_role_ids": ["professional_clinical", "professional_surgical"],
       "combined_performance_score_allowed": false,
       "explanatory_text_requirements": [
+        "Mantener la misma identidad, especialidad y unidad profesional al cambiar de lente.",
         "Mantener separados denominadores, tarjetas, hallazgos, gráficos y mapas clínicos y quirúrgicos.",
         "Se permite un resumen de conteos, pero no un puntaje combinado de desempeño."
       ],

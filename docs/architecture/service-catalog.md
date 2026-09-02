@@ -94,6 +94,31 @@ Departments organize the catalog but are not presented as performance units.
 - The professional mixed profile keeps separate clinical and surgical lenses.
 - Neurología Infantil is team-validated institutional context pending final sign-off.
 
+## Simulated professional specialty context
+
+`config/professional_profiles.json` maps stable, non-personal `SIM-*` profile
+IDs to the analytical specialties above. The professional selector presents the
+specialty first and then a readable simulated-profile label; an internal ID is
+never the sole dropdown text.
+
+- All 15 MVP clinical analytical specialties have one clinical simulated
+  profile.
+- All 11 MVP surgical analytical specialties have one surgical simulated
+  profile.
+- The mixed demonstration represents one simulated Cirugía Pediátrica
+  professional. Its outpatient/clinical and surgical/procedural activity use
+  the same professional ID, specialty, and Cirugía Infantil parent unit.
+  Results and denominators remain separated by lens and are never combined.
+- MVP organizational units that have no approved analytical specialty are not
+  offered as professional specialties. They remain available in the appropriate
+  service-chief workflow; a unit is not silently relabeled as a specialty.
+
+Each submitted professional context retains both the organizational parent and
+the analytical specialty, plus readable simulated-profile metadata. Activity
+rows must match the selected profile, specialty, type, lens, and period. A
+mixed-profile lens changes only the activity class; it never changes the
+professional identity or specialty.
+
 ## Privacy rules
 
 - No patient addresses.

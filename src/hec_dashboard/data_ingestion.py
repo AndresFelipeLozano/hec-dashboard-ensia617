@@ -501,6 +501,9 @@ def validate_tables(
 ) -> ValidationReport:
     contract = _load_json(repo_root / "config" / "data_contract.json")
     services = _load_json(repo_root / "config" / "services.json")
+    professional_profiles = _load_json(
+        repo_root / "config" / "professional_profiles.json"
+    )
     structural_errors: list[ValidationIssue] = []
     issues: list[ValidationIssue] = []
     required_sheets = set(contract["workbook"]["required_sheets"])
@@ -542,6 +545,51 @@ def validate_tables(
         for item in services["analytical_specialties"]
         if item.get("mvp_enabled")
     }
+    professional_profile_by_id = {
+        item["professional_id"]: item
+        for item in professional_profiles["profiles"]
+        if item.get("mvp_enabled") and item.get("simulated") is True
+    }
+    mixed_outpatient_scopes = {
+        (profile.get("service_id"), profile.get("specialty_id"))
+        for profile in professional_profile_by_id.values()
+        if profile.get("profile_type") == "mixed"
+        and profile.get("lens_contexts", {})
+        .get("clinical", {})
+        .get("activity_class")
+        == "outpatient_clinical"
+    }
+    for profile in professional_profile_by_id.values():
+        if profile.get("profile_type") != "mixed":
+            continue
+        lens_contexts = profile.get("lens_contexts")
+        valid_mixed_scope = isinstance(lens_contexts, dict)
+        if valid_mixed_scope:
+            valid_mixed_scope = all(
+                isinstance(lens_contexts.get(lens), dict)
+                and all(
+                    lens_contexts[lens].get(field) == profile.get(field)
+                    for field in (
+                        "service_id",
+                        "specialty_id",
+                        "specialty_display_name",
+                    )
+                )
+                and lens_contexts[lens].get("activity_class") == activity_class
+                for lens, activity_class in (
+                    ("clinical", "outpatient_clinical"),
+                    ("surgical", "surgical_procedural"),
+                )
+            )
+        if not valid_mixed_scope:
+            structural_errors.append(
+                ValidationIssue(
+                    "STRUCT_MIXED_PROFILE_SCOPE_MISMATCH",
+                    "error",
+                    "Mixed profile lenses must preserve one professional specialty and service",
+                    "ACTIVIDAD_PROF",
+                )
+            )
     reference_path = repo_root / contract["reference_data"]["deis_snapshot_file"]
     with reference_path.open("r", encoding="utf-8-sig", newline="") as handle:
         reference_codes = {
@@ -624,7 +672,31 @@ def validate_tables(
                     expected_type = sheet_rules.get("service_dashboard_type")
                     if sheet_name == "ACTIVIDAD_PROF":
                         expected_type = normalized["lens"]
-                    if unit["dashboard_type"] != expected_type:
+                    professional_profile = professional_profile_by_id.get(
+                        normalized.get("simulated_profile_key")
+                    )
+                    mixed_shared_service = (
+                        sheet_name == "ACTIVIDAD_PROF"
+                        and professional_profile is not None
+                        and professional_profile.get("profile_type") == "mixed"
+                        and normalized["service_id"]
+                        == professional_profile.get("service_id")
+                        and normalized["lens"]
+                        in professional_profile.get("supported_lenses", [])
+                    )
+                    mixed_outpatient_referral = (
+                        sheet_name == "DERIVACIONES"
+                        and (
+                            normalized["service_id"],
+                            normalized.get("specialty_id"),
+                        )
+                        in mixed_outpatient_scopes
+                    )
+                    if (
+                        unit["dashboard_type"] != expected_type
+                        and not mixed_shared_service
+                        and not mixed_outpatient_referral
+                    ):
                         row_issues.append(
                             ValidationIssue(
                                 "ROW_SERVICE_LENS_MISMATCH",
@@ -743,6 +815,62 @@ def validate_tables(
                 else:
                     profile_type = normalized["profile_type"]
                     lens = normalized["lens"]
+                    professional_id = normalized["simulated_profile_key"]
+                    professional_profile = professional_profile_by_id.get(
+                        professional_id
+                    )
+                    if professional_profile is None:
+                        row_issues.append(
+                            ValidationIssue(
+                                "ROW_UNKNOWN_PROFESSIONAL_PROFILE",
+                                "error",
+                                f"Unknown simulated profile '{professional_id}'",
+                                sheet_name,
+                                row_number,
+                                "simulated_profile_key",
+                                professional_id,
+                            )
+                        )
+                    else:
+                        if (
+                            professional_profile["profile_type"] != profile_type
+                            or lens
+                            not in professional_profile["supported_lenses"]
+                        ):
+                            row_issues.append(
+                                ValidationIssue(
+                                    "ROW_PROFILE_CONTRACT_MISMATCH",
+                                    "error",
+                                    "Profile type or lens is incompatible with the approved profile",
+                                    sheet_name,
+                                    row_number,
+                                    "simulated_profile_key",
+                                    professional_id,
+                                )
+                            )
+                        if profile_type == "mixed":
+                            expected_scope = professional_profile[
+                                "lens_contexts"
+                            ][lens]
+                        else:
+                            expected_scope = professional_profile
+                        if (
+                            normalized["service_id"]
+                            != expected_scope["service_id"]
+                            or normalized.get("specialty_id")
+                            != expected_scope["specialty_id"]
+                        ):
+                            row_issues.append(
+                                ValidationIssue(
+                                    "ROW_PROFILE_SCOPE_MISMATCH",
+                                    "error",
+                                    "Professional row belongs to another approved specialty",
+                                    sheet_name,
+                                    row_number,
+                                    "specialty_id",
+                                    normalized.get("specialty_id"),
+                                )
+                            )
                     if profile_type != "mixed" and profile_type != lens:
                         row_issues.append(
                             ValidationIssue(
@@ -755,6 +883,29 @@ def validate_tables(
                                 lens,
                             )
                         )
+                    if profile_type == "mixed":
+                        activity_code = normalized["activity_code"]
+                        valid_activity_class = (
+                            lens == "clinical"
+                            and activity_code
+                            in {"CONS-NUEVA", "CONS-CONTROL", "TELECONS"}
+                        ) or (
+                            lens == "surgical"
+                            and activity_code
+                            in {"PROC-CMA", "PROC-CIR", "PROC-TRA"}
+                        )
+                        if not valid_activity_class:
+                            row_issues.append(
+                                ValidationIssue(
+                                    "ROW_MIXED_ACTIVITY_CLASS_MISMATCH",
+                                    "error",
+                                    "Mixed professional activity_code is incompatible with its lens",
+                                    sheet_name,
+                                    row_number,
+                                    "activity_code",
+                                    activity_code,
+                                )
+                            )
                     if normalized["ambulatory_major_flag"] and not normalized[
                         "elective_major_applicable_flag"
                     ]:

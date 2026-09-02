@@ -1,5 +1,8 @@
+import json
 from pathlib import Path
+import shutil
 import sys
+import tempfile
 import unittest
 
 
@@ -7,6 +10,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from validate_contracts import (  # noqa: E402
+    ContractValidationError,
     check_limit,
     validate_contracts,
     validate_references,
@@ -17,11 +21,12 @@ from validate_contracts import (  # noqa: E402
 class ContractTests(unittest.TestCase):
     def test_real_project_contracts_validate_completely(self):
         counts = validate_contracts(REPO_ROOT)
-        self.assertEqual(counts["contract_files"], 4)
+        self.assertEqual(counts["contract_files"], 5)
         self.assertEqual(counts["indicators"], 31)
         self.assertEqual(counts["roles"], 7)
         self.assertEqual(counts["units"], 30)
         self.assertEqual(counts["specialties"], 26)
+        self.assertEqual(counts["simulated_professional_profiles"], 27)
         self.assertEqual(counts["maps"], 6)
         self.assertEqual(counts["finding_rules"], 19)
         self.assertEqual(counts["view_limits"], 7)
@@ -68,6 +73,36 @@ class ContractTests(unittest.TestCase):
             with self.subTest(value=value, maximum=maximum):
                 errors = check_limit(value, maximum, "test.limit")
                 self.assertIs(bool(errors), has_error)
+
+    def test_mixed_profile_contract_rejects_two_specialties(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / "config"
+            config.mkdir()
+            for name in (
+                "services.json",
+                "indicators.json",
+                "role_matrix.json",
+                "ui_contract.json",
+                "professional_profiles.json",
+            ):
+                shutil.copy2(REPO_ROOT / "config" / name, config / name)
+            path = config / "professional_profiles.json"
+            contract = json.loads(path.read_text(encoding="utf-8"))
+            mixed = next(
+                profile
+                for profile in contract["profiles"]
+                if profile["profile_type"] == "mixed"
+            )
+            mixed["lens_contexts"]["clinical"]["specialty_id"] = "pediatria"
+            path.write_text(
+                json.dumps(contract, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(
+                ContractValidationError, "preserve mixed specialty_id"
+            ):
+                validate_contracts(root)
 
 
 if __name__ == "__main__":

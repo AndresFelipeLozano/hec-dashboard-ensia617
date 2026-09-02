@@ -1,17 +1,34 @@
 {
   "contract_version": "1.1.0",
-  "dataset_id": "hec-sim-day3-v1",
-  "dataset_name": "Demostración HEC — Día 3",
+  "dataset_id": "hec-sim-day4r-v2",
+  "dataset_name": "Demostración HEC — Día 4 remediado",
   "source_mode": "simulado",
   "period_start": "2026-01-01",
   "period_end": "2026-06-30",
-  "generated_at_utc": "2026-08-31T12:00:00Z",
+  "generated_at_utc": "2026-09-01T12:00:00Z",
   "simulation_notice_es": "Datos operacionales y perfiles profesionales completamente simulados.",
   "deis_snapshot_id": "deis_ssmc_2026-08-25_etl-0.1.0",
   "seed": 617,
+  "coverage_design": {
+    "clinical_service_specialty_strata": 18,
+    "surgical_service_specialty_strata": 11,
+    "minimum_new_scheduled_per_stratum_period": 40,
+    "minimum_followup_scheduled_per_stratum_period": 40,
+    "minimum_elective_completed_per_stratum_period": 40,
+    "professional_rows_per_profile_lens_period": 60,
+    "professional_profiles": 27,
+    "professional_clinical_specialties": 15,
+    "professional_surgical_specialties": 11,
+    "professional_mixed_arrangements": 1
+  },
   "row_counts": {
-    "DERIVACIONES": 240,
-    "CIRUGIAS": 144,
-    "ACTIVIDAD_PROF": 216
+    "DERIVACIONES": 3400,
+    "CIRUGIAS": 2200,
+    "ACTIVIDAD_PROF": 3360
+  },
+  "artifact_checksums_sha256": {
+    "derivaciones_simuladas.csv": "dd098b82b96d93e9417dcdce77c7bc88d6e71f56bb4a2a6961cacb6f1d09b192",
+    "cirugias_simuladas.csv": "ef376542610429ef58bd641d548c43942118f8f5614bf19cf4cf50c914a09876",
+    "actividad_profesional_simulada.csv": "0c2a22ec809b212cd29c626fdcfb630c3a50abeeefb04cff1bf9c633d2556141"
   }
 }

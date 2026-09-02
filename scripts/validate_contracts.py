@@ -109,12 +109,14 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
         "indicators": config_dir / "indicators.json",
         "roles": config_dir / "role_matrix.json",
         "ui": config_dir / "ui_contract.json",
+        "professional_profiles": config_dir / "professional_profiles.json",
     }
     contracts = {name: load_json(path) for name, path in paths.items()}
     services = contracts["services"]
     indicators = contracts["indicators"]
     roles = contracts["roles"]
     ui = contracts["ui"]
+    professional_profiles = contracts["professional_profiles"]
 
     errors: list[str] = []
     unique_count = 0
@@ -137,6 +139,11 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
             "profile_id",
             "services.professional_profiles",
         ),
+        (
+            professional_profiles["profiles"],
+            "professional_id",
+            "professional_profiles.profiles",
+        ),
         (indicators["indicators"], "indicator_id", "indicators.indicators"),
         (roles["role_views"], "role_id", "role_matrix.role_views"),
         (roles["finding_rules"], "rule_id", "role_matrix.finding_rules"),
@@ -154,6 +161,7 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
     unit_ids = namespaces["services.organizational_units"]
     specialty_ids = namespaces["services.analytical_specialties"]
     profile_ids = namespaces["services.professional_profiles"]
+    simulated_professional_ids = namespaces["professional_profiles.profiles"]
     indicator_ids = namespaces["indicators.indicators"]
     role_ids = namespaces["role_matrix.role_views"]
     rule_ids = namespaces["role_matrix.finding_rules"]
@@ -188,6 +196,130 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
         checked, found_errors = validate_references(references, allowed, context)
         reference_count += checked
         errors.extend(found_errors)
+
+    errors.extend(
+        require_value(
+            professional_profiles.get("simulation_only"),
+            True,
+            "professional_profiles simulation marker",
+        )
+    )
+    errors.extend(
+        require_value(
+            professional_profiles.get("dataset_id"),
+            "hec-sim-day4r-v2",
+            "professional_profiles dataset",
+        )
+    )
+    unit_by_id = {
+        item["unit_id"]: item for item in services["organizational_units"]
+    }
+    specialty_by_id = {
+        item["specialty_id"]: item for item in services["analytical_specialties"]
+    }
+    covered_specialties: dict[str, set[str]] = {
+        "clinical": set(),
+        "surgical": set(),
+    }
+    mixed_profile_count = 0
+    for profile in professional_profiles["profiles"]:
+        profile_id = profile.get("professional_id")
+        profile_type = profile.get("profile_type")
+        specialty_id = profile.get("specialty_id")
+        service_id = profile.get("service_id")
+        specialty = specialty_by_id.get(specialty_id)
+        if profile.get("mvp_enabled") is not True or profile.get("simulated") is not True:
+            errors.append(f"{profile_id}: simulated MVP markers must be true")
+        for field in (
+            "display_label_es",
+            "short_label_es",
+            "specialty_display_name",
+        ):
+            if not isinstance(profile.get(field), str) or not profile[field].strip():
+                errors.append(f"{profile_id}: {field} must be a non-empty string")
+        if profile.get("display_label_es") == profile_id:
+            errors.append(f"{profile_id}: internal ID cannot be the display label")
+        if specialty is None:
+            errors.append(f"{profile_id}: unknown specialty_id '{specialty_id}'")
+            continue
+        if specialty.get("display_name") != profile.get("specialty_display_name"):
+            errors.append(f"{profile_id}: specialty display name does not match services.json")
+        if service_id not in unit_by_id or not unit_by_id[service_id].get("mvp_enabled"):
+            errors.append(f"{profile_id}: unknown or deferred service_id '{service_id}'")
+        if profile_type in {"clinical", "surgical"}:
+            covered_specialties[profile_type].add(specialty_id)
+            if specialty.get("dashboard_type") != profile_type:
+                errors.append(f"{profile_id}: profile and specialty types are incompatible")
+            if specialty.get("parent_unit_id") != service_id:
+                errors.append(f"{profile_id}: service is not the specialty parent")
+            if profile.get("supported_lenses") != [profile_type]:
+                errors.append(f"{profile_id}: non-mixed lens must equal profile type")
+        elif profile_type == "mixed":
+            mixed_profile_count += 1
+            if profile.get("supported_lenses") != ["clinical", "surgical"]:
+                errors.append(f"{profile_id}: mixed lenses must remain separate")
+            if specialty_id != "cirugia_pediatrica":
+                errors.append(
+                    f"{profile_id}: mixed specialty must be 'cirugia_pediatrica'"
+                )
+            if service_id != "cirugia_infantil":
+                errors.append(
+                    f"{profile_id}: mixed service must be 'cirugia_infantil'"
+                )
+            if specialty.get("parent_unit_id") != service_id:
+                errors.append(f"{profile_id}: mixed service is not the specialty parent")
+            lens_contexts = profile.get("lens_contexts")
+            if not isinstance(lens_contexts, dict):
+                errors.append(f"{profile_id}: mixed lens_contexts are required")
+                continue
+            expected_activity_classes = {
+                "clinical": "outpatient_clinical",
+                "surgical": "surgical_procedural",
+            }
+            for lens in ("clinical", "surgical"):
+                lens_context = lens_contexts.get(lens, {})
+                lens_specialty = specialty_by_id.get(lens_context.get("specialty_id"))
+                if lens_specialty is None:
+                    errors.append(f"{profile_id}: unknown {lens} lens specialty")
+                    continue
+                for field, expected in (
+                    ("service_id", service_id),
+                    ("specialty_id", specialty_id),
+                    ("specialty_display_name", profile.get("specialty_display_name")),
+                ):
+                    if lens_context.get(field) != expected:
+                        errors.append(
+                            f"{profile_id}: {lens} lens must preserve mixed {field}"
+                        )
+                if lens_context.get("professional_id", profile_id) != profile_id:
+                    errors.append(
+                        f"{profile_id}: {lens} lens must preserve professional identity"
+                    )
+                if (
+                    lens_context.get("activity_class")
+                    != expected_activity_classes[lens]
+                ):
+                    errors.append(
+                        f"{profile_id}: {lens} lens activity_class is incompatible"
+                    )
+        else:
+            errors.append(f"{profile_id}: unsupported profile_type '{profile_type}'")
+
+    for dashboard_type in ("clinical", "surgical"):
+        expected = {
+            item["specialty_id"]
+            for item in services["analytical_specialties"]
+            if item.get("mvp_enabled") and item.get("dashboard_type") == dashboard_type
+        }
+        missing = sorted(expected - covered_specialties[dashboard_type])
+        extra = sorted(covered_specialties[dashboard_type] - expected)
+        if missing or extra:
+            errors.append(
+                f"professional_profiles {dashboard_type} coverage mismatch; "
+                f"missing={missing}; extra={extra}"
+            )
+    if mixed_profile_count < 1:
+        errors.append("professional_profiles requires an approved mixed arrangement")
 
     role_by_id = {item["role_id"]: item for item in roles["role_views"]}
     ui_by_id = {item["role_id"]: item for item in ui["view_contracts"]}
@@ -371,6 +503,13 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
     else:
         errors.extend(
             require_value(
+                set(mixed["required_selectors"]),
+                {"period", "specialty", "simulated_profile", "professional_lens"},
+                "professional_mixed required selectors",
+            )
+        )
+        errors.extend(
+            require_value(
                 set(mixed["separate_lens_role_ids"]),
                 expected_lenses,
                 "professional_mixed separate lenses",
@@ -395,6 +534,32 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
                 mixed["map_role_reference"],
                 None,
                 "professional_mixed combined map",
+            )
+        )
+    professional_branch = next(
+        (
+            item
+            for item in ui["navigation_flow"]["branches"]
+            if item.get("selection_es") == "Profesional"
+        ),
+        None,
+    )
+    if professional_branch is None:
+        errors.append("ui.navigation requires the professional branch")
+    else:
+        mixed_behavior = professional_branch.get("mixed_profile_behavior", {})
+        errors.extend(
+            require_value(
+                mixed_behavior.get("single_specialty_across_lenses"),
+                True,
+                "professional navigation mixed single specialty",
+            )
+        )
+        errors.extend(
+            require_value(
+                mixed_behavior.get("same_professional_identity_across_lenses"),
+                True,
+                "professional navigation mixed shared identity",
             )
         )
     errors.extend(
@@ -614,6 +779,7 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
         "specialties": len(specialty_ids),
         "maps": len(map_role_ids),
         "finding_rules": len(rule_ids),
+        "simulated_professional_profiles": len(simulated_professional_ids),
     }
 
 
@@ -635,6 +801,7 @@ def main() -> int:
         f"{counts['roles']} roles; "
         f"{counts['units']} units; "
         f"{counts['specialties']} specialties; "
+        f"{counts['simulated_professional_profiles']} simulated professional profiles; "
         f"{counts['maps']} maps; "
         f"{counts['finding_rules']} finding rules"
     )

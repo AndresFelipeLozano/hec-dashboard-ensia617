@@ -57,10 +57,18 @@ class IndicatorEngineTests(unittest.TestCase):
         result = self.engine.calculate(
             "referral_growth_pct", self.dataset, self.context
         )
+        current = sum(
+            date(2026, 4, 1) <= row["period_date"] <= date(2026, 6, 30)
+            for row in self.dataset.tables["DERIVACIONES"]
+        )
+        previous = sum(
+            date(2026, 1, 1) <= row["period_date"] <= date(2026, 3, 31)
+            for row in self.dataset.tables["DERIVACIONES"]
+        )
         self.assertEqual(result.status, "available")
-        self.assertEqual(result.numerator, 0)
-        self.assertEqual(result.denominator, 120)
-        self.assertEqual(result.value, 0.0)
+        self.assertEqual(result.numerator, current - previous)
+        self.assertEqual(result.denominator, previous)
+        self.assertAlmostEqual(result.value, (current - previous) * 100 / previous, places=2)
 
     def test_zero_denominator_is_unavailable_not_zero(self):
         context = IndicatorContext(
@@ -74,10 +82,17 @@ class IndicatorEngineTests(unittest.TestCase):
         self.assertEqual(result.denominator, 0)
 
     def test_insufficient_n_is_unavailable_not_zero(self):
+        origin = next(
+            row["origin_establishment_code"]
+            for row in self.dataset.tables["DERIVACIONES"]
+            if row["service_id"] == "psiquiatria_infantil"
+            and date(2026, 4, 1) <= row["period_date"] <= date(2026, 6, 30)
+        )
         context = IndicatorContext(
             period_start=date(2026, 4, 1),
             period_end=date(2026, 6, 30),
             service_id="psiquiatria_infantil",
+            origin_establishment_code=origin,
         )
         result = self.engine.calculate("wait_p75_days", self.dataset, context)
         self.assertEqual(result.status, "insufficient_n")
