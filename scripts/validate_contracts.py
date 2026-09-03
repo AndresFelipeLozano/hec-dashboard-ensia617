@@ -110,6 +110,7 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
         "roles": config_dir / "role_matrix.json",
         "ui": config_dir / "ui_contract.json",
         "professional_profiles": config_dir / "professional_profiles.json",
+        "referral_diagnoses": config_dir / "referral_diagnoses.json",
     }
     contracts = {name: load_json(path) for name, path in paths.items()}
     services = contracts["services"]
@@ -117,6 +118,7 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
     roles = contracts["roles"]
     ui = contracts["ui"]
     professional_profiles = contracts["professional_profiles"]
+    referral_diagnoses = contracts["referral_diagnoses"]
 
     errors: list[str] = []
     unique_count = 0
@@ -144,6 +146,11 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
             "professional_id",
             "professional_profiles.profiles",
         ),
+        (
+            referral_diagnoses["diagnoses"],
+            "diagnosis_group_id",
+            "referral_diagnoses.diagnoses",
+        ),
         (indicators["indicators"], "indicator_id", "indicators.indicators"),
         (roles["role_views"], "role_id", "role_matrix.role_views"),
         (roles["finding_rules"], "rule_id", "role_matrix.finding_rules"),
@@ -162,6 +169,7 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
     specialty_ids = namespaces["services.analytical_specialties"]
     profile_ids = namespaces["services.professional_profiles"]
     simulated_professional_ids = namespaces["professional_profiles.profiles"]
+    diagnosis_ids = namespaces["referral_diagnoses.diagnoses"]
     indicator_ids = namespaces["indicators.indicators"]
     role_ids = namespaces["role_matrix.role_views"]
     rule_ids = namespaces["role_matrix.finding_rules"]
@@ -197,6 +205,37 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
         reference_count += checked
         errors.extend(found_errors)
 
+    checked, found_errors = validate_references(
+        [item.get("specialty_id") for item in referral_diagnoses["diagnoses"]],
+        specialty_ids,
+        "referral_diagnoses.diagnoses.specialty_id",
+    )
+    reference_count += checked
+    errors.extend(found_errors)
+    diagnosis_counts: dict[str, int] = {}
+    for item in referral_diagnoses["diagnoses"]:
+        diagnosis_counts[item.get("specialty_id", "")] = (
+            diagnosis_counts.get(item.get("specialty_id", ""), 0) + 1
+        )
+        for field in ("label_es", "diagnostic_family_es"):
+            if not isinstance(item.get(field), str) or not item[field].strip():
+                errors.append(f"{item.get('diagnosis_group_id')}: {field} must be non-empty")
+        errors.extend(
+            require_value(
+                item.get("status"), "active_mvp", f"{item.get('diagnosis_group_id')} status"
+            )
+        )
+        errors.extend(
+            require_value(
+                item.get("classification"),
+                "simulated_demo",
+                f"{item.get('diagnosis_group_id')} classification",
+            )
+        )
+    for specialty_id in specialty_ids:
+        if diagnosis_counts.get(specialty_id, 0) < 4:
+            errors.append(f"{specialty_id}: requires at least four referral diagnoses")
+
     errors.extend(
         require_value(
             professional_profiles.get("simulation_only"),
@@ -207,7 +246,7 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
     errors.extend(
         require_value(
             professional_profiles.get("dataset_id"),
-            "hec-sim-day4r-v2",
+            "hec-sim-day5-v1",
             "professional_profiles dataset",
         )
     )
@@ -780,6 +819,7 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
         "maps": len(map_role_ids),
         "finding_rules": len(rule_ids),
         "simulated_professional_profiles": len(simulated_professional_ids),
+        "referral_diagnoses": len(diagnosis_ids),
     }
 
 
@@ -802,6 +842,7 @@ def main() -> int:
         f"{counts['units']} units; "
         f"{counts['specialties']} specialties; "
         f"{counts['simulated_professional_profiles']} simulated professional profiles; "
+        f"{counts['referral_diagnoses']} simulated referral diagnoses; "
         f"{counts['maps']} maps; "
         f"{counts['finding_rules']} finding rules"
     )

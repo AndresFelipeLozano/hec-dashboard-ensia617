@@ -25,6 +25,7 @@ STATUS_LABELS = {
     "zero_denominator": "Sin denominador válido",
     "pending_definition": "Definición pendiente",
     "deferred": "Diferido",
+    "unavailable": "No disponible en la carga",
     "not_applicable": "No aplica",
 }
 

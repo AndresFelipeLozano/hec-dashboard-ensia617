@@ -1,7 +1,7 @@
 {
-  "binding_version": "1.0.0",
-  "status": "approved_day_3_executable_bindings",
-  "last_reviewed": "2026-08-31",
+  "binding_version": "1.1.0",
+  "status": "day_5_candidate_waitlist_bindings",
+  "last_reviewed": "2026-09-02",
   "rounding": {
     "percentage_decimals": 2,
     "days_decimals": 2,
@@ -13,6 +13,7 @@
     "zero_denominator",
     "pending_definition",
     "deferred",
+    "unavailable",
     "not_applicable"
   ],
   "bindings": [
@@ -46,6 +47,16 @@
     {"indicator_id": "surgical_activity_completed", "implementation": "prof_surgical_completed", "source": "ACTIVIDAD_PROF", "availability": "active"},
     {"indicator_id": "surgical_schedule_completion_pct", "implementation": "prof_surgical_schedule", "source": "ACTIVIDAD_PROF", "availability": "active"},
     {"indicator_id": "professional_ambulatory_surgery_pct", "implementation": "prof_surgical_ambulatory", "source": "ACTIVIDAD_PROF", "availability": "active"},
-    {"indicator_id": "professional_suspension_context_pct", "implementation": "prof_surgical_suspension", "source": "ACTIVIDAD_PROF", "availability": "active"}
+    {"indicator_id": "professional_suspension_context_pct", "implementation": "prof_surgical_suspension", "source": "ACTIVIDAD_PROF", "availability": "active"},
+    {"indicator_id": "new_waitlist_open_count", "implementation": "wait_new_open_count", "source": "LISTA_ESPERA_AMB", "availability": "active"},
+    {"indicator_id": "new_wait_median_days", "implementation": "wait_new_median", "source": "LISTA_ESPERA_AMB", "availability": "active"},
+    {"indicator_id": "new_wait_p75_days", "implementation": "wait_new_p75", "source": "LISTA_ESPERA_AMB", "availability": "active"},
+    {"indicator_id": "new_wait_over_90_pct", "implementation": "wait_new_over90", "source": "LISTA_ESPERA_AMB", "availability": "active"},
+    {"indicator_id": "new_waitlist_resolution_pct", "implementation": "wait_new_resolution", "source": "LISTA_ESPERA_AMB", "availability": "active"},
+    {"indicator_id": "followup_overdue_open_count", "implementation": "wait_followup_open_count", "source": "LISTA_ESPERA_AMB", "availability": "active"},
+    {"indicator_id": "followup_overdue_median_days", "implementation": "wait_followup_median", "source": "LISTA_ESPERA_AMB", "availability": "active"},
+    {"indicator_id": "followup_overdue_p75_days", "implementation": "wait_followup_p75", "source": "LISTA_ESPERA_AMB", "availability": "active"},
+    {"indicator_id": "followup_unscheduled_pct", "implementation": "wait_followup_unscheduled", "source": "LISTA_ESPERA_AMB", "availability": "active"},
+    {"indicator_id": "followup_resolution_pct", "implementation": "wait_followup_resolution", "source": "LISTA_ESPERA_AMB", "availability": "active"}
   ]
 }

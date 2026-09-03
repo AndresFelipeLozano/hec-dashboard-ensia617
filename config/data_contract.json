@@ -1,16 +1,43 @@
 {
-  "contract_version": "1.1.0",
-  "status": "approved_day_3_data_contract_extension",
-  "last_reviewed": "2026-08-31",
+  "contract_version": "1.3.0",
+  "status": "day_5_candidate_referral_network_extension",
+  "last_reviewed": "2026-09-02",
   "language": "es-CL",
   "workbook": {
-    "filename": "plantilla_carga_hec_v1.xlsx",
+    "filename": "plantilla_carga_hec_1_3.xlsx",
     "required_sheets": [
       "METADATOS",
       "DERIVACIONES",
       "CIRUGIAS",
-      "ACTIVIDAD_PROF"
+      "ACTIVIDAD_PROF",
+      "LISTA_ESPERA_AMB"
     ],
+    "legacy_compatible_versions": [
+      "1.1.0",
+      "1.2.0"
+    ],
+    "required_sheets_by_contract_version": {
+      "1.1.0": [
+        "METADATOS",
+        "DERIVACIONES",
+        "CIRUGIAS",
+        "ACTIVIDAD_PROF"
+      ],
+      "1.2.0": [
+        "METADATOS",
+        "DERIVACIONES",
+        "CIRUGIAS",
+        "ACTIVIDAD_PROF",
+        "LISTA_ESPERA_AMB"
+      ],
+      "1.3.0": [
+        "METADATOS",
+        "DERIVACIONES",
+        "CIRUGIAS",
+        "ACTIVIDAD_PROF",
+        "LISTA_ESPERA_AMB"
+      ]
+    },
     "informational_sheets": [
       "INSTRUCCIONES",
       "CATALOGOS"
@@ -60,12 +87,17 @@
     "origin_code_field": "origin_establishment_code",
     "minimum_geographic_cell_size": 10,
     "coordinate_policy": "official_establishment_coordinates_only"
+    ,"referral_diagnosis_catalog_file": "config/referral_diagnoses.json"
   },
   "metadata_keys": [
     {
       "key": "contract_version",
       "required": true,
-      "expected_value": "1.1.0"
+      "allowed_values": [
+        "1.1.0",
+        "1.2.0",
+        "1.3.0"
+      ]
     },
     {
       "key": "dataset_id",
@@ -176,6 +208,29 @@
         {"name": "ambulatory_major_flag", "type": "boolean", "required": true, "critical": true},
         {"name": "documentation_complete_flag", "type": "boolean", "required": true, "critical": true}
       ]
+    },
+    "LISTA_ESPERA_AMB": {
+      "primary_key": "wait_episode_id",
+      "columns": [
+        {"name": "wait_episode_id", "type": "identifier", "required": true, "critical": true, "unique": true},
+        {"name": "snapshot_date", "type": "date", "required": true, "critical": true},
+        {"name": "period_id", "type": "enum", "required": true, "critical": true, "allowed_values": ["2026-Q1", "2026-Q2"]},
+        {"name": "queue_type", "type": "enum", "required": true, "critical": true, "allowed_values": ["new_consultation", "followup_control"]},
+        {"name": "service_id", "type": "service_id", "required": true, "critical": true},
+        {"name": "specialty_id", "type": "specialty_id", "required": true, "critical": true},
+        {"name": "referral_diagnosis_id", "type": "identifier", "required": true, "critical": true},
+        {"name": "professional_profile_id", "type": "identifier", "required": false, "critical": false},
+        {"name": "origin_deis_code", "type": "deis_code", "required": true, "critical": true},
+        {"name": "requested_prestation", "type": "enum", "required": true, "critical": true, "allowed_values": ["consulta_nueva", "control_especialidad", "evaluacion_preoperatoria", "procedimiento_ambulatorio"]},
+        {"name": "queue_entry_date", "type": "date", "required": false, "critical": false},
+        {"name": "control_due_date", "type": "date", "required": false, "critical": false},
+        {"name": "scheduled_date", "type": "date", "required": false, "critical": false},
+        {"name": "completion_date", "type": "date", "required": false, "critical": false},
+        {"name": "episode_status", "type": "enum", "required": true, "critical": true, "allowed_values": ["open_unscheduled", "open_scheduled", "completed", "exited"]},
+        {"name": "exit_reason", "type": "enum", "required": false, "critical": false, "allowed_values": ["clinical_exit", "duplicate", "declined", "other_valid"]},
+        {"name": "priority_class", "type": "enum", "required": true, "critical": true, "allowed_values": ["routine", "preferential", "urgent"]},
+        {"name": "simulated_flag", "type": "boolean", "required": true, "critical": true}
+      ]
     }
   },
   "cross_field_rules": [
@@ -190,6 +245,16 @@
     "ambulatory_major_flag requires elective_major_applicable_flag",
     "clinical professional rows cannot be marked suspended, elective-major applicable, or ambulatory major",
     "surgical professional rows cannot be marked no-show, new consultation, or discharge",
-    "mixed profiles are represented through separate clinical and surgical rows"
+    "mixed profiles are represented through separate clinical and surgical rows",
+    "snapshot_date must fall within metadata period_start and period_end",
+    "period_id must match the quarter containing snapshot_date",
+    "new-consultation episodes require queue_entry_date and cannot use control_due_date",
+    "follow-up-control episodes require control_due_date and cannot use queue_entry_date",
+    "completed episodes require completion_date; open and exited episodes cannot have completion_date",
+    "open_scheduled episodes require scheduled_date; open_unscheduled episodes cannot have scheduled_date",
+    "exited episodes require exit_reason and other statuses cannot have exit_reason",
+    "professional_profile_id, when present, must match the episode specialty",
+    "referral_diagnosis_id must exist, remain explicitly simulated, and match specialty_id",
+    "all LISTA_ESPERA_AMB rows must be explicitly simulated"
   ]
 }

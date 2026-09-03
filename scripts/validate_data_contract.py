@@ -30,6 +30,7 @@ def load_simulated_tables(repo_root: Path) -> dict[str, list[list[str]]]:
         "DERIVACIONES": "derivaciones_simuladas.csv",
         "CIRUGIAS": "cirugias_simuladas.csv",
         "ACTIVIDAD_PROF": "actividad_profesional_simulada.csv",
+        "LISTA_ESPERA_AMB": "lista_espera_ambulatoria_simulada.csv",
     }
     metadata = json.loads(
         (repo_root / "data" / "simulated" / "metadata.json").read_text()
@@ -89,7 +90,7 @@ def main() -> int:
         report = validate_tables(
             load_simulated_tables(REPO_ROOT),
             REPO_ROOT,
-            validation_timestamp_utc="2026-08-31T12:00:00+00:00",
+            validation_timestamp_utc="2026-09-02T12:00:00+00:00",
         )
         if not report.activatable:
             details = [

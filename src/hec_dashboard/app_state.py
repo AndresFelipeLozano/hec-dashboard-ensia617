@@ -125,6 +125,8 @@ def _load_bundled_cached(
     metadata_mtime_ns: int,
     profiles_size: int,
     profiles_mtime_ns: int,
+    diagnoses_size: int,
+    diagnoses_mtime_ns: int,
 ) -> tuple[CandidateDataset, dict[str, Any]]:
     del (
         workbook_size,
@@ -133,9 +135,11 @@ def _load_bundled_cached(
         metadata_mtime_ns,
         profiles_size,
         profiles_mtime_ns,
+        diagnoses_size,
+        diagnoses_mtime_ns,
     )
     repo_root = Path(repo_root_text)
-    workbook = repo_root / "templates" / "plantilla_carga_hec_v1.xlsx"
+    workbook = repo_root / "templates" / "plantilla_carga_hec_1_3.xlsx"
     packaged_metadata = json.loads(
         (repo_root / "data" / "simulated" / "metadata.json").read_text(
             encoding="utf-8"
@@ -148,9 +152,9 @@ def _load_bundled_cached(
         or report.accepted_row_count != expected_rows
         or report.accepted_row_count < 6000
         or report.rejected_row_count != 0
-        or report.metadata.get("contract_version") != "1.1.0"
+        or report.metadata.get("contract_version") != "1.3.0"
         or report.metadata.get("dataset_id") != packaged_metadata.get("dataset_id")
-        or report.metadata.get("dataset_id") != "hec-sim-day4r-v2"
+        or report.metadata.get("dataset_id") != "hec-sim-day5-v1"
     ):
         raise AppInitializationError(
             "El conjunto simulado incluido no satisface el contrato aprobado."
@@ -159,12 +163,14 @@ def _load_bundled_cached(
 
 
 def _load_bundled(repo_root: Path) -> tuple[CandidateDataset, dict[str, Any]]:
-    workbook = repo_root / "templates" / "plantilla_carga_hec_v1.xlsx"
+    workbook = repo_root / "templates" / "plantilla_carga_hec_1_3.xlsx"
     metadata = repo_root / "data" / "simulated" / "metadata.json"
     profiles = repo_root / "config" / "professional_profiles.json"
+    diagnoses = repo_root / "config" / "referral_diagnoses.json"
     workbook_stat = workbook.stat()
     metadata_stat = metadata.stat()
     profiles_stat = profiles.stat()
+    diagnoses_stat = diagnoses.stat()
     dataset, summary = _load_bundled_cached(
         str(repo_root.resolve()),
         workbook_stat.st_size,
@@ -173,6 +179,8 @@ def _load_bundled(repo_root: Path) -> tuple[CandidateDataset, dict[str, Any]]:
         metadata_stat.st_mtime_ns,
         profiles_stat.st_size,
         profiles_stat.st_mtime_ns,
+        diagnoses_stat.st_size,
+        diagnoses_stat.st_mtime_ns,
     )
     return copy.deepcopy(dataset), copy.deepcopy(summary)
 

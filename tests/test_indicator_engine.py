@@ -34,13 +34,13 @@ class IndicatorEngineTests(unittest.TestCase):
 
     def test_bindings_cover_the_approved_catalog_exactly(self):
         self.assertEqual(set(self.engine.indicators), set(self.engine.bindings))
-        self.assertEqual(len(self.engine.indicators), 31)
+        self.assertEqual(len(self.engine.indicators), 41)
 
     def test_calculate_all_returns_each_indicator_once(self):
         results = self.engine.calculate_all(self.dataset, self.context)
         ids = [result.indicator_id for result in results]
-        self.assertEqual(len(ids), 31)
-        self.assertEqual(len(set(ids)), 31)
+        self.assertEqual(len(ids), 41)
+        self.assertEqual(len(set(ids)), 41)
         self.assertEqual(set(ids), set(self.engine.indicators))
 
     def test_snapshot_is_json_safe_and_contains_no_nonfinite_values(self):

@@ -1,4 +1,4 @@
-# Day 2 data ingestion contract with Day 3 extension
+# Data ingestion contract 1.3 with referral-network extension
 
 ## Purpose
 
@@ -17,22 +17,30 @@ documents, or patient-level records.
 
 | Input | Grain | Packaged rows | Purpose |
 |---|---|---:|---|
-| `DERIVACIONES` | One simulated referral episode | 240 | Clinical demand, waiting, attendance, pertinence, counter-referral, GES, and teleconsult measures |
-| `CIRUGIAS` | One simulated surgical case | 144 | Surgical waiting, completion, suspension, ambulatory status, and operating-room measures |
-| `ACTIVIDAD_PROF` | One simulated professional activity | 216 | Separate clinical and surgical profile lenses without a combined score |
+| `DERIVACIONES` | One simulated referral episode | 3,400 | Clinical demand, waiting, attendance, pertinence, counter-referral, GES, and teleconsult measures |
+| `CIRUGIAS` | One simulated surgical case | 2,200 | Surgical waiting, completion, suspension, ambulatory status, and operating-room measures |
+| `ACTIVIDAD_PROF` | One simulated professional activity | 3,360 | Separate clinical and surgical profile lenses without a combined score |
+| `LISTA_ESPERA_AMB` | One simulated episode at a quarterly snapshot | 6,240 | New-consultation queue, due follow-up controls, aging, scheduling and resolution |
 | DEIS establishment snapshot | One public establishment | 55 | Origin-code validation and establishment-level georeferencing |
 
 All operational records are synthetic. Their identifiers identify simulated
 episodes or activities, never people. The deterministic generator uses seed
 `617`, covers January through June 2026, and can be rerun with
-`scripts/generate_simulated_data.py`.
+`scripts/generate_simulated_data.py`. DEIS code `111101` identifies Hospital El
+Carmen itself and is excluded from the eligible external-origin pool. If a
+compatible user upload includes that code as an origin, validation preserves
+the accepted row and the quality page classifies it transparently as internal;
+only external-network maps, rankings, center selectors, tables, and downloads
+exclude it.
 
 ## Workbook contract
 
 The normative machine-readable definition is
 `config/data_contract.json`. The delivered workbook is
-`templates/plantilla_carga_hec_v1.xlsx`. Day 3 raises the contract to version
-`1.1.0` without changing the sheet set or privacy boundary.
+`templates/plantilla_carga_hec_1_3.xlsx`. The map remediation raises the
+contract to `1.3.0`. Contracts 1.1 and 1.2 remain loadable: 1.1 may omit the
+waitlist sheet and 1.2 may omit the referral-diagnosis field. Missing legacy
+dimensions report `unavailable`, never zero.
 
 | Sheet | Status | Rule |
 |---|---|---|
@@ -41,7 +49,8 @@ The normative machine-readable definition is
 | `DERIVACIONES` | Required | Exact ordered columns from the contract; clinical MVP service scope |
 | `CIRUGIAS` | Required | Exact ordered columns from the contract; surgical MVP service scope |
 | `ACTIVIDAD_PROF` | Required | Explicit `profile_type` and `lens`; mixed profiles use separate rows; `elective_major_applicable_flag` defines the professional ambulatory-surgery denominator |
-| `CATALOGOS` | Informational | Approved unit, specialty, and DEIS establishment codes |
+| `LISTA_ESPERA_AMB` | Required in 1.2–1.3 | Exact 18-column schema in 1.3; stores the governed `referral_diagnosis_id`, separates `queue_entry_date` from `control_due_date`, and validates dates against snapshot and status |
+| `CATALOGOS` | Informational | Approved unit, specialty, DEIS establishment, and simulated referral-diagnosis codes |
 
 Dates use ISO `YYYY-MM-DD`. Boolean fields accept `SI` or `NO`. The validator
 also supports ordinary Excel date serials for metadata timestamps because
@@ -103,6 +112,8 @@ contract version. Row validation checks:
 - professional lens-to-service consistency;
 - explicit surgical professional applicability before ambulatory-major status;
 - origin codes against the packaged DEIS snapshot;
+- diagnosis IDs against `config/referral_diagnoses.json` and their declared
+  analytical specialty;
 - flag consistency for attendance, GES, ambulatory surgery, professional
   activity, and operating-room hours.
 
@@ -151,9 +162,9 @@ Run:
 
     ./.venv/bin/python scripts/validate_contracts.py
     ./.venv/bin/python scripts/validate_data_contract.py \
-      --workbook templates/plantilla_carga_hec_v1.xlsx
+      --workbook templates/plantilla_carga_hec_1_3.xlsx
     ./.venv/bin/python -m unittest discover -s tests -p 'test_*.py' -q
 
-Acceptance requires the packaged simulation and workbook to report 600 accepted
+Acceptance requires the packaged simulation and workbook to report 15,200 accepted
 rows, zero quarantined rows, 100% acceptance, 55 valid DEIS codes, and a passing
 test suite.

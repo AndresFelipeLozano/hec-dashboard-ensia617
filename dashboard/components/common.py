@@ -12,6 +12,42 @@ from hec_dashboard.app_state import Keys, reset_role
 from hec_dashboard.presentation import KpiPresentation
 
 
+FOOTER_TEXT = "Desarrollo propuesto en la asignatura Tecnología de la Información, Magíster en Administración de Salud, FEN."
+
+
+def render_footer() -> None:
+    """Render the shared, in-flow academic footer with static safe content."""
+
+    st.markdown(
+        """
+        <style>
+        .hec-global-footer {
+            margin-top: 3rem;
+            padding: 1.25rem 0.75rem 0.75rem;
+            border-top: 1px solid #D0D5DD;
+            color: #667085;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            text-align: center;
+            overflow-wrap: anywhere;
+        }
+        @media (max-width: 390px) {
+            .hec-global-footer {
+                margin-top: 2rem;
+                padding-left: 0.25rem;
+                padding-right: 0.25rem;
+                font-size: 0.76rem;
+            }
+        }
+        </style>
+        <footer class="hec-global-footer" role="contentinfo">
+            Desarrollo propuesto en la asignatura Tecnología de la Información, Magíster en Administración de Salud, FEN.
+        </footer>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def _period_text(value: tuple[date, date] | None) -> str:
     if not value:
         return "No disponible"

@@ -1,7 +1,7 @@
 {
-  "matrix_version": "1.0.0",
-  "status": "functional_baseline",
-  "last_reviewed": "2026-08-31",
+  "matrix_version": "1.1.0",
+  "status": "day_5_candidate_waitlist_views",
+  "last_reviewed": "2026-09-02",
   "global_constraints": {
     "maximum_primary_cards": 6,
     "maximum_prioritized_findings": 5,
@@ -334,6 +334,42 @@
         "minimum_n_not_met",
         "completeness_not_met"
       ]
+    },
+    {
+      "rule_id": "new_wait_over_90_high",
+      "indicator_id": "new_wait_over_90_pct",
+      "expression": "value > 50",
+      "authority_class": "simulated_demonstration",
+      "rule_status": "active",
+      "minimum_valid_n": 30,
+      "minimum_completeness_pct": 95,
+      "severity": "high",
+      "review_action_es": "Revisar priorización, capacidad y programación por especialidad.",
+      "suppress_when": ["indicator_not_applicable", "minimum_n_not_met", "completeness_not_met"]
+    },
+    {
+      "rule_id": "followup_overdue_worsening",
+      "indicator_id": "followup_overdue_p75_days",
+      "expression": "current > previous * 1.10",
+      "authority_class": "simulated_demonstration",
+      "rule_status": "active",
+      "minimum_valid_n": 30,
+      "minimum_completeness_pct": 95,
+      "severity": "high",
+      "review_action_es": "Revisar controles debidos, agenda y continuidad asistencial agregada.",
+      "suppress_when": ["indicator_not_applicable", "minimum_n_not_met", "completeness_not_met"]
+    },
+    {
+      "rule_id": "followup_resolution_drop",
+      "indicator_id": "followup_resolution_pct",
+      "expression": "current < previous - 5 percentage_points",
+      "authority_class": "simulated_demonstration",
+      "rule_status": "active",
+      "minimum_valid_n": 30,
+      "minimum_completeness_pct": 95,
+      "severity": "medium",
+      "review_action_es": "Revisar resolución, egresos y consistencia de fechas de control.",
+      "suppress_when": ["indicator_not_applicable", "minimum_n_not_met", "completeness_not_met"]
     }
   ],
   "role_views": [
@@ -343,12 +379,13 @@
       "indicator_profile": "institutional",
       "primary_indicator_ids": [
         "referrals_total",
-        "wait_p75_days",
-        "ges_compliance_pct",
-        "new_no_show_pct",
-        "elective_surgery_suspension_pct",
+        "new_waitlist_open_count",
+        "new_wait_p75_days",
+        "followup_overdue_open_count",
+        "followup_unscheduled_pct",
         "accepted_record_pct"
       ],
+      "secondary_indicator_ids": ["new_wait_median_days", "new_wait_over_90_pct", "new_waitlist_resolution_pct", "followup_overdue_median_days", "followup_overdue_p75_days", "followup_resolution_pct"],
       "cadence": "monthly_quarterly",
       "questions": [
         {
@@ -414,13 +451,14 @@
       "display_name_es": "Directivo — Director Médico",
       "indicator_profile": "institutional",
       "primary_indicator_ids": [
-        "referral_growth_pct",
-        "wait_p75_days",
-        "discharge_rate_pct",
-        "referral_pertinence_pct",
-        "ges_compliance_pct",
-        "surgical_waitlist_resolution_pct"
+        "new_wait_p75_days",
+        "new_wait_over_90_pct",
+        "new_waitlist_resolution_pct",
+        "followup_overdue_p75_days",
+        "followup_resolution_pct",
+        "ges_compliance_pct"
       ],
+      "secondary_indicator_ids": ["new_waitlist_open_count", "new_wait_median_days", "followup_overdue_open_count", "followup_overdue_median_days", "followup_unscheduled_pct"],
       "cadence": "weekly_monthly",
       "questions": [
         {
@@ -485,6 +523,7 @@
         "discharge_rate_pct",
         "referral_pertinence_pct"
       ],
+      "secondary_indicator_ids": ["new_waitlist_open_count", "new_wait_median_days", "new_wait_p75_days", "new_wait_over_90_pct", "new_waitlist_resolution_pct", "followup_overdue_open_count", "followup_overdue_median_days", "followup_overdue_p75_days", "followup_unscheduled_pct", "followup_resolution_pct"],
       "cadence": "weekly_monthly",
       "questions": [
         {
@@ -558,11 +597,12 @@
       "primary_indicator_ids": [
         "surgical_waitlist_open_count",
         "surgery_wait_p75_days",
-        "elective_major_surgery_count",
-        "ambulatory_major_surgery_pct",
-        "elective_surgery_suspension_pct",
-        "surgical_waitlist_resolution_pct"
+        "new_waitlist_open_count",
+        "new_wait_p75_days",
+        "followup_overdue_open_count",
+        "followup_overdue_p75_days"
       ],
+      "secondary_indicator_ids": ["new_wait_median_days", "new_wait_over_90_pct", "new_waitlist_resolution_pct", "followup_overdue_median_days", "followup_unscheduled_pct", "followup_resolution_pct", "elective_major_surgery_count", "ambulatory_major_surgery_pct", "elective_surgery_suspension_pct", "surgical_waitlist_resolution_pct"],
       "cadence": "weekly_monthly",
       "questions": [
         {
@@ -630,11 +670,12 @@
       "primary_indicator_ids": [
         "clinical_activity_completed",
         "clinical_schedule_completion_pct",
-        "new_consultation_share_pct",
-        "discharge_rate_pct",
-        "professional_documentation_completeness_pct",
-        "professional_no_show_context_pct"
+        "new_wait_p75_days",
+        "followup_overdue_open_count",
+        "followup_unscheduled_pct",
+        "professional_documentation_completeness_pct"
       ],
+      "secondary_indicator_ids": ["new_waitlist_open_count", "new_wait_median_days", "new_wait_over_90_pct", "new_waitlist_resolution_pct", "followup_overdue_median_days", "followup_overdue_p75_days", "followup_resolution_pct", "new_consultation_share_pct", "discharge_rate_pct", "professional_no_show_context_pct"],
       "cadence": "bounded_simulated_snapshot",
       "questions": [
         {
@@ -689,10 +730,12 @@
       "primary_indicator_ids": [
         "surgical_activity_completed",
         "surgical_schedule_completion_pct",
+        "new_wait_p75_days",
+        "new_wait_over_90_pct",
         "professional_ambulatory_surgery_pct",
-        "professional_documentation_completeness_pct",
-        "professional_suspension_context_pct"
+        "professional_documentation_completeness_pct"
       ],
+      "secondary_indicator_ids": ["new_waitlist_open_count", "new_wait_median_days", "new_wait_over_90_pct", "new_waitlist_resolution_pct", "followup_overdue_open_count", "followup_overdue_median_days", "followup_unscheduled_pct", "followup_resolution_pct", "professional_suspension_context_pct"],
       "cadence": "bounded_simulated_snapshot",
       "questions": [
         {
@@ -758,10 +801,10 @@
         "specialty",
         "prestation"
       ],
-      "bubble_size": "referrals_total",
+      "bubble_size": "new_waitlist_open_count",
       "bubble_color_options": [
-        "referral_growth_pct",
-        "wait_p75_days"
+        "new_wait_over_90_pct",
+        "new_wait_p75_days"
       ],
       "allowed_detail": [
         "origin_establishment",
@@ -780,11 +823,11 @@
         "prestation",
         "ges_status"
       ],
-      "bubble_size": "referrals_total",
+      "bubble_size": "new_waitlist_open_count",
       "bubble_color_options": [
-        "referral_pertinence_pct",
-        "ges_compliance_pct",
-        "wait_p75_days"
+        "new_wait_over_90_pct",
+        "followup_unscheduled_pct",
+        "new_wait_p75_days"
       ],
       "allowed_detail": [
         "origin_establishment",
@@ -803,10 +846,10 @@
         "specialty",
         "prestation"
       ],
-      "bubble_size": "referrals_total",
+      "bubble_size": "new_waitlist_open_count",
       "bubble_color_options": [
-        "wait_p75_days",
-        "referral_pertinence_pct"
+        "new_wait_p75_days",
+        "new_wait_over_90_pct"
       ],
       "allowed_detail": [
         "origin_establishment",
@@ -823,9 +866,9 @@
         "specialty",
         "procedure"
       ],
-      "bubble_size": "surgical_waitlist_open_count",
+      "bubble_size": "new_waitlist_open_count",
       "bubble_color_options": [
-        "surgery_wait_p75_days"
+        "new_wait_p75_days"
       ],
       "allowed_detail": [
         "origin_establishment",
@@ -841,9 +884,9 @@
         "simulated_profile",
         "prestation"
       ],
-      "bubble_size": "clinical_activity_completed",
+      "bubble_size": "new_waitlist_open_count",
       "bubble_color_options": [
-        "professional_no_show_context_pct"
+        "followup_unscheduled_pct"
       ],
       "allowed_detail": [
         "origin_establishment",
@@ -859,9 +902,9 @@
         "simulated_profile",
         "procedure"
       ],
-      "bubble_size": "surgical_activity_completed",
+      "bubble_size": "new_waitlist_open_count",
       "bubble_color_options": [
-        "professional_suspension_context_pct"
+        "followup_unscheduled_pct"
       ],
       "allowed_detail": [
         "origin_establishment",

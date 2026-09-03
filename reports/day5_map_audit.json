@@ -1,0 +1,1500 @@
+{
+  "status": "PASS",
+  "dataset_id": "hec-sim-day5-v1",
+  "contract_version": "1.3.0",
+  "contexts_checked": 32,
+  "representative_specialties": [
+    "urologia",
+    "neurologia_infantil",
+    "cardiologia_adulto",
+    "cirugia_general",
+    "traumatologia"
+  ],
+  "packaged_hec_origin_counts": {
+    "DERIVACIONES": 0,
+    "CIRUGIAS": 0,
+    "ACTIVIDAD_PROF": 0,
+    "LISTA_ESPERA_AMB": 0
+  },
+  "hec_destination_marker_count": 1,
+  "contexts": [
+    {
+      "context": "institutional_overview",
+      "filtered_total": 3120,
+      "active_establishments": 12,
+      "top_three": [
+        {
+          "deis_code": "111010",
+          "episodes": 430
+        },
+        {
+          "deis_code": "111195",
+          "episodes": 370
+        },
+        {
+          "deis_code": "111305",
+          "episodes": 370
+        }
+      ],
+      "bubble_size_signature": [
+        430,
+        370,
+        370,
+        340,
+        340,
+        290,
+        260,
+        190,
+        180,
+        130,
+        120,
+        100
+      ],
+      "dominant_signature": [
+        "Gastroenterología Adulto",
+        "Neurología Adulto",
+        "Cirugía Vascular Periférica",
+        "Cirugía Digestiva",
+        "Medicina Interna",
+        "Geriatría",
+        "Broncopulmonar Adulto",
+        "Neurología Infantil",
+        "Traumatología",
+        "Ginecología",
+        "Cirugía General",
+        "Coloproctología"
+      ],
+      "current_comparison_vector": [
+        60,
+        20,
+        -10,
+        -20,
+        20,
+        -40,
+        10,
+        0,
+        0,
+        -20,
+        -10,
+        -10
+      ],
+      "map_signature": "b303b0deca780b52111e00f1f73532177224138521a623b3a89f8c89e572202b",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "medical_director_overview",
+      "filtered_total": 3120,
+      "active_establishments": 12,
+      "top_three": [
+        {
+          "deis_code": "111010",
+          "episodes": 430
+        },
+        {
+          "deis_code": "111195",
+          "episodes": 370
+        },
+        {
+          "deis_code": "111305",
+          "episodes": 370
+        }
+      ],
+      "bubble_size_signature": [
+        430,
+        370,
+        370,
+        340,
+        340,
+        290,
+        260,
+        190,
+        180,
+        130,
+        120,
+        100
+      ],
+      "dominant_signature": [
+        "Gastroenterología Adulto",
+        "Neurología Adulto",
+        "Cirugía Vascular Periférica",
+        "Cirugía Digestiva",
+        "Medicina Interna",
+        "Geriatría",
+        "Broncopulmonar Adulto",
+        "Neurología Infantil",
+        "Traumatología",
+        "Ginecología",
+        "Cirugía General",
+        "Coloproctología"
+      ],
+      "current_comparison_vector": [
+        60,
+        20,
+        -10,
+        -20,
+        20,
+        -40,
+        10,
+        0,
+        0,
+        -20,
+        -10,
+        -10
+      ],
+      "map_signature": "c5b3cffd31b995ad22c3db0e8d7e3f1bc5e48fdf2e86e7c472b5b5b97f703582",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_broncopulmonar_adulto",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111100",
+          "episodes": 40
+        },
+        {
+          "deis_code": "111304",
+          "episodes": 40
+        },
+        {
+          "deis_code": "111010",
+          "episodes": 10
+        }
+      ],
+      "bubble_size_signature": [
+        40,
+        40,
+        10,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Alteración radiológica pulmonar",
+        "Sospecha de enfermedad pulmonar obstructiva",
+        "Sospecha de enfermedad pulmonar obstructiva",
+        "Asma de difícil control",
+        "Alteración radiológica pulmonar",
+        "Disnea o limitación respiratoria"
+      ],
+      "current_comparison_vector": [
+        10,
+        10,
+        0,
+        -10,
+        0,
+        -10
+      ],
+      "map_signature": "8cbce9be1c6c755a84a160ecf3c4433947dd4069fe76a2bb8615aab83b5acea6",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_cardiologia_adulto",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111010",
+          "episodes": 40
+        },
+        {
+          "deis_code": "111307",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111306",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        40,
+        30,
+        20,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Hipertensión arterial de difícil manejo",
+        "Dolor torácico en estudio",
+        "Insuficiencia cardíaca sospechada o conocida",
+        "Dolor torácico en estudio",
+        "Hipertensión arterial de difícil manejo",
+        "Arritmia o palpitaciones"
+      ],
+      "current_comparison_vector": [
+        10,
+        0,
+        0,
+        0,
+        0,
+        -10
+      ],
+      "map_signature": "0c801ac52bb0bd955a688d2a53f83ed289a79326377e3216fb97877ff6591624",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_cirugia_digestiva",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111030",
+          "episodes": 40
+        },
+        {
+          "deis_code": "111100",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111195",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        40,
+        30,
+        20,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Patología esofagogástrica quirúrgica",
+        "Patología hepatobiliar compleja",
+        "Patología pancreática en evaluación",
+        "Evaluación de cirugía digestiva compleja",
+        "Patología esofagogástrica quirúrgica",
+        "Patología hepatobiliar compleja"
+      ],
+      "current_comparison_vector": [
+        10,
+        0,
+        0,
+        -10,
+        0,
+        0
+      ],
+      "map_signature": "fcfbd74096eb57adce0060d19c91ee6460b0633917b625809bed30c747f5c7b5",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_cirugia_general",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111010",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111300",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111100",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        30,
+        30,
+        20,
+        20,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Patología biliar sintomática",
+        "Lesión de partes blandas para evaluación",
+        "Hernia de pared abdominal",
+        "Hernia de pared abdominal",
+        "Lesión de partes blandas para evaluación",
+        "Patología biliar sintomática"
+      ],
+      "current_comparison_vector": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "map_signature": "8723d5a5e032aeafd5750f7160df9886467e9a6804103858b374d60f0f798c2c",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_cirugia_pediatrica",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111195",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111305",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111307",
+          "episodes": 30
+        }
+      ],
+      "bubble_size_signature": [
+        30,
+        30,
+        30,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Dolor abdominal recurrente con evaluación quirúrgica",
+        "Lesión de partes blandas pediátrica",
+        "Patología genital o inguinal pediátrica",
+        "Dolor abdominal recurrente con evaluación quirúrgica",
+        "Hernia o defecto de pared abdominal pediátrico",
+        "Patología genital o inguinal pediátrica"
+      ],
+      "current_comparison_vector": [
+        0,
+        10,
+        0,
+        0,
+        -10,
+        0
+      ],
+      "map_signature": "7bb56022664ffc2611d9a26faf9d73398fb6df12e1e9916a2261ae00599aff8f",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_cirugia_plastica",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111010",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111030",
+          "episodes": 20
+        },
+        {
+          "deis_code": "111195",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        30,
+        20,
+        20,
+        20,
+        20,
+        10
+      ],
+      "dominant_signature": [
+        "Lesión cutánea para resolución quirúrgica",
+        "Secuela de lesión de partes blandas",
+        "Lesión cutánea para resolución quirúrgica",
+        "Secuela de lesión de partes blandas",
+        "Cicatriz patológica",
+        "Necesidad reconstructiva funcional"
+      ],
+      "current_comparison_vector": [
+        0,
+        0,
+        10,
+        -10,
+        0,
+        0
+      ],
+      "map_signature": "b5f8390a3bcd82b5dcf504bff0ca0aa420805f674193bc7773516074f8631552",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_cirugia_vascular_periferica",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111305",
+          "episodes": 50
+        },
+        {
+          "deis_code": "111302",
+          "episodes": 20
+        },
+        {
+          "deis_code": "111304",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        50,
+        20,
+        20,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Alteración vascular periférica en estudio",
+        "Insuficiencia venosa crónica",
+        "Enfermedad arterial periférica sospechada",
+        "Enfermedad arterial periférica sospechada",
+        "Alteración vascular periférica en estudio",
+        "Pie de riesgo vascular"
+      ],
+      "current_comparison_vector": [
+        20,
+        0,
+        -10,
+        0,
+        0,
+        -10
+      ],
+      "map_signature": "44eeef2b3f02d86d642cc0d371f10a26d896419972d86cafe0da1f5333d0a5e1",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_coloproctologia",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111301",
+          "episodes": 40
+        },
+        {
+          "deis_code": "111302",
+          "episodes": 20
+        },
+        {
+          "deis_code": "111304",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        40,
+        20,
+        20,
+        20,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Sangrado digestivo bajo",
+        "Enfermedad hemorroidal sintomática",
+        "Alteración persistente del tránsito intestinal",
+        "Sangrado digestivo bajo",
+        "Sangrado digestivo bajo",
+        "Enfermedad hemorroidal sintomática"
+      ],
+      "current_comparison_vector": [
+        10,
+        -10,
+        0,
+        0,
+        0,
+        0
+      ],
+      "map_signature": "46a72fe9ea9ab51f42e35ade720959fd162d9600f0983cf2e62f7ee2df9180ea",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_diabetologia",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111305",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111306",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111010",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        30,
+        30,
+        20,
+        20,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Diabetes con control metabólico insuficiente",
+        "Sospecha de complicación microvascular",
+        "Diabetes con control metabólico insuficiente",
+        "Hipoglicemias recurrentes",
+        "Diabetes con control metabólico insuficiente",
+        "Sospecha de complicación microvascular"
+      ],
+      "current_comparison_vector": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "map_signature": "9e35c7689655b619bc17556b0052d21408c6a9594716cdb2049d4c2b490a30f8",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_endocrinologia",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111195",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111010",
+          "episodes": 20
+        },
+        {
+          "deis_code": "111030",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        30,
+        20,
+        20,
+        20,
+        20,
+        10
+      ],
+      "dominant_signature": [
+        "Nódulo tiroideo",
+        "Nódulo tiroideo",
+        "Alteración tiroidea en estudio",
+        "Alteración tiroidea en estudio",
+        "Trastorno suprarrenal sospechado",
+        "Trastorno suprarrenal sospechado"
+      ],
+      "current_comparison_vector": [
+        0,
+        10,
+        0,
+        0,
+        -10,
+        0
+      ],
+      "map_signature": "43b7842bfdd11fe4c4deccbbf6d8350cefe610847a06b95c5ec451d735388f67",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_gastroenterologia_adulto",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111010",
+          "episodes": 50
+        },
+        {
+          "deis_code": "111030",
+          "episodes": 20
+        },
+        {
+          "deis_code": "111302",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        50,
+        20,
+        20,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Enfermedad hepática sospechada",
+        "Dolor abdominal persistente",
+        "Dolor abdominal persistente",
+        "Enfermedad hepática sospechada",
+        "Sangrado digestivo en estudio",
+        "Alteración del tránsito intestinal"
+      ],
+      "current_comparison_vector": [
+        20,
+        0,
+        -10,
+        0,
+        -10,
+        0
+      ],
+      "map_signature": "182444f74eac71408ff7eb2fba01c75507c94da764b3f22f7b7c122e970e5745",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_geriatria",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111010",
+          "episodes": 40
+        },
+        {
+          "deis_code": "111302",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111030",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        40,
+        30,
+        20,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Deterioro cognitivo en estudio",
+        "Polifarmacia o complejidad clínica",
+        "Deterioro funcional progresivo",
+        "Deterioro cognitivo en estudio",
+        "Caídas recurrentes",
+        "Polifarmacia o complejidad clínica"
+      ],
+      "current_comparison_vector": [
+        10,
+        0,
+        0,
+        0,
+        -10,
+        0
+      ],
+      "map_signature": "17358a7eb77ea74c49a970611ea368e4cc27af4f2010a87aa791a5c577427e5d",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_ginecologia",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111100",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111195",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111011",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        30,
+        30,
+        20,
+        20,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Sangrado uterino anormal",
+        "Alteración cervical o vulvar en estudio",
+        "Masa anexial en evaluación",
+        "Dolor pélvico persistente",
+        "Alteración cervical o vulvar en estudio",
+        "Sangrado uterino anormal"
+      ],
+      "current_comparison_vector": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "map_signature": "2e2c190b12aa7a9f32e6f66975e2c641156298ea5c076d5d20a9a34fcd6df149",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_medicina_fisica_rehabilitacion",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111307",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111010",
+          "episodes": 20
+        },
+        {
+          "deis_code": "111011",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        30,
+        20,
+        20,
+        20,
+        20,
+        10
+      ],
+      "dominant_signature": [
+        "Dolor musculoesquelético persistente",
+        "Secuela neurológica con limitación funcional",
+        "Alteración de marcha o movilidad",
+        "Dolor musculoesquelético persistente",
+        "Dolor musculoesquelético persistente",
+        "Secuela neurológica con limitación funcional"
+      ],
+      "current_comparison_vector": [
+        0,
+        -10,
+        0,
+        0,
+        10,
+        0
+      ],
+      "map_signature": "d9e5f2844a8e69f5b579d6664af5c55e7495d6a572345f0ad1ac43b6d8367da4",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_medicina_interna",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111307",
+          "episodes": 50
+        },
+        {
+          "deis_code": "111195",
+          "episodes": 20
+        },
+        {
+          "deis_code": "111305",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        50,
+        20,
+        20,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Anemia no aclarada",
+        "Comorbilidad múltiple descompensada",
+        "Síndrome constitucional en estudio",
+        "Comorbilidad múltiple descompensada",
+        "Síndrome constitucional en estudio",
+        "Anemia no aclarada"
+      ],
+      "current_comparison_vector": [
+        20,
+        -10,
+        0,
+        0,
+        -10,
+        0
+      ],
+      "map_signature": "1ce52872eea5c8e1dbdcd992d7b2c89c72b1541db639050350ca4a581ea31364",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_nefrologia",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111010",
+          "episodes": 40
+        },
+        {
+          "deis_code": "111030",
+          "episodes": 20
+        },
+        {
+          "deis_code": "111302",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        40,
+        20,
+        20,
+        20,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Hipertensión de probable causa renal",
+        "Enfermedad renal crónica en evaluación",
+        "Enfermedad renal crónica en evaluación",
+        "Proteinuria o hematuria glomerular",
+        "Hipertensión de probable causa renal",
+        "Alteración hidroelectrolítica recurrente"
+      ],
+      "current_comparison_vector": [
+        10,
+        0,
+        -10,
+        0,
+        0,
+        0
+      ],
+      "map_signature": "4263b366fa47b0875a0916252f6e73e027fa51a7e58d4c24144c8a48a04546a8",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_neurologia_adulto",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111195",
+          "episodes": 40
+        },
+        {
+          "deis_code": "111011",
+          "episodes": 20
+        },
+        {
+          "deis_code": "111030",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        40,
+        20,
+        20,
+        20,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Déficit neurológico focal en estudio",
+        "Trastorno del movimiento",
+        "Epilepsia o crisis recurrentes",
+        "Cefalea recurrente o compleja",
+        "Déficit neurológico focal en estudio",
+        "Cefalea recurrente o compleja"
+      ],
+      "current_comparison_vector": [
+        10,
+        0,
+        0,
+        -10,
+        0,
+        0
+      ],
+      "map_signature": "6878564c6766c2fcd2af9d73acc75a5381e97ea1fa69d1b1f1fe41526dd4cc55",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_neurologia_infantil",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111100",
+          "episodes": 40
+        },
+        {
+          "deis_code": "111306",
+          "episodes": 40
+        },
+        {
+          "deis_code": "111011",
+          "episodes": 10
+        }
+      ],
+      "bubble_size_signature": [
+        40,
+        40,
+        10,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Trastorno neuromuscular o paroxístico",
+        "Condición del espectro autista sospechada",
+        "Retraso del desarrollo",
+        "Cefalea recurrente",
+        "Epilepsia o crisis recurrentes",
+        "Condición del espectro autista sospechada"
+      ],
+      "current_comparison_vector": [
+        10,
+        10,
+        -10,
+        0,
+        -10,
+        0
+      ],
+      "map_signature": "5d76b48ee450811895a72a5c8600621c95532b70a051bb3b3d7b5332b9b140eb",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_obstetricia",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111305",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111306",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111307",
+          "episodes": 30
+        }
+      ],
+      "bubble_size_signature": [
+        30,
+        30,
+        30,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Alteración del crecimiento fetal sospechada",
+        "Embarazo con factor de riesgo materno",
+        "Antecedente obstétrico de mayor complejidad",
+        "Embarazo con factor de riesgo materno",
+        "Antecedente obstétrico de mayor complejidad",
+        "Hipertensión asociada al embarazo en evaluación"
+      ],
+      "current_comparison_vector": [
+        10,
+        0,
+        0,
+        0,
+        0,
+        -10
+      ],
+      "map_signature": "f773433bddb6b455f7df6fc8b0dfb78e32a12ab0f0e60b46b5e196f0f4b50e77",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_oncologia",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111100",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111195",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111300",
+          "episodes": 30
+        }
+      ],
+      "bubble_size_signature": [
+        30,
+        30,
+        30,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Sospecha de neoplasia sólida",
+        "Evaluación posterior a confirmación externa simulada",
+        "Síntomas asociados a tratamiento oncológico simulado",
+        "Seguimiento oncológico especializado simulado",
+        "Sospecha de neoplasia sólida",
+        "Evaluación posterior a confirmación externa simulada"
+      ],
+      "current_comparison_vector": [
+        0,
+        0,
+        10,
+        -10,
+        0,
+        0
+      ],
+      "map_signature": "e9d88ee0353e5b7e52e6bdd08d7dcaf12e1b30cdc8e2a6c71b85a08fabdd5c94",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_otorrinolaringologia",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111010",
+          "episodes": 40
+        },
+        {
+          "deis_code": "111307",
+          "episodes": 40
+        },
+        {
+          "deis_code": "111011",
+          "episodes": 10
+        }
+      ],
+      "bubble_size_signature": [
+        40,
+        40,
+        10,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Obstrucción nasal persistente",
+        "Hipoacusia en estudio",
+        "Disfonía o alteración laríngea",
+        "Otitis recurrente o patología ótica",
+        "Hipoacusia en estudio",
+        "Obstrucción nasal persistente"
+      ],
+      "current_comparison_vector": [
+        10,
+        10,
+        -10,
+        -10,
+        0,
+        0
+      ],
+      "map_signature": "a681bcf05c05eb720060cc0ab90efd776d833eb4c06e8df27ad4dc3439aadc45",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_pediatria",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111305",
+          "episodes": 40
+        },
+        {
+          "deis_code": "111030",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111302",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        40,
+        30,
+        20,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Infecciones recurrentes en estudio",
+        "Síntomas persistentes de causa no aclarada",
+        "Falla de medro o dificultad nutricional",
+        "Falla de medro o dificultad nutricional",
+        "Infecciones recurrentes en estudio",
+        "Síntomas persistentes de causa no aclarada"
+      ],
+      "current_comparison_vector": [
+        10,
+        0,
+        0,
+        -10,
+        0,
+        0
+      ],
+      "map_signature": "c13767505ba9fa2ad1935a5d5cd2189b04db97836f9d401e253b6eb8c18f305f",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_psiquiatria_adulto",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111030",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111302",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111195",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        30,
+        30,
+        20,
+        20,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Riesgo suicida en evaluación especializada",
+        "Trastorno ansioso severo o persistente",
+        "Síntomas psicóticos en evaluación",
+        "Trastorno del ánimo de manejo complejo",
+        "Riesgo suicida en evaluación especializada",
+        "Trastorno ansioso severo o persistente"
+      ],
+      "current_comparison_vector": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "map_signature": "863d04624f50652a2905630cfe605f85125313e530bc96cee620472a139b99da",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_psiquiatria_infantil",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111195",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111010",
+          "episodes": 20
+        },
+        {
+          "deis_code": "111011",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        30,
+        20,
+        20,
+        20,
+        20,
+        10
+      ],
+      "dominant_signature": [
+        "Riesgo en salud mental infantojuvenil",
+        "Trastorno del ánimo en población infantojuvenil",
+        "Alteración conductual compleja",
+        "Ansiedad severa o persistente",
+        "Trastorno del ánimo en población infantojuvenil",
+        "Trastorno del ánimo en población infantojuvenil"
+      ],
+      "current_comparison_vector": [
+        0,
+        10,
+        0,
+        0,
+        -10,
+        0
+      ],
+      "map_signature": "30253a8de43d4c085dc31c9f7658c76f39cb6bdc173249d94762feee502d41f4",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_traumatologia",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111304",
+          "episodes": 50
+        },
+        {
+          "deis_code": "111305",
+          "episodes": 20
+        },
+        {
+          "deis_code": "111306",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        50,
+        20,
+        20,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Dolor articular persistente",
+        "Secuela de lesión musculoesquelética",
+        "Sospecha de lesión tendinosa o ligamentaria",
+        "Dolor articular persistente",
+        "Secuela de lesión musculoesquelética",
+        "Deformidad o alteración ortopédica"
+      ],
+      "current_comparison_vector": [
+        20,
+        -10,
+        0,
+        0,
+        0,
+        -10
+      ],
+      "map_signature": "db04de5c9400aef4927b3f03829f79b85455e205130d44ab810734977dc517b8",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "director_urologia",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111195",
+          "episodes": 40
+        },
+        {
+          "deis_code": "111030",
+          "episodes": 20
+        },
+        {
+          "deis_code": "111302",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        40,
+        20,
+        20,
+        20,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Litiasis urinaria",
+        "Hematuria",
+        "Infección urinaria recurrente",
+        "Síntomas urinarios bajos o enfermedad prostática",
+        "Sospecha de neoplasia urológica",
+        "Litiasis urinaria"
+      ],
+      "current_comparison_vector": [
+        10,
+        0,
+        0,
+        -10,
+        0,
+        0
+      ],
+      "map_signature": "5ad481457d92a4202c91690405181474e486e0a06f2904ca56ee0c87e8261e3e",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "clinical_professional",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111100",
+          "episodes": 40
+        },
+        {
+          "deis_code": "111304",
+          "episodes": 40
+        },
+        {
+          "deis_code": "111010",
+          "episodes": 10
+        }
+      ],
+      "bubble_size_signature": [
+        40,
+        40,
+        10,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Alteración radiológica pulmonar",
+        "Sospecha de enfermedad pulmonar obstructiva",
+        "Sospecha de enfermedad pulmonar obstructiva",
+        "Asma de difícil control",
+        "Alteración radiológica pulmonar",
+        "Disnea o limitación respiratoria"
+      ],
+      "current_comparison_vector": [
+        10,
+        10,
+        0,
+        -10,
+        0,
+        -10
+      ],
+      "map_signature": "354ae0e71f287f36d3831a546f6469455b992bffed30dea6bb01eefbbd6a91d8",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "surgical_professional",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111010",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111300",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111100",
+          "episodes": 20
+        }
+      ],
+      "bubble_size_signature": [
+        30,
+        30,
+        20,
+        20,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Patología biliar sintomática",
+        "Lesión de partes blandas para evaluación",
+        "Hernia de pared abdominal",
+        "Hernia de pared abdominal",
+        "Lesión de partes blandas para evaluación",
+        "Patología biliar sintomática"
+      ],
+      "current_comparison_vector": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "map_signature": "2fe883caa102523a7d52f69b32df59eb6fb3dc44c935f1d0b4d65e461f99bba5",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "mixed_clinical",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111195",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111305",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111307",
+          "episodes": 30
+        }
+      ],
+      "bubble_size_signature": [
+        30,
+        30,
+        30,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Dolor abdominal recurrente con evaluación quirúrgica",
+        "Lesión de partes blandas pediátrica",
+        "Patología genital o inguinal pediátrica",
+        "Dolor abdominal recurrente con evaluación quirúrgica",
+        "Hernia o defecto de pared abdominal pediátrico",
+        "Patología genital o inguinal pediátrica"
+      ],
+      "current_comparison_vector": [
+        0,
+        10,
+        0,
+        0,
+        -10,
+        0
+      ],
+      "map_signature": "6712aa104ef90e5cacbd754e2007fce84daac872b173f0a3f3abff84fe9ce826",
+      "accessible_table_reconciled": true
+    },
+    {
+      "context": "mixed_surgical",
+      "filtered_total": 120,
+      "active_establishments": 6,
+      "top_three": [
+        {
+          "deis_code": "111195",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111305",
+          "episodes": 30
+        },
+        {
+          "deis_code": "111307",
+          "episodes": 30
+        }
+      ],
+      "bubble_size_signature": [
+        30,
+        30,
+        30,
+        10,
+        10,
+        10
+      ],
+      "dominant_signature": [
+        "Dolor abdominal recurrente con evaluación quirúrgica",
+        "Lesión de partes blandas pediátrica",
+        "Patología genital o inguinal pediátrica",
+        "Dolor abdominal recurrente con evaluación quirúrgica",
+        "Hernia o defecto de pared abdominal pediátrico",
+        "Patología genital o inguinal pediátrica"
+      ],
+      "current_comparison_vector": [
+        0,
+        10,
+        0,
+        0,
+        -10,
+        0
+      ],
+      "map_signature": "0cf7d349eb2c7cafa961f0109bfe1f453b2c335aa7a3a87221c9f08f12efbce6",
+      "accessible_table_reconciled": true
+    }
+  ],
+  "failures": [],
+  "elapsed_seconds": 0.294
+}

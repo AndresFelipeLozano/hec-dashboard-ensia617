@@ -179,6 +179,16 @@ class IndicatorEngine:
             "prof_surgical_schedule": self._prof_surgical_schedule,
             "prof_surgical_ambulatory": self._prof_surgical_ambulatory,
             "prof_surgical_suspension": self._prof_surgical_suspension,
+            "wait_new_open_count": self._wait_new_open_count,
+            "wait_new_median": self._wait_new_median,
+            "wait_new_p75": self._wait_new_p75,
+            "wait_new_over90": self._wait_new_over90,
+            "wait_new_resolution": self._wait_new_resolution,
+            "wait_followup_open_count": self._wait_followup_open_count,
+            "wait_followup_median": self._wait_followup_median,
+            "wait_followup_p75": self._wait_followup_p75,
+            "wait_followup_unscheduled": self._wait_followup_unscheduled,
+            "wait_followup_resolution": self._wait_followup_resolution,
         }
 
     @classmethod
@@ -215,15 +225,20 @@ class IndicatorEngine:
         period_end: date,
         *,
         forced_lens: str | None = None,
+        waitlist_queue_type: str | None = None,
+        filter_waitlist_professional: bool = False,
     ) -> list[dict[str, Any]]:
         activity_field = {
             "DERIVACIONES": "referral_type",
             "CIRUGIAS": "procedure_code",
             "ACTIVIDAD_PROF": "activity_code",
+            "LISTA_ESPERA_AMB": "requested_prestation",
         }.get(sheet)
         filtered = []
         for row in rows:
-            period = row["period_date"]
+            period = row[
+                "snapshot_date" if sheet == "LISTA_ESPERA_AMB" else "period_date"
+            ]
             if not period_start <= period <= period_end:
                 continue
             if context.service_id and row.get("service_id") != context.service_id:
@@ -232,7 +247,11 @@ class IndicatorEngine:
                 continue
             if (
                 context.origin_establishment_code
-                and row.get("origin_establishment_code")
+                and row.get(
+                    "origin_deis_code"
+                    if sheet == "LISTA_ESPERA_AMB"
+                    else "origin_establishment_code"
+                )
                 != context.origin_establishment_code
             ):
                 continue
@@ -246,6 +265,20 @@ class IndicatorEngine:
                 sheet == "ACTIVIDAD_PROF"
                 and context.simulated_profile_key
                 and row.get("simulated_profile_key")
+                != context.simulated_profile_key
+            ):
+                continue
+            if (
+                sheet == "LISTA_ESPERA_AMB"
+                and waitlist_queue_type
+                and row.get("queue_type") != waitlist_queue_type
+            ):
+                continue
+            if (
+                sheet == "LISTA_ESPERA_AMB"
+                and filter_waitlist_professional
+                and context.simulated_profile_key
+                and row.get("professional_profile_id")
                 != context.simulated_profile_key
             ):
                 continue
@@ -312,8 +345,27 @@ class IndicatorEngine:
             )
 
         sheet = binding["source"]
+        if sheet != "VALIDATION_REPORT" and sheet not in dataset.tables:
+            return IndicatorResult(
+                status="unavailable",
+                value=None,
+                prior_value=None,
+                numerator=None,
+                denominator=None,
+                valid_n=0,
+                reason_es=(
+                    "No disponible: la carga compatible 1.1 no contiene "
+                    "LISTA_ESPERA_AMB; no se interpreta la ausencia como cero."
+                ),
+                reference=self._reference(indicator, None, "unavailable"),
+                **base,
+            )
         source_rows = dataset.tables.get(sheet, []) if sheet != "VALIDATION_REPORT" else []
         forced_lens = self._forced_lens(binding["implementation"])
+        waitlist_queue_type = self._waitlist_queue_type(binding["implementation"])
+        filter_waitlist_professional = binding["implementation"].startswith(
+            "wait_followup"
+        )
         current_rows = self._filter_rows(
             source_rows,
             sheet,
@@ -321,6 +373,8 @@ class IndicatorEngine:
             current_start,
             current_end,
             forced_lens=forced_lens,
+            waitlist_queue_type=waitlist_queue_type,
+            filter_waitlist_professional=filter_waitlist_professional,
         ) if sheet != "VALIDATION_REPORT" else []
         previous_rows = self._filter_rows(
             source_rows,
@@ -329,6 +383,8 @@ class IndicatorEngine:
             previous_start,
             previous_end,
             forced_lens=forced_lens,
+            waitlist_queue_type=waitlist_queue_type,
+            filter_waitlist_professional=filter_waitlist_professional,
         ) if sheet != "VALIDATION_REPORT" else []
         calculator = self._calculators[binding["implementation"]]
         parts = calculator(dataset, current_rows, previous_rows)
@@ -378,6 +434,14 @@ class IndicatorEngine:
             return "clinical"
         if implementation.startswith("prof_surgical"):
             return "surgical"
+        return None
+
+    @staticmethod
+    def _waitlist_queue_type(implementation: str) -> str | None:
+        if implementation.startswith("wait_new"):
+            return "new_consultation"
+        if implementation.startswith("wait_followup"):
+            return "followup_control"
         return None
 
     @staticmethod
@@ -796,3 +860,157 @@ class IndicatorEngine:
     ) -> CalculationParts:
         scheduled = [row for row in rows if row["scheduled_flag"]]
         return _ratio(sum(row["suspended_flag"] for row in scheduled), len(scheduled))
+
+    @staticmethod
+    def _wait_new_open_count(
+        _dataset: CandidateDataset,
+        rows: list[dict[str, Any]],
+        _previous: list[dict[str, Any]],
+    ) -> CalculationParts:
+        value = len(
+            {
+                row["wait_episode_id"]
+                for row in rows
+                if row["episode_status"] in {"open_unscheduled", "open_scheduled"}
+            }
+        )
+        return CalculationParts(value, value, None, value)
+
+    @staticmethod
+    def _new_open_wait_days(rows: list[dict[str, Any]]) -> list[float]:
+        return [
+            float((row["snapshot_date"] - row["queue_entry_date"]).days)
+            for row in rows
+            if row["episode_status"] in {"open_unscheduled", "open_scheduled"}
+        ]
+
+    @classmethod
+    def _wait_new_median(
+        cls,
+        _dataset: CandidateDataset,
+        rows: list[dict[str, Any]],
+        _previous: list[dict[str, Any]],
+    ) -> CalculationParts:
+        values = cls._new_open_wait_days(rows)
+        return CalculationParts(
+            median(values) if values else None, None, None, len(values)
+        )
+
+    @classmethod
+    def _wait_new_p75(
+        cls,
+        _dataset: CandidateDataset,
+        rows: list[dict[str, Any]],
+        _previous: list[dict[str, Any]],
+    ) -> CalculationParts:
+        values = cls._new_open_wait_days(rows)
+        return CalculationParts(
+            _percentile(values, 0.75) if values else None,
+            None,
+            None,
+            len(values),
+        )
+
+    @classmethod
+    def _wait_new_over90(
+        cls,
+        _dataset: CandidateDataset,
+        rows: list[dict[str, Any]],
+        _previous: list[dict[str, Any]],
+    ) -> CalculationParts:
+        values = cls._new_open_wait_days(rows)
+        return _ratio(sum(value > 90 for value in values), len(values))
+
+    @staticmethod
+    def _wait_new_resolution(
+        _dataset: CandidateDataset,
+        rows: list[dict[str, Any]],
+        _previous: list[dict[str, Any]],
+    ) -> CalculationParts:
+        return _ratio(
+            sum(row["episode_status"] in {"completed", "exited"} for row in rows),
+            len(rows),
+        )
+
+    @staticmethod
+    def _followup_overdue_open_rows(
+        rows: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        return [
+            row
+            for row in rows
+            if row["control_due_date"] <= row["snapshot_date"]
+            and row["episode_status"] in {"open_unscheduled", "open_scheduled"}
+        ]
+
+    @classmethod
+    def _wait_followup_open_count(
+        cls,
+        _dataset: CandidateDataset,
+        rows: list[dict[str, Any]],
+        _previous: list[dict[str, Any]],
+    ) -> CalculationParts:
+        eligible = cls._followup_overdue_open_rows(rows)
+        value = len({row["wait_episode_id"] for row in eligible})
+        return CalculationParts(value, value, None, value)
+
+    @classmethod
+    def _followup_overdue_days(cls, rows: list[dict[str, Any]]) -> list[float]:
+        return [
+            float((row["snapshot_date"] - row["control_due_date"]).days)
+            for row in cls._followup_overdue_open_rows(rows)
+        ]
+
+    @classmethod
+    def _wait_followup_median(
+        cls,
+        _dataset: CandidateDataset,
+        rows: list[dict[str, Any]],
+        _previous: list[dict[str, Any]],
+    ) -> CalculationParts:
+        values = cls._followup_overdue_days(rows)
+        return CalculationParts(
+            median(values) if values else None, None, None, len(values)
+        )
+
+    @classmethod
+    def _wait_followup_p75(
+        cls,
+        _dataset: CandidateDataset,
+        rows: list[dict[str, Any]],
+        _previous: list[dict[str, Any]],
+    ) -> CalculationParts:
+        values = cls._followup_overdue_days(rows)
+        return CalculationParts(
+            _percentile(values, 0.75) if values else None,
+            None,
+            None,
+            len(values),
+        )
+
+    @classmethod
+    def _wait_followup_unscheduled(
+        cls,
+        _dataset: CandidateDataset,
+        rows: list[dict[str, Any]],
+        _previous: list[dict[str, Any]],
+    ) -> CalculationParts:
+        eligible = cls._followup_overdue_open_rows(rows)
+        return _ratio(
+            sum(row["episode_status"] == "open_unscheduled" for row in eligible),
+            len(eligible),
+        )
+
+    @staticmethod
+    def _wait_followup_resolution(
+        _dataset: CandidateDataset,
+        rows: list[dict[str, Any]],
+        _previous: list[dict[str, Any]],
+    ) -> CalculationParts:
+        eligible = [
+            row for row in rows if row["control_due_date"] <= row["snapshot_date"]
+        ]
+        return _ratio(
+            sum(row["episode_status"] == "completed" for row in eligible),
+            len(eligible),
+        )

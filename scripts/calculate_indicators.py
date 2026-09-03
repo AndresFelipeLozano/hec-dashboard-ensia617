@@ -26,7 +26,7 @@ def load_packaged_candidate(repo_root: Path) -> CandidateDataset:
     report = validate_tables(
         load_simulated_tables(repo_root),
         repo_root,
-        validation_timestamp_utc="2026-08-31T12:00:00+00:00",
+        validation_timestamp_utc="2026-09-02T12:00:00+00:00",
     )
     if not report.activatable or report.rejected_row_count:
         raise ValueError(
@@ -54,8 +54,8 @@ def build_snapshot(repo_root: Path) -> dict[str, object]:
         status = result["status"]
         status_counts[status] = status_counts.get(status, 0) + 1
     return {
-        "snapshot_version": "1.0.0",
-        "generated_at_utc": "2026-08-31T15:00:00Z",
+        "snapshot_version": "1.1.0",
+        "generated_at_utc": "2026-09-02T15:00:00Z",
         "dataset_id": dataset.metadata["dataset_id"],
         "contract_version": dataset.metadata["contract_version"],
         "indicator_catalog_version": engine.catalog["catalog_version"],

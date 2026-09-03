@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+from datetime import date, timedelta
 from hashlib import sha256
 from html import escape
 from io import StringIO
@@ -18,18 +19,24 @@ import zipfile
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "data" / "simulated"
-DEFAULT_WORKBOOK = REPO_ROOT / "templates" / "plantilla_carga_hec_v1.xlsx"
+DEFAULT_WORKBOOK_SOURCE = REPO_ROOT / "templates" / "plantilla_carga_hec_v1.xlsx"
+DEFAULT_WORKBOOK_OUTPUT = REPO_ROOT / "templates" / "plantilla_carga_hec_1_3.xlsx"
 SEED = 617
-DATASET_ID = "hec-sim-day4r-v2"
-DATASET_NAME = "Demostración HEC — Día 4 remediado"
-GENERATED_AT_UTC = "2026-09-01T12:00:00Z"
+DATASET_ID = "hec-sim-day5-v1"
+DATASET_NAME = (
+    "Demostración HEC — Día 5 red de derivación y lista de espera ambulatoria"
+)
+GENERATED_AT_UTC = "2026-09-02T12:00:00Z"
+HEC_DEIS_CODE = "111101"
 PERIOD_MONTHS = {
     "Q1": ("2026-01-01", "2026-02-01", "2026-03-01"),
     "Q2": ("2026-04-01", "2026-05-01", "2026-06-01"),
 }
 
 
-def load_catalogs() -> tuple[dict[str, dict], dict[str, list[str]], list[str]]:
+def load_catalogs() -> tuple[
+    dict[str, dict], dict[str, list[str]], list[str], dict[str, list[str]]
+]:
     services = json.loads((REPO_ROOT / "config" / "services.json").read_text())
     units = {
         item["unit_id"]: item
@@ -49,10 +56,27 @@ def load_catalogs() -> tuple[dict[str, dict], dict[str, list[str]], list[str]]:
             row["establishment_code"]
             for row in csv.DictReader(handle)
             if row["coordinates_available"].casefold() == "true"
+            and row["establishment_code"] != HEC_DEIS_CODE
             and row["commune_name"]
             in {"Maipú", "Cerrillos", "Estación Central", "Santiago"}
         )
-    return units, specialties, origins
+    diagnosis_contract = json.loads(
+        (REPO_ROOT / "config" / "referral_diagnoses.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    diagnoses_by_specialty: dict[str, list[str]] = {}
+    for item in diagnosis_contract["diagnoses"]:
+        if (
+            item.get("status") == "active_mvp"
+            and item.get("classification") == "simulated_demo"
+        ):
+            diagnoses_by_specialty.setdefault(item["specialty_id"], []).append(
+                item["diagnosis_group_id"]
+            )
+    for values in diagnoses_by_specialty.values():
+        values.sort()
+    return units, specialties, origins, diagnoses_by_specialty
 
 
 def coverage_strata(
@@ -384,9 +408,181 @@ def build_professional_activity(
     return rows
 
 
+def build_ambulatory_waitlist(
+    specialties: list[tuple[str, str]],
+    origins: list[str],
+    profiles: list[dict[str, object]],
+    diagnoses_by_specialty: dict[str, list[str]],
+) -> list[dict[str, object]]:
+    """Build 60 deterministic episodes per specialty, queue and quarter."""
+
+    profiles_by_scope: dict[tuple[str, str], list[str]] = {}
+    for profile in profiles:
+        profiles_by_scope.setdefault(
+            (str(profile["service_id"]), str(profile["specialty_id"])), []
+        ).append(str(profile["professional_id"]))
+    rows: list[dict[str, object]] = []
+    record_index = 0
+    snapshots = {"Q1": date(2026, 3, 31), "Q2": date(2026, 6, 30)}
+    exit_reasons = ("clinical_exit", "duplicate", "declined", "other_valid")
+    followup_prestations = (
+        "control_especialidad",
+        "evaluacion_preoperatoria",
+        "procedimiento_ambulatorio",
+    )
+    for stratum_index, (service_id, specialty_id) in enumerate(specialties):
+        profile_ids = profiles_by_scope[(service_id, specialty_id)]
+        diagnosis_ids = diagnoses_by_specialty[specialty_id]
+        if len(diagnosis_ids) < 4:
+            raise RuntimeError(
+                f"At least four simulated referral diagnoses are required for {specialty_id}"
+            )
+        trend = _trend(stratum_index)
+        for quarter_index, quarter in enumerate(("Q1", "Q2")):
+            snapshot = snapshots[quarter]
+            period_effect = -12 * trend if quarter == "Q2" else 0
+            specialty_hash = int(
+                sha256(specialty_id.encode("utf-8")).hexdigest()[:8], 16
+            )
+            origin_step = (1, 5, 7, 11)[stratum_index % 4]
+            origin_order = [
+                origins[(specialty_hash % 12 + rank * origin_step) % 12]
+                for rank in range(12)
+            ]
+            if quarter == "Q1":
+                origin_counts = [30, 30, 20, 20, 10, 10, 0, 0, 0, 0, 0, 0]
+            else:
+                origin_counts = (
+                    [40, 30, 20, 10, 10, 10, 0, 0, 0, 0, 0, 0],
+                    [30, 30, 20, 20, 10, 10, 0, 0, 0, 0, 0, 0],
+                    [30, 20, 20, 20, 20, 10, 0, 0, 0, 0, 0, 0],
+                    [50, 20, 20, 10, 10, 10, 0, 0, 0, 0, 0, 0],
+                    [40, 20, 20, 20, 10, 10, 0, 0, 0, 0, 0, 0],
+                    [30, 30, 30, 10, 10, 10, 0, 0, 0, 0, 0, 0],
+                    [40, 40, 10, 10, 10, 10, 0, 0, 0, 0, 0, 0],
+                )[stratum_index % 7]
+            origin_sequence = [
+                code
+                for code, count in zip(origin_order, origin_counts)
+                for _ in range(count)
+            ]
+            if len(origin_sequence) != 120:
+                raise RuntimeError("Origin weighting must allocate exactly 120 rows")
+            local_rng = random.Random(
+                SEED + stratum_index * 101 + quarter_index * 17
+            )
+            local_rng.shuffle(origin_sequence)
+            origin_rank = {code: rank for rank, code in enumerate(origin_order)}
+            occurrence_by_origin: dict[str, int] = {}
+            for queue_index, queue_type in enumerate(
+                ("new_consultation", "followup_control")
+            ):
+                for local_index in range(60):
+                    record_index += 1
+                    position = queue_index * 60 + local_index
+                    origin_code = origin_sequence[position]
+                    occurrence = occurrence_by_origin.get(origin_code, 0)
+                    occurrence_by_origin[origin_code] = occurrence + 1
+                    dominant_diagnosis = (
+                        origin_rank[origin_code] + stratum_index
+                    ) % len(diagnosis_ids)
+                    center_count = origin_counts[origin_rank[origin_code]]
+                    diagnosis_index = (
+                        dominant_diagnosis
+                        if occurrence < max(10, center_count - 10)
+                        else (dominant_diagnosis + 1) % len(diagnosis_ids)
+                    )
+                    referral_diagnosis_id = diagnosis_ids[diagnosis_index]
+                    shared_professional_scope = (
+                        queue_type == "followup_control" and len(profile_ids) > 1
+                    )
+                    if shared_professional_scope:
+                        status = (
+                            "open_unscheduled"
+                            if local_index % 30 < 15
+                            else "open_scheduled"
+                        )
+                    elif local_index < 18:
+                        status = "open_unscheduled"
+                    elif local_index < 34:
+                        status = "open_scheduled"
+                    elif local_index < 54:
+                        status = "completed"
+                    else:
+                        status = "exited"
+                    age_days = max(
+                        5,
+                        25
+                        + (stratum_index % 6) * 13
+                        + (local_index * 7) % 85
+                        + queue_index * 9
+                        + period_effect,
+                    )
+                    index_date = snapshot - timedelta(days=age_days)
+                    completion_date: date | None = None
+                    scheduled_date: date | None = None
+                    exit_reason = ""
+                    if status == "open_scheduled":
+                        scheduled_date = snapshot + timedelta(
+                            days=1 + ((local_index + stratum_index) % 30)
+                        )
+                    elif status == "completed":
+                        completion_date = index_date + timedelta(
+                            days=max(1, age_days - (local_index % 18))
+                        )
+                    elif status == "exited":
+                        exit_reason = exit_reasons[
+                            (local_index + stratum_index + quarter_index) % len(exit_reasons)
+                        ]
+                    is_new = queue_type == "new_consultation"
+                    rows.append(
+                        {
+                            "wait_episode_id": f"SIM-WAIT-{record_index:06d}",
+                            "snapshot_date": snapshot.isoformat(),
+                            "period_id": f"2026-{quarter}",
+                            "queue_type": queue_type,
+                            "service_id": service_id,
+                            "specialty_id": specialty_id,
+                            "referral_diagnosis_id": referral_diagnosis_id,
+                            "professional_profile_id": (
+                                profile_ids[
+                                    min(local_index // 30, len(profile_ids) - 1)
+                                    if shared_professional_scope
+                                    else 0
+                                ]
+                                if not is_new or local_index % 3 == 0
+                                else ""
+                            ),
+                            "origin_deis_code": origin_code,
+                            "requested_prestation": (
+                                "consulta_nueva"
+                                if is_new
+                                else followup_prestations[
+                                    (local_index + stratum_index) % len(followup_prestations)
+                                ]
+                            ),
+                            "queue_entry_date": index_date.isoformat() if is_new else "",
+                            "control_due_date": "" if is_new else index_date.isoformat(),
+                            "scheduled_date": (
+                                scheduled_date.isoformat() if scheduled_date else ""
+                            ),
+                            "completion_date": (
+                                completion_date.isoformat() if completion_date else ""
+                            ),
+                            "episode_status": status,
+                            "exit_reason": exit_reason,
+                            "priority_class": ("routine", "preferential", "urgent")[
+                                (local_index + stratum_index) % 3
+                            ],
+                            "simulated_flag": "SI",
+                        }
+                    )
+    return rows
+
+
 def generate_dataset() -> tuple[dict[str, list[dict[str, object]]], dict[str, object]]:
     rng = random.Random(SEED)
-    units, specialties, origins = load_catalogs()
+    units, specialties, origins, diagnoses_by_specialty = load_catalogs()
     if len(origins) < 12:
         raise RuntimeError("At least 12 mapped DEIS origins are required")
     profile_contract = json.loads(
@@ -430,15 +626,28 @@ def generate_dataset() -> tuple[dict[str, list[dict[str, object]]], dict[str, ob
     )
     clinical_strata.sort()
     surgical_strata = coverage_strata(units, specialties, "surgical")
+    waitlist_strata = sorted(
+        (item["parent_unit_id"], item["specialty_id"])
+        for item in json.loads(
+            (REPO_ROOT / "config" / "services.json").read_text(encoding="utf-8")
+        )["analytical_specialties"]
+        if item.get("mvp_enabled")
+    )
     tables = {
         "DERIVACIONES": build_referrals(rng, clinical_strata, origins),
         "CIRUGIAS": build_surgeries(rng, surgical_strata, origins),
         "ACTIVIDAD_PROF": build_professional_activity(
             professional_profiles, origins
         ),
+        "LISTA_ESPERA_AMB": build_ambulatory_waitlist(
+            waitlist_strata,
+            origins,
+            professional_profiles,
+            diagnoses_by_specialty,
+        ),
     }
     metadata: dict[str, object] = {
-        "contract_version": "1.1.0",
+        "contract_version": "1.3.0",
         "dataset_id": DATASET_ID,
         "dataset_name": DATASET_NAME,
         "source_mode": "simulado",
@@ -470,6 +679,16 @@ def generate_dataset() -> tuple[dict[str, list[dict[str, object]]], dict[str, ob
                 profile["profile_type"] == "mixed"
                 for profile in professional_profiles
             ),
+            "waitlist_specialties": len(waitlist_strata),
+            "waitlist_rows_per_specialty_queue_period": 60,
+            "waitlist_queue_types": 2,
+            "waitlist_periods": 2,
+            "referral_diagnosis_groups": sum(
+                len(values) for values in diagnoses_by_specialty.values()
+            ),
+            "heterogeneous_origin_model": (
+                "base propensity + specialty affinity + diagnosis-center affinity + period trend; seed 617"
+            ),
         },
         "row_counts": {name: len(rows) for name, rows in tables.items()},
     }
@@ -494,6 +713,7 @@ def write_outputs(
         "DERIVACIONES": "derivaciones_simuladas.csv",
         "CIRUGIAS": "cirugias_simuladas.csv",
         "ACTIVIDAD_PROF": "actividad_profesional_simulada.csv",
+        "LISTA_ESPERA_AMB": "lista_espera_ambulatoria_simulada.csv",
     }
     artifacts = {
         filename: _csv_text(tables[sheet]).encode("utf-8")
@@ -608,6 +828,11 @@ def update_workbook(
                 [list(row.values()) for row in tables["ACTIVIDAD_PROF"]],
                 False,
             ),
+            "xl/worksheets/sheet7.xml": (
+                list(tables["LISTA_ESPERA_AMB"][0]),
+                [list(row.values()) for row in tables["LISTA_ESPERA_AMB"]],
+                False,
+            ),
         }
         for path, (headers, rows, is_metadata) in sheet_specs.items():
             xml_text = archive.read(path).decode("utf-8")
@@ -623,6 +848,7 @@ def update_workbook(
             "xl/tables/table2.xml": ("Q", len(tables["DERIVACIONES"]) + 1),
             "xl/tables/table3.xml": ("N", len(tables["CIRUGIAS"]) + 1),
             "xl/tables/table4.xml": ("R", len(tables["ACTIVIDAD_PROF"]) + 1),
+            "xl/tables/table6.xml": ("R", len(tables["LISTA_ESPERA_AMB"]) + 1),
         }
         for path, (last_column, final_row) in table_rows.items():
             xml_text = archive.read(path).decode("utf-8")
@@ -638,7 +864,7 @@ def update_workbook(
 
         target_workbook.parent.mkdir(parents=True, exist_ok=True)
         with tempfile.NamedTemporaryFile(
-            prefix="hec_day4r_", suffix=".xlsx", dir=target_workbook.parent, delete=False
+            prefix="hec_day5_", suffix=".xlsx", dir=target_workbook.parent, delete=False
         ) as handle:
             temporary_path = Path(handle.name)
         try:
@@ -654,18 +880,22 @@ def update_workbook(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
-    parser.add_argument("--workbook-output", type=Path, default=DEFAULT_WORKBOOK)
+    parser.add_argument("--workbook-source", type=Path, default=DEFAULT_WORKBOOK_SOURCE)
+    parser.add_argument("--workbook-output", type=Path, default=DEFAULT_WORKBOOK_OUTPUT)
+    parser.add_argument("--skip-workbook", action="store_true")
     args = parser.parse_args()
 
     tables, metadata = generate_dataset()
     write_outputs(args.output_dir, tables, metadata)
-    update_workbook(DEFAULT_WORKBOOK, args.workbook_output, tables, metadata)
+    if not args.skip_workbook:
+        update_workbook(args.workbook_source, args.workbook_output, tables, metadata)
     counts = metadata["row_counts"]
     print(
         "PASS simulated data: "
         f"{counts['DERIVACIONES']} referrals; "
         f"{counts['CIRUGIAS']} surgeries; "
         f"{counts['ACTIVIDAD_PROF']} professional activities; "
+        f"{counts['LISTA_ESPERA_AMB']} ambulatory waitlist episodes; "
         f"total={sum(counts.values())}; seed={SEED}; dataset={DATASET_ID}"
     )
     return 0

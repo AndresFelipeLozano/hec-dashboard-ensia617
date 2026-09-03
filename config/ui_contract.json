@@ -1,7 +1,7 @@
 {
-  "contract_version": "1.1.0",
-  "status": "approved_day_4_professional_context_remediation",
-  "last_reviewed": "2026-09-01",
+  "contract_version": "1.2.0",
+  "status": "day_5_candidate_visual_analytics",
+  "last_reviewed": "2026-09-02",
   "language": "es-CL",
   "application_title_es": "Tablero de apoyo a decisiones por rol — Hospital El Carmen",
   "global_layout": {
@@ -115,6 +115,26 @@
       "accessible_table_required": true
     }
   },
+  "information_architecture": {
+    "tabs_es": [
+      "Resumen",
+      "Acceso y listas de espera",
+      "Origen territorial",
+      "Actividad y calidad",
+      "Datos y definiciones"
+    ],
+    "waitlist_sections": [
+      "consultas_nuevas",
+      "controles_vencidos",
+      "antiguedad",
+      "flujo_y_resolucion",
+      "composicion_por_prestacion"
+    ],
+    "all_charts_require_accessible_table": true,
+    "all_aggregated_tables_are_downloadable_csv": true,
+    "map_engine": "plotly_scatter_map_maplibre",
+    "map_requires_token": false
+  },
   "view_contracts": [
     {
       "role_id": "director",
@@ -124,10 +144,10 @@
       "optional_filters": ["service", "specialty", "prestation"],
       "primary_indicator_ids": [
         "referrals_total",
-        "wait_p75_days",
-        "ges_compliance_pct",
-        "new_no_show_pct",
-        "elective_surgery_suspension_pct",
+        "new_waitlist_open_count",
+        "new_wait_p75_days",
+        "followup_overdue_open_count",
+        "followup_unscheduled_pct",
         "accepted_record_pct"
       ],
       "prioritized_findings_limit": 5,
@@ -170,12 +190,12 @@
       "required_selectors": ["period"],
       "optional_filters": ["service", "specialty", "prestation", "ges_status"],
       "primary_indicator_ids": [
-        "referral_growth_pct",
-        "wait_p75_days",
-        "discharge_rate_pct",
-        "referral_pertinence_pct",
-        "ges_compliance_pct",
-        "surgical_waitlist_resolution_pct"
+        "new_wait_p75_days",
+        "new_wait_over_90_pct",
+        "new_waitlist_resolution_pct",
+        "followup_overdue_p75_days",
+        "followup_resolution_pct",
+        "ges_compliance_pct"
       ],
       "prioritized_findings_limit": 5,
       "sections": [
@@ -260,10 +280,10 @@
       "primary_indicator_ids": [
         "surgical_waitlist_open_count",
         "surgery_wait_p75_days",
-        "elective_major_surgery_count",
-        "ambulatory_major_surgery_pct",
-        "elective_surgery_suspension_pct",
-        "surgical_waitlist_resolution_pct"
+        "new_waitlist_open_count",
+        "new_wait_p75_days",
+        "followup_overdue_open_count",
+        "followup_overdue_p75_days"
       ],
       "prioritized_findings_limit": 5,
       "sections": [
@@ -308,10 +328,10 @@
       "primary_indicator_ids": [
         "clinical_activity_completed",
         "clinical_schedule_completion_pct",
-        "new_consultation_share_pct",
-        "discharge_rate_pct",
-        "professional_documentation_completeness_pct",
-        "professional_no_show_context_pct"
+        "new_wait_p75_days",
+        "followup_overdue_open_count",
+        "followup_unscheduled_pct",
+        "professional_documentation_completeness_pct"
       ],
       "prioritized_findings_limit": 5,
       "sections": [
@@ -352,9 +372,10 @@
       "primary_indicator_ids": [
         "surgical_activity_completed",
         "surgical_schedule_completion_pct",
+        "new_wait_p75_days",
+        "new_wait_over_90_pct",
         "professional_ambulatory_surgery_pct",
-        "professional_documentation_completeness_pct",
-        "professional_suspension_context_pct"
+        "professional_documentation_completeness_pct"
       ],
       "prioritized_findings_limit": 5,
       "sections": [

@@ -293,7 +293,7 @@ class ProfessionalContextTests(unittest.TestCase):
             "active_dataset_id",
         ):
             self.assertTrue(stored[key], key)
-        self.assertEqual(stored["active_dataset_id"], "hec-sim-day4r-v2")
+        self.assertEqual(stored["active_dataset_id"], "hec-sim-day5-v1")
 
     def test_professional_calculation_filters_profile_specialty_and_service(self):
         profile = professional_profiles("clinical")[0]

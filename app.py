@@ -12,7 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT))
 
-from dashboard.components.common import render_app_frame  # noqa: E402
+from dashboard.components.common import render_app_frame, render_footer  # noqa: E402
 from dashboard.views import data_quality, landing, role_dashboard, upload  # noqa: E402
 from hec_dashboard.app_state import (  # noqa: E402
     AppInitializationError,
@@ -66,3 +66,4 @@ if pending_navigation == "dashboard" and dashboard_page is not None:
 if pending_navigation == "landing":
     st.switch_page(landing_page)
 selected_page.run()
+render_footer()

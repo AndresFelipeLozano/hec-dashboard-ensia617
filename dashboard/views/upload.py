@@ -51,7 +51,7 @@ def render() -> None:
         "Solo se admiten libros XLSX con datos completamente simulados. El archivo "
         "permanece en la sesión y nunca reemplaza automáticamente el dataset activo."
     )
-    template = REPO_ROOT / "templates" / "plantilla_carga_hec_v1.xlsx"
+    template = REPO_ROOT / "templates" / "plantilla_carga_hec_1_3.xlsx"
     st.download_button(
         "Descargar plantilla XLSX aprobada",
         data=template.read_bytes(),

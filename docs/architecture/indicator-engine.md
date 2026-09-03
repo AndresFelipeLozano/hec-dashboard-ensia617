@@ -2,7 +2,7 @@
 
 ## Purpose and boundary
 
-The Day 3 engine turns the approved 31-indicator catalog into executable,
+The engine turns the approved 41-indicator catalog into executable,
 reviewable calculations over the validated Day 2 candidate dataset. It is a
 calculation layer only: it does not add Streamlit views, persistent storage,
 production integrations, AI-generated formulas, or patient-level outputs.
@@ -28,8 +28,9 @@ indicator is missing, duplicated, or added only on one side.
 | `DERIVACIONES` and validation report | 14 | 0 | 0 | 14 |
 | `CIRUGIAS` | 5 | 1 | 1 | 7 |
 | `ACTIVIDAD_PROF` | 9 | 0 | 0 | 9 |
+| `LISTA_ESPERA_AMB` | 10 | 0 | 0 | 10 |
 | Not yet packaged | 0 | 0 | 1 | 1 |
-| **Total** | **28** | **1** | **2** | **31** |
+| **Total** | **38** | **1** | **2** | **41** |
 
 The three non-active bindings remain explicit rather than receiving invented
 proxies:
@@ -68,7 +69,7 @@ Every indicator returns the same serializable structure:
 
 | Field | Meaning |
 |---|---|
-| `status` | `available`, `insufficient_n`, `zero_denominator`, `pending_definition`, `deferred`, or `not_applicable` |
+| `status` | `available`, `insufficient_n`, `zero_denominator`, `pending_definition`, `deferred`, `unavailable`, or `not_applicable` |
 | `value` / `prior_value` | Rounded current and comparable values only when valid |
 | `numerator` / `denominator` | Auditable calculation parts where applicable |
 | `valid_n` / `minimum_valid_n` | Observed and required sample size |
@@ -119,10 +120,10 @@ with a fixed timestamp. Regenerate and verify with:
     ./.venv/bin/python scripts/generate_simulated_data.py
     ./.venv/bin/python scripts/calculate_indicators.py
     ./.venv/bin/python scripts/validate_data_contract.py \
-      --workbook templates/plantilla_carga_hec_v1.xlsx
+      --workbook templates/plantilla_carga_hec_1_3.xlsx
     ./.venv/bin/python -m unittest discover -s tests -p 'test_*.py' -q
 
-Acceptance requires 31 unique results, finite JSON numbers only, exact catalog
+Acceptance requires 41 unique results, finite JSON numbers only, exact catalog
 coverage, explicit non-active states, minimum-sample enforcement, no zero
-substitution, stable comparable-period behavior, and a fully valid 600-row
+substitution, stable comparable-period behavior, and a fully valid 15,200-row
 packaged workbook.

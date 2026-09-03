@@ -19,6 +19,7 @@ _CONTRACTS: dict[str, tuple[str, ...]] = {
     "data_contract": ("contract_version", "workbook", "sheets"),
     "indicator_bindings": ("binding_version", "bindings"),
     "professional_profiles": ("contract_version", "profiles", "simulation_only"),
+    "referral_diagnoses": ("catalog_version", "diagnoses", "user_facing_term_es"),
 }
 
 PROFESSIONAL_TYPES = {"clinical", "surgical", "mixed"}
@@ -127,6 +128,21 @@ def specialty_label(specialty_id: str, repo_root: Path = REPO_ROOT) -> str:
     raise AppConfigError(f"Especialidad no aprobada o diferida: {specialty_id}")
 
 
+def referral_diagnoses(
+    specialty_id: str | None = None, repo_root: Path = REPO_ROOT
+) -> list[dict[str, Any]]:
+    """Return governed simulated referral-reason groups, optionally by specialty."""
+
+    items = [
+        copy.deepcopy(item)
+        for item in load_contract("referral_diagnoses", repo_root)["diagnoses"]
+        if item.get("status") == "active_mvp"
+        and item.get("classification") == "simulated_demo"
+        and (specialty_id is None or item.get("specialty_id") == specialty_id)
+    ]
+    return sorted(items, key=lambda item: (item["specialty_id"], item["label_es"].casefold()))
+
+
 def professional_profiles(
     profile_type: str,
     specialty_id: str | None = None,
@@ -233,3 +249,11 @@ def primary_indicator_ids(
     if len(ids) > 6:
         raise AppConfigError(f"{role_id} supera el máximo de seis KPI primarios")
     return ids
+
+
+def secondary_indicator_ids(
+    role_id: str, repo_root: Path = REPO_ROOT
+) -> tuple[str, ...]:
+    return tuple(
+        get_role_definition(role_id, repo_root).get("secondary_indicator_ids", [])
+    )

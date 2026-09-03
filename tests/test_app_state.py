@@ -29,9 +29,9 @@ class AppStateTests(unittest.TestCase):
     def test_initialization_activates_bundled_validated_dataset(self):
         self.assertTrue(self.state[Keys.INITIALIZED])
         self.assertEqual(
-            self.state[Keys.ACTIVE_DATASET_METADATA]["dataset_id"], "hec-sim-day4r-v2"
+            self.state[Keys.ACTIVE_DATASET_METADATA]["dataset_id"], "hec-sim-day5-v1"
         )
-        self.assertEqual(self.state[Keys.ACTIVE_VALIDATION_SUMMARY]["accepted_rows"], 8960)
+        self.assertEqual(self.state[Keys.ACTIVE_VALIDATION_SUMMARY]["accepted_rows"], 15200)
         self.assertEqual(self.state[Keys.ACTIVE_VALIDATION_SUMMARY]["rejected_rows"], 0)
 
     def test_initialization_is_idempotent(self):
@@ -41,14 +41,14 @@ class AppStateTests(unittest.TestCase):
 
     def test_valid_candidate_remains_separate_until_activation(self):
         active = self.state[Keys.ACTIVE_DATASET]
-        data = (REPO_ROOT / "templates" / "plantilla_carga_hec_v1.xlsx").read_bytes()
+        data = (REPO_ROOT / "templates" / "plantilla_carga_hec_1_3.xlsx").read_bytes()
         report = validate_candidate_bytes(self.state, "candidate.xlsx", data)
         self.assertTrue(report.activatable)
         self.assertIs(self.state[Keys.ACTIVE_DATASET], active)
         self.assertIsNotNone(self.state[Keys.CANDIDATE_DATASET])
         activated = activate_candidate(self.state)
         self.assertIsNot(self.state[Keys.ACTIVE_DATASET], self.state[Keys.CANDIDATE_DATASET])
-        self.assertEqual(activated.metadata["dataset_id"], "hec-sim-day4r-v2")
+        self.assertEqual(activated.metadata["dataset_id"], "hec-sim-day5-v1")
 
     def test_failed_candidate_preserves_active_dataset(self):
         active = self.state[Keys.ACTIVE_DATASET]
@@ -67,7 +67,7 @@ class AppStateTests(unittest.TestCase):
     def test_restore_bundled_dataset_revalidates_default(self):
         self.state[Keys.ACTIVE_SOURCE_MODE] = "uploaded"
         restored = restore_bundled_dataset(self.state)
-        self.assertEqual(restored.metadata["dataset_id"], "hec-sim-day4r-v2")
+        self.assertEqual(restored.metadata["dataset_id"], "hec-sim-day5-v1")
         self.assertEqual(
             self.state[Keys.ACTIVE_SOURCE_MODE],
             "bundled_validated_simulated_session_only",

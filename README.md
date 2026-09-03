@@ -7,16 +7,15 @@ Hospital El Carmen Dr. Luis Valentín Ferrada, Maipú.
 ## Current phase
 
 The Day 1 architecture baseline, Day 2 data foundation, Day 3 indicator
-engine, and Day 4 Streamlit shell are complete. The repository now contains the normalized Excel
+engine, Day 4 Streamlit shell, and Day 5 ambulatory-waitlist visual layer are complete. The repository now contains the normalized Excel
 contract, verified upload template, deterministic simulated operational and
 professional data, a traceable public DEIS establishment snapshot, row
-quarantine, explicit in-memory candidate activation, and 31 executable or
+quarantine, explicit in-memory candidate activation, and 41 executable or
 explicitly unavailable indicator bindings. The role-based shell adds dynamic
 navigation, session-only upload validation, explicit activation, data-quality
-status, and KPI cards backed directly by the approved indicator engine.
-
-Final charts, MapLibre georeferencing, the accessible map table, and
-deterministic prioritized findings remain scheduled for Day 5.
+status, KPI cards, role-aware charts, deterministic findings, MapLibre
+georeferencing, specialty and referring-center drill-downs, accessible evidence
+tables, and aggregated CSV downloads.
 
 ## Data disclaimer
 
@@ -37,19 +36,26 @@ an HIS, EHR, ERP, CDSS, production integration engine, or official HEC system.
 
 - [Data ingestion contract](docs/architecture/data-ingestion-contract.md)
 - [Machine-readable workbook contract](config/data_contract.json)
-- [Verified Excel template](templates/plantilla_carga_hec_v1.xlsx)
+- [Verified Excel template 1.3](templates/plantilla_carga_hec_1_3.xlsx)
+- [Governed simulated referral diagnoses](config/referral_diagnoses.json)
 - [DEIS reference provenance](data/reference/deis_snapshot_manifest.json)
 - Deterministic simulated data under `data/simulated/`
 
-The remediated packaged demonstration `hec-sim-day4r-v2` contains 3,400
+The packaged demonstration `hec-sim-day5-v1` contains 3,400
 simulated referrals, 2,200 simulated surgical cases, and 3,360 simulated
-professional activities, for 8,960 accepted rows. Its deterministic profile
+professional activities plus 6,240 simulated ambulatory-waitlist episodes,
+for 15,200 accepted rows. Its deterministic profile
 catalog covers all 15 clinical and 11 surgical MVP analytical specialties plus
 one mixed Cirugía Pediátrica professional with separate clinical and surgical
 lenses under the same identity and specialty. The coverage matrix keeps
 applicable default role/service/specialty/profile indicators above their
 approved minimum sample sizes in both Q1 and Q2. The DEIS snapshot
 contains 55 unique establishments from the validated HEC service context.
+Hospital El Carmen (`111101`) remains in that reference catalog as the fixed
+destination marker, but the deterministic simulation and all external-network
+aggregates exclude it as a referring origin. Compatible uploaded rows with
+that origin remain counted in general data-quality totals as internal-origin
+records.
 
 Professional selectors use readable specialty/profile labels from
 `config/professional_profiles.json`; internal `SIM-*` identifiers are never the
@@ -84,9 +90,11 @@ Run the standard-library validator with:
 
     ./.venv/bin/python scripts/validate_contracts.py
     ./.venv/bin/python scripts/validate_data_contract.py \
-      --workbook templates/plantilla_carga_hec_v1.xlsx
+      --workbook templates/plantilla_carga_hec_1_3.xlsx
     ./.venv/bin/python scripts/calculate_indicators.py
     ./.venv/bin/python scripts/audit_day4_coverage.py
+    ./.venv/bin/python scripts/audit_day5.py
+    ./.venv/bin/python scripts/audit_day5_map.py
 
 Run the test suite with:
 

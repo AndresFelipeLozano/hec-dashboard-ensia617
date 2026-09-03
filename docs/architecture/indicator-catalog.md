@@ -1,9 +1,9 @@
 # HEC indicator catalog
 
-- Version: 1.0.0
-- Status: Functional baseline
-- Review date: 2026-08-31
-- Indicators: 31
+- Version: 1.1.0
+- Status: Day 5 candidate
+- Review date: 2026-09-02
+- Indicators: 41
 
 ## Governance rules
 
@@ -48,6 +48,16 @@
 | `surgical_schedule_completion_pct` | Cumplimiento de actividad quirúrgica programada | percentage | professional_surgical | No target | MVP simulated |
 | `professional_ambulatory_surgery_pct` | Cirugía ambulatoria del perfil | percentage | professional_surgical | No target | MVP simulated |
 | `professional_suspension_context_pct` | Contexto de suspensiones | percentage | professional_surgical | No target | MVP simulated |
+| `new_waitlist_open_count` | Consultas nuevas pendientes | count | approved decision profiles | No target | MVP simulated |
+| `new_wait_median_days` | Mediana de espera de consultas nuevas | days | approved decision profiles | No target | MVP simulated |
+| `new_wait_p75_days` | P75 de espera de consultas nuevas | days | approved decision profiles | No target | MVP simulated |
+| `new_wait_over_90_pct` | Consultas nuevas sobre 90 días | percentage | approved decision profiles | No target | MVP simulated |
+| `new_waitlist_resolution_pct` | Resolución de consultas nuevas | percentage | approved decision profiles | No target | MVP simulated |
+| `followup_overdue_open_count` | Controles vencidos pendientes | count | approved decision profiles | No target | MVP simulated |
+| `followup_overdue_median_days` | Mediana de atraso de controles | days | approved decision profiles | No target | MVP simulated |
+| `followup_overdue_p75_days` | P75 de atraso de controles | days | approved decision profiles | No target | MVP simulated |
+| `followup_unscheduled_pct` | Controles vencidos sin programación | percentage | approved decision profiles | No target | MVP simulated |
+| `followup_resolution_pct` | Resolución de controles debidos | percentage | approved decision profiles | No target | MVP simulated |
 
 ## Status summary
 
@@ -56,7 +66,7 @@
 | MVP core | 14 | Available in the primary simulated operational contract. |
 | Conditional | 6 | Displayed only when the required fields and applicability are valid. |
 | Deferred | 2 | Requires a separate validated data contract outside the initial MVP. |
-| MVP simulated | 9 | Used only for simulated professional profiles. |
+| MVP simulated | 19 | Nine professional-context indicators and ten Day 5 waitlist indicators. |
 
 ## Target interpretation
 

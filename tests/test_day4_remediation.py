@@ -4,7 +4,6 @@ from collections import Counter
 from datetime import date
 import json
 from pathlib import Path
-import subprocess
 import sys
 from time import perf_counter
 import unittest
@@ -38,18 +37,23 @@ class Day4RemediationTests(unittest.TestCase):
 
     def test_generation_has_required_size_unique_ids_and_periods(self):
         tables, metadata = generate_dataset()
-        self.assertGreaterEqual(sum(metadata["row_counts"].values()), 6000)
+        self.assertEqual(sum(metadata["row_counts"].values()), 15200)
+        self.assertEqual(metadata["row_counts"]["LISTA_ESPERA_AMB"], 6240)
         key_by_sheet = {
             "DERIVACIONES": "referral_id",
             "CIRUGIAS": "surgery_case_id",
             "ACTIVIDAD_PROF": "activity_id",
+            "LISTA_ESPERA_AMB": "wait_episode_id",
         }
         for sheet, rows in tables.items():
             with self.subTest(sheet=sheet):
                 ids = [row[key_by_sheet[sheet]] for row in rows]
                 self.assertEqual(len(ids), len(set(ids)))
+                date_field = (
+                    "snapshot_date" if sheet == "LISTA_ESPERA_AMB" else "period_date"
+                )
                 quarters = Counter(
-                    "Q1" if str(row["period_date"]) < "2026-04-01" else "Q2"
+                    "Q1" if str(row[date_field]) < "2026-04-01" else "Q2"
                     for row in rows
                 )
                 self.assertGreater(quarters["Q1"], 0)
@@ -118,8 +122,8 @@ class Day4RemediationTests(unittest.TestCase):
 
     def test_independent_coverage_audit_has_no_failure(self):
         report = audit_coverage(REPO_ROOT)
-        self.assertEqual(report["dataset_id"], "hec-sim-day4r-v2")
-        self.assertEqual(report["accepted_rows"], 8960)
+        self.assertEqual(report["dataset_id"], "hec-sim-day5-v1")
+        self.assertEqual(report["accepted_rows"], 15200)
         self.assertGreaterEqual(report["context_count"], 74)
         self.assertEqual(report["failure_count"], 0, report["failures"])
 
@@ -163,7 +167,7 @@ class Day4RemediationTests(unittest.TestCase):
         workbook = REPO_ROOT / "templates" / "plantilla_carga_hec_v1.xlsx"
         report = validate_workbook(workbook, REPO_ROOT)
         self.assertTrue(report.activatable)
-        self.assertEqual(report.accepted_row_count, 8960)
+        self.assertEqual(report.accepted_row_count, 15200)
         self.assertEqual(report.rejected_row_count, 0)
         tables = load_workbook_tables(workbook)
         self.assertEqual(
@@ -175,6 +179,7 @@ class Day4RemediationTests(unittest.TestCase):
                 "CIRUGIAS",
                 "ACTIVIDAD_PROF",
                 "CATALOGOS",
+                "LISTA_ESPERA_AMB",
             ],
         )
         professional_headers = tables["ACTIVIDAD_PROF"][0]
@@ -184,23 +189,25 @@ class Day4RemediationTests(unittest.TestCase):
             professional_headers.index("ambulatory_major_flag"),
         )
         with zipfile.ZipFile(workbook) as archive:
-            for sheet_number in (3, 4, 5):
+            for sheet_number in (3, 4, 5, 7):
                 xml = archive.read(
                     f"xl/worksheets/sheet{sheet_number}.xml"
                 ).decode("utf-8")
                 self.assertIn("15000\"", xml)
 
-    def test_historical_indicator_engine_is_unchanged_from_head(self):
-        expected = subprocess.check_output(
-            [
-                "git",
-                "show",
-                "5069164439fcf4382a95ef26e0b681087d6369d9:src/hec_dashboard/indicator_engine.py",
-            ],
-            cwd=REPO_ROOT,
+    def test_deterministic_artifacts_match_external_network_remediation(self):
+        metadata = json.loads(
+            (REPO_ROOT / "data" / "simulated" / "metadata.json").read_text()
         )
-        actual = (REPO_ROOT / "src" / "hec_dashboard" / "indicator_engine.py").read_bytes()
-        self.assertEqual(actual, expected)
+        self.assertEqual(
+            metadata["artifact_checksums_sha256"],
+            {
+                "derivaciones_simuladas.csv": "6e9b1c6678e3a128ee5764d0cefbe1c105ce7c3b6afe23594c014e116045240e",
+                "cirugias_simuladas.csv": "c5151163537710dd900fed6f91e8950cad5e09597c12153b1c8da637ae4286d8",
+                "actividad_profesional_simulada.csv": "c462b51e5bc6314d57ec933e468d6990be9e82e701554d9f48c6ed944e2988db",
+                "lista_espera_ambulatoria_simulada.csv": "0a92d90ad2dd9f3b1a7ed42a4220ac289241f057bc8ec837f20775fa4ea56af7",
+            },
+        )
 
     def test_expanded_dataset_remains_responsive(self):
         _load_bundled_cached.cache_clear()

@@ -16,6 +16,7 @@ from hec_dashboard.app_config import (  # noqa: E402
     professional_specialty_choices,
     service_choices,
 )
+from dashboard.components.common import FOOTER_TEXT  # noqa: E402
 
 
 class StreamlitAppTests(unittest.TestCase):
@@ -56,6 +57,15 @@ class StreamlitAppTests(unittest.TestCase):
         at._page_hash = calc_hash(url_path)
         return at.run()
 
+    def assert_footer(self, at: AppTest) -> None:
+        self.assertTrue(
+            any(
+                FOOTER_TEXT in item.value
+                for item in at.markdown
+                if isinstance(item.value, str)
+            )
+        )
+
     def test_entrypoint_loads_with_academic_simulation_disclaimer(self):
         at = self.app()
         self.assertEqual(len(at.exception), 0)
@@ -64,6 +74,24 @@ class StreamlitAppTests(unittest.TestCase):
         self.assertIn("Demostración académica", combined)
         self.assertIn("Datos completamente simulados", combined)
         self.assertEqual(len(at.get("json")), 0)
+        self.assert_footer(at)
+
+    def test_global_footer_is_shared_static_and_in_flow(self):
+        source = (REPO_ROOT / "dashboard/components/common.py").read_text(
+            encoding="utf-8"
+        )
+        app_source = (REPO_ROOT / "app.py").read_text(encoding="utf-8")
+        self.assertIn(FOOTER_TEXT, source)
+        self.assertEqual(app_source.count("render_footer()"), 1)
+        self.assertNotRegex(source, r"position\s*:\s*(fixed|sticky)")
+
+    def test_footer_is_present_on_every_registered_page(self):
+        landing = self.app()
+        self.assert_footer(landing)
+        self.assert_footer(self.open_callable_page(landing, "carga"))
+        self.assert_footer(self.open_callable_page(landing, "calidad"))
+        dashboard = self.select_role("Directivo", "Director")
+        self.assert_footer(self.open_callable_page(dashboard, "dashboard"))
 
     def test_reset_returns_to_landing_and_clears_role(self):
         at = self.select_role("Jefe de Servicio", "Clínico")
@@ -241,9 +269,20 @@ class StreamlitAppTests(unittest.TestCase):
         content = " ".join(
             item.value for item in at.markdown if isinstance(item.value, str)
         )
-        self.assertIn("hec-sim-day4r-v2", content)
+        self.assertIn("hec-sim-day5-v1", content)
         self.assertIn("Contrato", content)
         self.assertGreaterEqual(len(at.metric), 5)
+        tables = " ".join(str(item.value) for item in at.table)
+        self.assertIn("Hoja LISTA_ESPERA_AMB presente", tables)
+        self.assertIn("Inconsistencias de cronología", tables)
+        self.assertIn("Catálogo DEIS empaquetado", tables)
+        self.assertIn("55 de 55", tables)
+        self.assertIn("Orígenes DEIS con coordenadas completas", tables)
+        self.assertIn("Indicadores no disponibles por carga legado 1.1", tables)
+        self.assertIn("Registros de origen interno (HEC)", tables)
+        self.assertIn("Origen interno HEC · LISTA_ESPERA_AMB", tables)
+        self.assertIn("Consulta nueva", tables)
+        self.assertIn("Control", tables)
 
     def test_ui_exposes_no_real_person_labels(self):
         at = self.select_role("Profesional", "Mixto")

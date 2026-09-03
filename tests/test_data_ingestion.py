@@ -35,18 +35,18 @@ class DataIngestionTests(unittest.TestCase):
             validation_timestamp_utc="2026-08-31T12:00:00+00:00",
         )
         self.assertTrue(report.activatable)
-        self.assertEqual(report.accepted_row_count, 8960)
+        self.assertEqual(report.accepted_row_count, 15200)
         self.assertEqual(report.rejected_row_count, 0)
         self.assertEqual(report.accepted_record_pct, 100.0)
         self.assertEqual(report.critical_field_completeness_pct, 100.0)
 
     def test_packaged_workbook_round_trip_is_fully_valid(self):
         report = validate_workbook(
-            REPO_ROOT / "templates" / "plantilla_carga_hec_v1.xlsx",
+            REPO_ROOT / "templates" / "plantilla_carga_hec_1_3.xlsx",
             REPO_ROOT,
         )
         self.assertTrue(report.activatable)
-        self.assertEqual(report.accepted_row_count, 8960)
+        self.assertEqual(report.accepted_row_count, 15200)
         self.assertEqual(report.rejected_row_count, 0)
 
     def test_unmatched_deis_code_is_quarantined_actionably(self):

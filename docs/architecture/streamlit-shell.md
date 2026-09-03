@@ -69,13 +69,14 @@ There is no module-level active dataset. Each session receives independent
 copies; reset-role preserves the active data.
 
 First-session initialization reads
-`templates/plantilla_carga_hec_v1.xlsx` through the protected XLSX reader and
-`validate_workbook`. Activation requires contract `1.1.0`, dataset
-`hec-sim-day4r-v2`, 8,960 accepted rows, zero quarantined rows, and 100%
+`templates/plantilla_carga_hec_1_3.xlsx` through the protected XLSX reader and
+`validate_workbook`. Bundled activation requires contract `1.3.0`, dataset
+`hec-sim-day5-v1`, 15,200 accepted rows, zero quarantined rows, and 100%
 acceptance. Failure stops safely; there is no raw-CSV fallback.
 
 The immutable validated workbook parse is cached by repository path, workbook
-size/mtime, metadata size/mtime, and professional-profile contract size/mtime.
+size/mtime, metadata size/mtime, professional-profile contract size/mtime, and
+referral-diagnosis catalog size/mtime.
 Every session still receives deep copies;
 candidate validation and activation are never cached as shared mutable state.
 
@@ -178,7 +179,7 @@ The replacement uses seed `617` and deterministic coverage strata:
   surgical/procedural lenses under the same identity, specialty, and service,
   without combining denominators or scores.
 
-The resulting `hec-sim-day4r-v2` contains 3,400 referrals, 2,200 surgeries,
+The resulting `hec-sim-day5-v1` contains 3,400 referrals, 2,200 surgeries,
 and 3,360 professional activities: 8,960 accepted records. Q1 and Q2 retain
 direct comparability while service-level patterns rotate deterministically
 through improvement, deterioration, and stability. Values are not uniformly

@@ -42,10 +42,10 @@ class PresentationTests(unittest.TestCase):
             [card.indicator_id for card in cards],
             [
                 "referrals_total",
-                "wait_p75_days",
-                "ges_compliance_pct",
-                "new_no_show_pct",
-                "elective_surgery_suspension_pct",
+                "new_waitlist_open_count",
+                "new_wait_p75_days",
+                "followup_overdue_open_count",
+                "followup_unscheduled_pct",
                 "accepted_record_pct",
             ],
         )
@@ -91,6 +91,7 @@ class PresentationTests(unittest.TestCase):
             "zero_denominator",
             "pending_definition",
             "deferred",
+            "unavailable",
             "not_applicable",
         ):
             with self.subTest(status=status):

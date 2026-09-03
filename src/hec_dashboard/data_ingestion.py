@@ -451,8 +451,14 @@ def _sheet_dict_rows(
     rows: list[list[Any]],
     rules: dict[str, Any],
     structural_errors: list[ValidationIssue],
+    *,
+    allowed_missing_columns: set[str] | None = None,
 ) -> list[tuple[int, dict[str, Any]]]:
     expected = [column["name"] for column in rules["columns"]]
+    allowed_missing_columns = allowed_missing_columns or set()
+    legacy_expected = [
+        name for name in expected if name not in allowed_missing_columns
+    ]
     if not rows:
         structural_errors.append(
             ValidationIssue(
@@ -464,7 +470,7 @@ def _sheet_dict_rows(
         )
         return []
     headers = [str(value).strip() for value in rows[0]]
-    if headers != expected:
+    if headers not in (expected, legacy_expected):
         missing = [name for name in expected if name not in headers]
         unknown = [name for name in headers if name not in expected]
         details = []
@@ -486,10 +492,10 @@ def _sheet_dict_rows(
         return []
     result: list[tuple[int, dict[str, Any]]] = []
     for row_number, values in enumerate(rows[1:], start=2):
-        padded = values + [""] * (len(expected) - len(values))
-        if all(value == "" or value is None for value in padded[: len(expected)]):
+        padded = values + [""] * (len(headers) - len(values))
+        if all(value == "" or value is None for value in padded[: len(headers)]):
             continue
-        result.append((row_number, dict(zip(expected, padded[: len(expected)]))))
+        result.append((row_number, dict(zip(headers, padded[: len(headers)]))))
     return result
 
 
@@ -504,10 +510,26 @@ def validate_tables(
     professional_profiles = _load_json(
         repo_root / "config" / "professional_profiles.json"
     )
+    referral_diagnoses = _load_json(
+        repo_root / "config" / "referral_diagnoses.json"
+    )
     structural_errors: list[ValidationIssue] = []
     issues: list[ValidationIssue] = []
-    required_sheets = set(contract["workbook"]["required_sheets"])
-    allowed_sheets = required_sheets | set(
+    metadata = _parse_metadata(
+        tables.get("METADATOS", []),
+        contract["metadata_keys"],
+        structural_errors,
+    )
+    contract_version = str(metadata.get("contract_version", ""))
+    required_by_version = contract["workbook"].get(
+        "required_sheets_by_contract_version", {}
+    )
+    required_sheets = set(
+        required_by_version.get(
+            contract_version, contract["workbook"]["required_sheets"]
+        )
+    )
+    allowed_sheets = set(contract["workbook"]["required_sheets"]) | set(
         contract["workbook"]["informational_sheets"]
     )
     for sheet in sorted(set(tables) - allowed_sheets):
@@ -530,11 +552,6 @@ def validate_tables(
             )
         )
 
-    metadata = _parse_metadata(
-        tables.get("METADATOS", []),
-        contract["metadata_keys"],
-        structural_errors,
-    )
     unit_by_id = {
         item["unit_id"]: item
         for item in services["organizational_units"]
@@ -549,6 +566,12 @@ def validate_tables(
         item["professional_id"]: item
         for item in professional_profiles["profiles"]
         if item.get("mvp_enabled") and item.get("simulated") is True
+    }
+    referral_diagnosis_by_id = {
+        item["diagnosis_group_id"]: item
+        for item in referral_diagnoses["diagnoses"]
+        if item.get("status") == "active_mvp"
+        and item.get("classification") == "simulated_demo"
     }
     mixed_outpatient_scopes = {
         (profile.get("service_id"), profile.get("specialty_id"))
@@ -596,22 +619,36 @@ def validate_tables(
             row["establishment_code"] for row in csv.DictReader(handle)
         }
 
+    applicable_sheets = [
+        sheet for sheet in contract["sheets"] if sheet in required_sheets
+    ]
     accepted: dict[str, list[dict[str, Any]]] = {
-        sheet: [] for sheet in contract["sheets"]
+        sheet: [] for sheet in applicable_sheets
     }
     quarantined: dict[str, list[dict[str, Any]]] = {
-        sheet: [] for sheet in contract["sheets"]
+        sheet: [] for sheet in applicable_sheets
     }
-    seen_keys: dict[str, set[str]] = {
-        sheet: set() for sheet in contract["sheets"]
-    }
+    seen_keys: dict[str, set[str]] = {sheet: set() for sheet in applicable_sheets}
 
-    for sheet_name, sheet_rules in contract["sheets"].items():
+    for sheet_name in applicable_sheets:
+        sheet_rules = copy.deepcopy(contract["sheets"][sheet_name])
+        legacy_diagnosis_missing = (
+            sheet_name == "LISTA_ESPERA_AMB"
+            and contract_version in {"1.1.0", "1.2.0"}
+        )
+        if legacy_diagnosis_missing:
+            for column in sheet_rules["columns"]:
+                if column["name"] == "referral_diagnosis_id":
+                    column["required"] = False
+                    column["critical"] = False
         source_rows = _sheet_dict_rows(
             sheet_name,
             tables.get(sheet_name, []),
             sheet_rules,
             structural_errors,
+            allowed_missing_columns=(
+                {"referral_diagnosis_id"} if legacy_diagnosis_missing else set()
+            ),
         )
         columns = {column["name"]: column for column in sheet_rules["columns"]}
         for row_number, raw_row in source_rows:
@@ -693,7 +730,8 @@ def validate_tables(
                         in mixed_outpatient_scopes
                     )
                     if (
-                        unit["dashboard_type"] != expected_type
+                        expected_type is not None
+                        and unit["dashboard_type"] != expected_type
                         and not mixed_shared_service
                         and not mixed_outpatient_referral
                     ):
@@ -735,7 +773,12 @@ def validate_tables(
                                 specialty_id,
                             )
                         )
-                origin = normalized["origin_establishment_code"]
+                origin_field = (
+                    "origin_deis_code"
+                    if sheet_name == "LISTA_ESPERA_AMB"
+                    else "origin_establishment_code"
+                )
+                origin = normalized[origin_field]
                 if origin not in reference_codes:
                     row_issues.append(
                         ValidationIssue(
@@ -744,11 +787,16 @@ def validate_tables(
                             f"DEIS origin code '{origin}' is not in the packaged snapshot",
                             sheet_name,
                             row_number,
-                            "origin_establishment_code",
+                            origin_field,
                             origin,
                         )
                     )
-                period = normalized["period_date"]
+                period_field = (
+                    "snapshot_date"
+                    if sheet_name == "LISTA_ESPERA_AMB"
+                    else "period_date"
+                )
+                period = normalized[period_field]
                 if isinstance(metadata.get("period_start"), date) and (
                     period < metadata["period_start"]
                     or period > metadata.get("period_end", period)
@@ -757,10 +805,10 @@ def validate_tables(
                         ValidationIssue(
                             "ROW_DATE_OUTSIDE_PERIOD",
                             "error",
-                            "period_date is outside the metadata period",
+                            f"{period_field} is outside the metadata period",
                             sheet_name,
                             row_number,
-                            "period_date",
+                            period_field,
                             period.isoformat(),
                         )
                     )
@@ -812,7 +860,7 @@ def validate_tables(
                                 "or_hours_used",
                             )
                         )
-                else:
+                elif sheet_name == "ACTIVIDAD_PROF":
                     profile_type = normalized["profile_type"]
                     lens = normalized["lens"]
                     professional_id = normalized["simulated_profile_key"]
@@ -945,6 +993,163 @@ def validate_tables(
                                 "Surgical rows cannot use clinical context flags",
                                 sheet_name,
                                 row_number,
+                            )
+                        )
+                elif sheet_name == "LISTA_ESPERA_AMB":
+                    queue_type = normalized["queue_type"]
+                    status = normalized["episode_status"]
+                    snapshot = normalized["snapshot_date"]
+                    queue_entry = normalized["queue_entry_date"]
+                    due = normalized["control_due_date"]
+                    scheduled = normalized["scheduled_date"]
+                    completion = normalized["completion_date"]
+                    exit_reason = normalized["exit_reason"]
+                    profile_id = normalized["professional_profile_id"]
+                    referral_diagnosis_id = normalized.get("referral_diagnosis_id")
+                    expected_period_id = (
+                        f"{snapshot.year}-Q{((snapshot.month - 1) // 3) + 1}"
+                    )
+                    contradictions: list[tuple[str, str]] = []
+                    if normalized["period_id"] != expected_period_id:
+                        contradictions.append(
+                            ("period_id", "period_id must match snapshot_date")
+                        )
+                    if queue_type == "new_consultation":
+                        if queue_entry is None or due is not None:
+                            contradictions.append(
+                                (
+                                    "queue_entry_date",
+                                    "New-consultation episodes require queue_entry_date and cannot use control_due_date",
+                                )
+                            )
+                        if normalized["requested_prestation"] != "consulta_nueva":
+                            contradictions.append(
+                                (
+                                    "requested_prestation",
+                                    "New-consultation episodes must request consulta_nueva",
+                                )
+                            )
+                    else:
+                        if due is None or queue_entry is not None:
+                            contradictions.append(
+                                (
+                                    "control_due_date",
+                                    "Follow-up episodes require control_due_date and cannot use queue_entry_date",
+                                )
+                            )
+                        if normalized["requested_prestation"] == "consulta_nueva":
+                            contradictions.append(
+                                (
+                                    "requested_prestation",
+                                    "Follow-up episodes cannot request consulta_nueva",
+                                )
+                            )
+                    index_date = queue_entry if queue_type == "new_consultation" else due
+                    if index_date is not None and index_date > snapshot:
+                        contradictions.append(
+                            (
+                                "queue_entry_date" if queue_type == "new_consultation" else "control_due_date",
+                                "Queue entry or control due date cannot be after snapshot_date",
+                            )
+                        )
+                    if status == "completed":
+                        if completion is None:
+                            contradictions.append(
+                                ("completion_date", "Completed episodes require completion_date")
+                            )
+                        elif completion > snapshot or (
+                            index_date is not None and completion < index_date
+                        ):
+                            contradictions.append(
+                                (
+                                    "completion_date",
+                                    "completion_date must be between the episode index date and snapshot_date",
+                                )
+                            )
+                    elif completion is not None:
+                        contradictions.append(
+                            ("completion_date", "Only completed episodes may have completion_date")
+                        )
+                    if status == "open_scheduled":
+                        if scheduled is None:
+                            contradictions.append(
+                                ("scheduled_date", "open_scheduled requires scheduled_date")
+                            )
+                    elif scheduled is not None:
+                        contradictions.append(
+                            ("scheduled_date", "scheduled_date is only valid for open_scheduled episodes")
+                        )
+                    if status == "exited":
+                        if exit_reason is None:
+                            contradictions.append(
+                                ("exit_reason", "Exited episodes require exit_reason")
+                            )
+                    elif exit_reason is not None:
+                        contradictions.append(
+                            ("exit_reason", "Only exited episodes may have exit_reason")
+                        )
+                    if profile_id is not None:
+                        profile = professional_profile_by_id.get(profile_id)
+                        if profile is None:
+                            contradictions.append(
+                                (
+                                    "professional_profile_id",
+                                    "Unknown simulated professional profile",
+                                )
+                            )
+                        elif (
+                            profile.get("service_id") != normalized["service_id"]
+                            or profile.get("specialty_id")
+                            != normalized["specialty_id"]
+                        ):
+                            contradictions.append(
+                                (
+                                    "professional_profile_id",
+                                    "Professional profile does not match service and specialty",
+                                )
+                            )
+                    if referral_diagnosis_id is not None:
+                        diagnosis = referral_diagnosis_by_id.get(
+                            referral_diagnosis_id
+                        )
+                        if diagnosis is None:
+                            row_issues.append(
+                                ValidationIssue(
+                                    "ROW_INVALID_REFERRAL_DIAGNOSIS",
+                                    "error",
+                                    "Unknown or inactive simulated referral diagnosis",
+                                    sheet_name,
+                                    row_number,
+                                    "referral_diagnosis_id",
+                                    referral_diagnosis_id,
+                                )
+                            )
+                        elif diagnosis["specialty_id"] != normalized["specialty_id"]:
+                            row_issues.append(
+                                ValidationIssue(
+                                    "ROW_DIAGNOSIS_SPECIALTY_MISMATCH",
+                                    "error",
+                                    "Referral diagnosis is incompatible with specialty_id",
+                                    sheet_name,
+                                    row_number,
+                                    "referral_diagnosis_id",
+                                    referral_diagnosis_id,
+                                )
+                            )
+                    if normalized["simulated_flag"] is not True:
+                        contradictions.append(
+                            ("simulated_flag", "All waitlist rows must be simulated")
+                        )
+                    for field_name, message in contradictions:
+                        row_issues.append(
+                            ValidationIssue(
+                                "ROW_WAITLIST_SEMANTIC_CONTRADICTION",
+                                "error",
+                                message,
+                                sheet_name,
+                                row_number,
+                                field_name,
+                                normalized.get(field_name),
                             )
                         )
 
