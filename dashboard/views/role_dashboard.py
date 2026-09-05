@@ -7,12 +7,20 @@ from datetime import date
 import streamlit as st
 
 from dashboard.components.common import (
+    render_badges,
+    render_compact_kpi_cards,
     render_interpretation,
     render_kpi_cards,
     render_simulation_notice,
 )
+from dashboard.components.inpatient import render_inpatient_reference
 from dashboard.components.visuals import (
+    render_diabetology_activity_prototype,
+    render_diabetology_origin_context,
+    render_director_waitlist_prototype,
     render_origin_map,
+    render_palliative_ambulatory_prototype,
+    render_palliative_territorial_prototype,
     render_role_activity_analytics,
     render_waitlist_analytics,
 )
@@ -39,6 +47,9 @@ PREVIOUS_PERIODS = {
     "Q2 2026": PERIODS["Q1 2026"],
     "Q1 2026": (date(2025, 10, 1), date(2025, 12, 31)),
 }
+
+PALLIATIVE_SERVICE_ID = "alivio_dolor_cuidados_paliativos"
+DIABETOLOGY_SPECIALTY_ID = "diabetologia"
 
 
 def _render_group(title: str, cards) -> None:
@@ -106,6 +117,197 @@ def _render_definitions(indicator_ids: list[str]) -> None:
         "Los episodios de consulta nueva se miden desde queue_entry_date; los "
         "controles desde control_due_date. La lista quirúrgica permanece separada."
     )
+
+
+def _render_director_dashboard(
+    dataset,
+    current: tuple[date, date],
+    previous: tuple[date, date],
+    context: dict,
+    primary_cards,
+    secondary_cards,
+) -> None:
+    """Render the Director prototype at the visual-review gate."""
+
+    primary_focus = [
+        card
+        for card in primary_cards
+        if card.indicator_id not in {"referrals_total", "accepted_record_pct"}
+    ]
+    by_id = {card.indicator_id: card for card in primary_cards}
+    tabs = st.tabs(
+        [
+            "Resumen ejecutivo",
+            "Acceso ambulatorio",
+            "Hospitalización",
+            "Red territorial",
+            "Métodos y calidad",
+        ]
+    )
+    with tabs[0]:
+        st.subheader("Pulso ejecutivo de acceso")
+        st.caption(
+            "Indicadores priorizados para reconocer acumulación y demora sin mezclar "
+            "fuentes ni construir un puntaje compuesto."
+        )
+        render_compact_kpi_cards(primary_focus, show_interpretation=False)
+        referrals = by_id.get("referrals_total")
+        quality = by_id.get("accepted_record_pct")
+        render_badges(
+            (
+                f"Calidad de carga: {quality.value_text} de registros aceptados"
+                if quality and quality.is_available
+                else "Calidad de carga: no disponible"
+            ),
+            (
+                f"Contexto de demanda: {referrals.value_text} derivaciones"
+                if referrals and referrals.is_available
+                else "Contexto de demanda: no disponible"
+            ),
+            source=(
+                "Datos operacionales simulados — "
+                f"{current[0].strftime('%d-%m-%Y')} a {current[1].strftime('%d-%m-%Y')}"
+            ),
+        )
+        with st.expander("Lectura y alcance de los indicadores ejecutivos"):
+            render_interpretation(primary_focus)
+            st.caption(
+                "La calidad de carga y el volumen bruto permanecen visibles como contexto, "
+                "pero no ocupan una tarjeta primaria."
+            )
+    with tabs[1]:
+        render_director_waitlist_prototype(dataset, current, previous, context)
+        with st.expander("Indicadores complementarios de acceso"):
+            _render_secondary(secondary_cards)
+    with tabs[2]:
+        render_inpatient_reference("director")
+    with tabs[3]:
+        render_origin_map(dataset, current, previous, context)
+    with tabs[4]:
+        render_role_activity_analytics(dataset, current, previous, context)
+        _render_data_context(dataset)
+        role_contract = get_role_definition("director")
+        with st.expander("Definiciones y denominadores operacionales"):
+            _render_definitions(
+                [*role_contract["primary_indicator_ids"], *secondary_indicator_ids("director")]
+            )
+
+
+def _render_palliative_dashboard(
+    dataset,
+    current: tuple[date, date],
+    previous: tuple[date, date],
+    context: dict,
+    primary_cards,
+    secondary_cards,
+) -> None:
+    focus_ids = {
+        "wait_p75_days",
+        "new_no_show_pct",
+        "followup_no_show_pct",
+        "discharge_rate_pct",
+    }
+    tabs = st.tabs(
+        [
+            "Resumen del servicio",
+            "Comparación ambulatoria",
+            "Origen territorial",
+            "Datos y métodos",
+        ]
+    )
+    with tabs[0]:
+        st.subheader("Alivio del Dolor y Cuidados Paliativos")
+        st.caption(
+            "Vista a nivel de servicio. No se crea una especialidad artificial para "
+            "habilitar filtros o visualizaciones."
+        )
+        render_compact_kpi_cards(
+            [card for card in primary_cards if card.indicator_id in focus_ids],
+            show_interpretation=False,
+        )
+        render_badges(
+            "4 indicadores primarios",
+            "Especialidad analítica: no configurada",
+            source="Datos operacionales simulados — alcance de servicio",
+        )
+    with tabs[1]:
+        render_palliative_ambulatory_prototype(
+            dataset, current, previous, context
+        )
+    with tabs[2]:
+        render_palliative_territorial_prototype(
+            dataset, current, previous, context
+        )
+    with tabs[3]:
+        with st.expander("Indicadores complementarios del servicio"):
+            _render_secondary(secondary_cards)
+        _render_data_context(dataset)
+        role_contract = get_role_definition("service_chief_clinical")
+        with st.expander("Definiciones y denominadores"):
+            _render_definitions(
+                [
+                    *role_contract["primary_indicator_ids"],
+                    *secondary_indicator_ids("service_chief_clinical"),
+                ]
+            )
+
+
+def _render_diabetology_dashboard(
+    dataset,
+    current: tuple[date, date],
+    previous: tuple[date, date],
+    context: dict,
+    primary_cards,
+    secondary_cards,
+) -> None:
+    focus_ids = {
+        "clinical_activity_completed",
+        "clinical_schedule_completion_pct",
+        "professional_documentation_completeness_pct",
+    }
+    tabs = st.tabs(
+        [
+            "Resumen clínico",
+            "Actividad comparada",
+            "Origen de la demanda",
+            "Datos y métodos",
+        ]
+    )
+    with tabs[0]:
+        st.subheader("Actividad clínica · Diabetología")
+        st.caption(
+            "Perfil completamente simulado; las medidas no constituyen ranking, "
+            "evaluación contractual ni atribución a una persona real."
+        )
+        render_compact_kpi_cards(
+            [card for card in primary_cards if card.indicator_id in focus_ids],
+            show_interpretation=False,
+        )
+        render_badges(
+            "3 indicadores primarios",
+            "Sin puntaje compuesto",
+            source="ACTIVIDAD_PROF simulada — Diabetología",
+        )
+    with tabs[1]:
+        render_diabetology_activity_prototype(
+            dataset, current, previous, context
+        )
+    with tabs[2]:
+        render_diabetology_origin_context(
+            dataset, current, previous, context
+        )
+    with tabs[3]:
+        with st.expander("Indicadores complementarios de contexto"):
+            _render_secondary(secondary_cards)
+        _render_data_context(dataset)
+        role_contract = get_role_definition("professional_clinical")
+        with st.expander("Definiciones y denominadores"):
+            _render_definitions(
+                [
+                    *role_contract["primary_indicator_ids"],
+                    *secondary_indicator_ids("professional_clinical"),
+                ]
+            )
 
 
 def render() -> None:
@@ -203,6 +405,43 @@ def render() -> None:
             previous,
             **kwargs,
         )
+    if role_id == "director":
+        _render_director_dashboard(
+            dataset,
+            current,
+            previous,
+            visual_context,
+            primary_cards,
+            secondary_cards,
+        )
+        return
+    if (
+        role_id == "service_chief_clinical"
+        and context.get("service_id") == PALLIATIVE_SERVICE_ID
+        and context.get("specialty_id") is None
+    ):
+        _render_palliative_dashboard(
+            dataset,
+            current,
+            previous,
+            visual_context,
+            primary_cards,
+            secondary_cards,
+        )
+        return
+    if (
+        role_id == "professional_clinical"
+        and context.get("specialty_id") == DIABETOLOGY_SPECIALTY_ID
+    ):
+        _render_diabetology_dashboard(
+            dataset,
+            current,
+            previous,
+            visual_context,
+            primary_cards,
+            secondary_cards,
+        )
+        return
     tabs = st.tabs(
         [
             "Resumen",

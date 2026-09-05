@@ -20,6 +20,13 @@ _CONTRACTS: dict[str, tuple[str, ...]] = {
     "indicator_bindings": ("binding_version", "bindings"),
     "professional_profiles": ("contract_version", "profiles", "simulation_only"),
     "referral_diagnoses": ("catalog_version", "diagnoses", "user_facing_term_es"),
+    "inpatient_reference": (
+        "reference_contract_version",
+        "dataset_id",
+        "allowed_role_ids",
+        "observation_period",
+        "indicators",
+    ),
 }
 
 PROFESSIONAL_TYPES = {"clinical", "surgical", "mixed"}

@@ -1,0 +1,38 @@
+{
+  "dataset_id": "hec-inpatient-reference-2025-v1",
+  "reference_contract_version": "1.0.0",
+  "source_filename": "establecimientos_cerrillos_maipu_2026.xlsx",
+  "source_sha256": "d797f9c1d90bfc0618af2a5c3d6f908efa27cb76b08fce945841e2cc5a120b24",
+  "source_scope": "Curated establishment workbook requested for Cerrillos and Maipú; the supplied source contains one establishment row, located in Maipú.",
+  "filter_field": "EstablecimientoCodigo",
+  "filter_values_requested": [
+    "111101"
+  ],
+  "records_in_source": 1,
+  "records_after_filter": 1,
+  "maipu_records": 1,
+  "cerrillos_records": 0,
+  "selected_establishment_code": "111101",
+  "performance_year": 2025,
+  "performance_year_evidence": "The workbook does not encode a performance year. The local teaching HTML titled 'Indicadores Hospitalarios SNSS 2025 — Dashboard Docente' declares 2025 hospital statistics and its HEC annual primitives match the workbook exactly. This is secondary curated academic evidence, not the original MINSAL dataset.",
+  "source_cut_date": "2026-04-16",
+  "source_cut_date_evidence": "Declared in the secondary local teaching HTML; not present in the workbook.",
+  "created_by_process": "Manual deterministic extraction of the single HEC record after source hash, schema, scope, and formula reconciliation.",
+  "annual_reference_file": "data/reference/hec_inpatient_2025.csv",
+  "annual_reference_sha256": "b6613436757499cb74f19e1d6b8adc9765d398e200b6c32518cc05e74d1ac82b",
+  "monthly_reference_active": true,
+  "monthly_reference_file": "data/reference/hec_inpatient_monthly_2025.csv",
+  "monthly_reference_sha256": "6e0bcee25446cf1291dabf3a56b4ffea74ee8b82815d4a0febac8f07e525a18c",
+  "monthly_source_filename": "dashboard_indicadores_hospitalarios_2025.html",
+  "monthly_source_sha256": "85b9ee4a738a1a4766b5898a50afc4d3d64ac6d9174606644dedd2d2be85942e",
+  "monthly_source_scope": "Twelve HEC-only 2025 observations extracted from a 192-establishment teaching artifact after the user explicitly approved annual plus monthly data.",
+  "calculation_policy": "Retain primitive counts; recompute all ratios deterministically from summed numerators and denominators; return unavailable for missing values and zero_denominator for invalid denominators; do not compare with simulated 2026 operational data.",
+  "geography_policy": "Join only by establishment code 111101. Source coordinates are excluded; any map continues to use the packaged validated DEIS reference layer.",
+  "privacy_policy": "Aggregate establishment-level reference only. Address, telephone, patient identifiers, employee identifiers, and source coordinates are excluded.",
+  "limitations": [
+    "The performance year and source cut date rely on a secondary curated teaching artifact rather than the original upstream MINSAL dataset.",
+    "Cerrillos is absent from this source and must never be represented as zero activity or capacity.",
+    "The reference supports HEC descriptive inpatient context only; it does not support territorial comparison, ranking, benchmarking, specialty analysis, risk adjustment, prediction, or causal inference.",
+    "The reference is visible only to Director and Medical Director roles and is isolated from the simulated operational upload contract."
+  ]
+}

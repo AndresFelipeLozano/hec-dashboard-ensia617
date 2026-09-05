@@ -19,8 +19,8 @@ import zipfile
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "data" / "simulated"
-DEFAULT_WORKBOOK_SOURCE = REPO_ROOT / "templates" / "plantilla_carga_hec_v1.xlsx"
 DEFAULT_WORKBOOK_OUTPUT = REPO_ROOT / "templates" / "plantilla_carga_hec_1_3.xlsx"
+DEFAULT_WORKBOOK_SOURCE = DEFAULT_WORKBOOK_OUTPUT
 SEED = 617
 DATASET_ID = "hec-sim-day5-v1"
 DATASET_NAME = (
@@ -109,6 +109,70 @@ def _trend(stratum_index: int) -> int:
     return (stratum_index % 3) - 1
 
 
+def _weighted_origin_sequence(
+    total: int,
+    origins: list[str],
+    stratum_index: int,
+    quarter_index: int,
+    *,
+    salt: int,
+) -> list[str]:
+    """Allocate a stable, realistic referral concentration without changing volume."""
+
+    weights = (
+        (30, 22, 16, 12, 10, 4, 3, 2, 1, 0, 0, 0)
+        if quarter_index == 0
+        else (27, 24, 17, 13, 10, 4, 3, 1, 1, 0, 0, 0)
+    )
+    counts = [total * weight // 100 for weight in weights]
+    for index in range(total - sum(counts)):
+        counts[index % len(counts)] += 1
+    step = (1, 5, 7, 11)[stratum_index % 4]
+    start = (stratum_index * 5 + salt) % len(origins)
+    origin_order = [
+        origins[(start + rank * step) % len(origins)]
+        for rank in range(len(weights))
+    ]
+    sequence = [
+        code
+        for code, count in zip(origin_order, counts)
+        for _ in range(count)
+    ]
+    local_rng = random.Random(
+        SEED + salt * 10_007 + stratum_index * 101 + quarter_index * 17
+    )
+    local_rng.shuffle(sequence)
+    return sequence
+
+
+def _surgical_origin_sequence(
+    origins: list[str], stratum_index: int, quarter_index: int
+) -> list[str]:
+    """Keep each simulated procedure publishable while preserving geographic spread."""
+
+    step = (1, 5, 7, 11)[stratum_index % 4]
+    start = (stratum_index * 5 + 29) % len(origins)
+    origin_order = [
+        origins[(start + rank * step) % len(origins)]
+        for rank in range(len(origins))
+    ]
+    occurrences = [0] * 5
+    sequence = []
+    primary_limit = 12 if quarter_index == 0 else 14
+    for local_index in range(100):
+        procedure_index = (local_index + stratum_index) % 5
+        occurrence = occurrences[procedure_index]
+        occurrences[procedure_index] += 1
+        if occurrence < primary_limit:
+            origin_code = origin_order[procedure_index]
+        else:
+            origin_code = origin_order[
+                5 + ((occurrence - primary_limit + procedure_index * 2) % 7)
+            ]
+        sequence.append(origin_code)
+    return sequence
+
+
 def build_referrals(
     rng: random.Random,
     clinical_strata: list[tuple[str, str]],
@@ -143,6 +207,17 @@ def build_referrals(
         for quarter_index, quarter in enumerate(("Q1", "Q2")):
             # Reserve the relevant denominators instead of relying on random luck.
             count = counts_by_quarter[quarter][stratum_index]
+            service_level_origins = (
+                _weighted_origin_sequence(
+                    count,
+                    origins,
+                    stratum_index,
+                    quarter_index,
+                    salt=11,
+                )
+                if not specialty_id
+                else []
+            )
             for local_index in range(count):
                 record_index += 1
                 referral_type = (
@@ -183,9 +258,11 @@ def build_referrals(
                         ],
                         "service_id": service_id,
                         "specialty_id": specialty_id,
-                        "origin_establishment_code": origins[
-                            (record_index + stratum_index) % 12
-                        ],
+                        "origin_establishment_code": (
+                            service_level_origins[local_index]
+                            if service_level_origins
+                            else origins[(record_index + stratum_index) % 12]
+                        ),
                         "referral_type": referral_type,
                         "status": status,
                         "wait_days": max(
@@ -240,6 +317,9 @@ def build_surgeries(
             waitlisted_count = 40 - (4 * trend if quarter == "Q2" else 0)
             completed_count = 40
             suspended_count = 10 - (2 * trend if quarter == "Q2" else 0)
+            surgical_origins = _surgical_origin_sequence(
+                origins, stratum_index, quarter_index
+            )
             for local_index in range(100):
                 record_index += 1
                 rank = (local_index + stratum_index * 7) % 100
@@ -275,9 +355,7 @@ def build_surgeries(
                         ],
                         "service_id": service_id,
                         "specialty_id": specialty_id,
-                        "origin_establishment_code": origins[
-                            (record_index + stratum_index * 2) % 12
-                        ],
+                        "origin_establishment_code": surgical_origins[local_index],
                         "procedure_code": procedures[
                             (local_index + stratum_index) % len(procedures)
                         ],

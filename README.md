@@ -15,11 +15,16 @@ explicitly unavailable indicator bindings. The role-based shell adds dynamic
 navigation, session-only upload validation, explicit activation, data-quality
 status, KPI cards, role-aware charts, deterministic findings, MapLibre
 georeferencing, specialty and referring-center drill-downs, accessible evidence
-tables, and aggregated CSV downloads.
+tables, and aggregated CSV downloads. A local redesign candidate now adds a
+source-isolated HEC 2025 inpatient reference and observed monthly trend for
+directorial use; it does not change the 41 operational indicators or their
+upload contract.
 
 ## Data disclaimer
 
-Operational and professional data are clearly simulated. The prototype contains
+Operational and professional data are clearly simulated. The directorial
+historical inpatient module is a separately labeled curated aggregate reference,
+not simulated operational data and not an official live HEC feed. The prototype contains
 no real patient or employee identifiers, patient addresses, or patient-level
 drill-down. It is an academic BI/data-extraction and decision-support layer, not
 an HIS, EHR, ERP, CDSS, production integration engine, or official HEC system.
@@ -39,6 +44,8 @@ an HIS, EHR, ERP, CDSS, production integration engine, or official HEC system.
 - [Verified Excel template 1.3](templates/plantilla_carga_hec_1_3.xlsx)
 - [Governed simulated referral diagnoses](config/referral_diagnoses.json)
 - [DEIS reference provenance](data/reference/deis_snapshot_manifest.json)
+- [HEC inpatient reference architecture](docs/architecture/inpatient-historical-reference.md)
+- [HEC inpatient source manifest](data/reference/hec_inpatient_2025_manifest.json)
 - Deterministic simulated data under `data/simulated/`
 
 The packaged demonstration `hec-sim-day5-v1` contains 3,400
@@ -95,6 +102,7 @@ Run the standard-library validator with:
     ./.venv/bin/python scripts/audit_day4_coverage.py
     ./.venv/bin/python scripts/audit_day5.py
     ./.venv/bin/python scripts/audit_day5_map.py
+    ./.venv/bin/python scripts/audit_territorial_coverage.py
 
 Run the test suite with:
 

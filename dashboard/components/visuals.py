@@ -11,12 +11,32 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+from dashboard.components.charts import (
+    PLOTLY_CONFIG,
+    build_100pct_stacked_figure,
+    build_bubble_figure,
+    build_dumbbell_figure,
+    build_grouped_two_period_bar_figure,
+    build_horizontal_category_bar_figure,
+    build_lollipop_figure,
+    render_chart_card,
+)
+from dashboard.components.common import MetricCard, render_badges, render_compact_metric_cards
+from dashboard.components.design import (
+    COMPARISON_COLOR,
+    PALETTE,
+    SPECIALTY_PALETTE,
+    TOKENS,
+    WARNING_COLOR,
+    apply_plotly_theme,
+)
 from hec_dashboard.data_ingestion import CandidateDataset
-from hec_dashboard.app_config import specialty_label
+from hec_dashboard.app_config import service_label, specialty_choices, specialty_label
 from hec_dashboard.visual_analytics import (
     HEC_MARKER_SIZE,
     HEC_MARKER_SYMBOL,
     aging_distribution,
+    aging_composition_100,
     center_waitlist_context,
     diagnosis_composition_by_establishment,
     diagnosis_options,
@@ -32,13 +52,16 @@ from hec_dashboard.visual_analytics import (
     rows_to_csv,
     scoped_network_rows,
     scoped_waitlist_rows,
+    service_referral_status_composition,
+    service_referral_type_composition,
+    specialty_new_wait_relationship,
     specialty_pressure,
     status_flow,
+    status_flow_composition_100,
+    surgical_procedure_options,
+    territorial_scope_summary,
     waitlist_indicator_trend,
 )
-
-
-PALETTE = ["#0B6B69", "#2F80ED", "#F2C94C", "#EB5757", "#6C5CE7"]
 
 
 def _chart_and_table(
@@ -49,12 +72,11 @@ def _chart_and_table(
     key: str,
 ) -> None:
     responsive_title = "<br>".join(wrap(title, width=36))
+    apply_plotly_theme(figure, height=330)
     figure.update_layout(
         title={"text": responsive_title, "font": {"size": 17}},
         margin={"l": 10, "r": 10, "t": 55, "b": 10},
         legend_title_text="",
-        font={"family": "Arial, sans-serif", "size": 13},
-        colorway=PALETTE,
     )
     figure.update_xaxes(automargin=True)
     figure.update_yaxes(automargin=True)
@@ -72,12 +94,14 @@ def _chart_and_table(
             title_text="",
             tickmode="array",
             tickvals=category_values,
-            ticktext=[
-                value if len(value) <= 16 else f"{value[:15].rstrip()}…"
-                for value in category_values
-            ],
+            ticktext=category_values,
         )
-    st.plotly_chart(figure, width="stretch", key=f"chart_{key}")
+    st.plotly_chart(
+        figure,
+        width="stretch",
+        config=PLOTLY_CONFIG,
+        key=f"chart_{key}",
+    )
     with st.expander(f"Tabla accesible · {title}"):
         st.dataframe(rows, hide_index=True, width="stretch")
         st.download_button(
@@ -130,7 +154,7 @@ def render_waitlist_analytics(
         _chart_and_table(
             count_figure,
             count_trend,
-            title="Tendencia gobernada de episodios abiertos",
+            title="Comparación de episodios abiertos",
             key=f"tendencia_espera_conteos_{role_context['role_id']}",
         )
     if days_trend:
@@ -145,7 +169,7 @@ def render_waitlist_analytics(
         _chart_and_table(
             days_figure,
             days_trend,
-            title="Tendencia gobernada de percentil 75",
+            title="Comparación de percentil 75",
             key=f"tendencia_espera_dias_{role_context['role_id']}",
         )
     render_findings(rows)
@@ -213,6 +237,466 @@ def render_waitlist_analytics(
         )
 
 
+def _pair_two_period_rows(
+    rows: list[dict[str, Any]],
+    *,
+    category_key: str,
+    value_key: str,
+) -> list[dict[str, Any]]:
+    grouped: dict[str, dict[str, float]] = {}
+    for row in rows:
+        value = row.get(value_key)
+        if value is None:
+            continue
+        grouped.setdefault(str(row[category_key]), {})[str(row["Período"])] = float(value)
+    output = []
+    for category, values in grouped.items():
+        if {"Comparación", "Actual"} - set(values):
+            continue
+        output.append(
+            {
+                category_key: category,
+                "Comparación": values["Comparación"],
+                "Actual": values["Actual"],
+                "Delta": values["Actual"] - values["Comparación"],
+            }
+        )
+    return output
+
+
+def render_director_waitlist_prototype(
+    dataset: CandidateDataset,
+    current: tuple[date, date],
+    previous: tuple[date, date],
+    role_context: dict[str, Any],
+) -> None:
+    """Render the bounded Director chart-selection prototype."""
+
+    rows = scoped_waitlist_rows(dataset, current, role_context)
+    if not rows:
+        st.warning("No hay episodios ambulatorios publicables para este contexto.")
+        return
+
+    comparison = waitlist_indicator_trend(dataset, current, previous, role_context)
+    comparison_view = st.radio(
+        "Comparación entre los dos períodos",
+        ["Episodios abiertos", "Percentil 75 de espera"],
+        horizontal=True,
+        key="director_comparison_view",
+    )
+    comparison_unit = "Episodios" if comparison_view == "Episodios abiertos" else "Días"
+    comparison_rows = _pair_two_period_rows(
+        [
+            row
+            for row in comparison
+            if row["Unidad"] == comparison_unit and row["Estado"] == "available"
+        ],
+        category_key="Indicador",
+        value_key="Valor",
+    )
+    comparison_figure = build_dumbbell_figure(
+        comparison_rows,
+        label_key="Indicador",
+        comparison_key="Comparación",
+        current_key="Actual",
+        value_suffix=" días" if comparison_unit == "Días" else "",
+        axis_title=comparison_unit,
+    )
+    render_chart_card(
+        comparison_figure,
+        comparison_rows,
+        title="¿Qué cambió entre el trimestre actual y el de comparación?",
+        subtitle=(
+            f"Dos mediciones comparables en {comparison_unit.casefold()}; gris indica "
+            "comparación y teal el período actual. No constituye una tendencia temporal."
+        ),
+        key=f"director_comparison_{comparison_unit.casefold()}",
+    )
+
+    composition_view = st.radio(
+        "Composición de la lista de espera",
+        ["Antigüedad", "Flujo y resolución"],
+        horizontal=True,
+        key="director_waitlist_composition",
+    )
+    if composition_view == "Antigüedad":
+        composition_rows = aging_composition_100(rows)
+        segment_key = "Tramo"
+        segment_order = ["0–30", "31–60", "61–90", ">90 días"]
+        colors = {
+            "0–30": "#DCEDEC",
+            "31–60": "#B8D7D5",
+            "61–90": "#6FA8A5",
+            ">90 días": WARNING_COLOR,
+        }
+        title = "¿Cómo se distribuye la antigüedad de los episodios abiertos?"
+        subtitle = (
+            "Composición dentro de cada cola; cada segmento muestra porcentaje y n. "
+            "El tramo >90 días es descriptivo y no se presenta como meta oficial."
+        )
+        key = "director_aging_composition"
+    else:
+        composition_rows = status_flow_composition_100(rows)
+        segment_key = "Estado"
+        segment_order = [
+            "Abierto sin programación",
+            "Abierto programado",
+            "Completado",
+            "Egreso válido",
+        ]
+        colors = {
+            "Abierto sin programación": "#B8C3C4",
+            "Abierto programado": "#8BB9B6",
+            "Completado": TOKENS["teal_500"],
+            "Egreso válido": TOKENS["teal_900"],
+        }
+        title = "¿En qué estado se encuentran las dos colas al corte?"
+        subtitle = (
+            "Estados mutuamente excluyentes dentro de cada cola; no se interpreta como "
+            "un embudo ni como etapas secuenciales verificadas."
+        )
+        key = "director_flow_composition"
+    composition_figure = build_100pct_stacked_figure(
+        composition_rows,
+        row_key="Cola",
+        segment_key=segment_key,
+        count_key="Episodios",
+        percentage_key="Porcentaje",
+        segment_order=segment_order,
+        color_map=colors,
+    )
+    render_chart_card(
+        composition_figure,
+        composition_rows,
+        title=title,
+        subtitle=subtitle,
+        key=key,
+    )
+
+    relationship_rows = specialty_new_wait_relationship(
+        dataset, current, role_context
+    )
+    if relationship_rows:
+        relationship_figure = build_bubble_figure(
+            relationship_rows,
+            label_key="Especialidad",
+            x_key="Consultas nuevas",
+            y_key="P75 espera (días)",
+            size_key="Abiertos",
+            x_title="Consultas nuevas",
+            y_title="P75 de espera (días)",
+        )
+        render_chart_card(
+            relationship_figure,
+            relationship_rows,
+            title="¿Qué especialidades combinan mayor demanda nueva y mayor espera?",
+            subtitle=(
+                "Cada burbuja es una especialidad agregada; tamaño = episodios abiertos. "
+                "La relación es descriptiva y no demuestra causalidad."
+            ),
+            key="director_specialty_wait_relationship",
+        )
+    with st.expander("Hallazgos descriptivos priorizados"):
+        render_findings(rows)
+
+
+def render_palliative_ambulatory_prototype(
+    dataset: CandidateDataset,
+    current: tuple[date, date],
+    previous: tuple[date, date],
+    role_context: dict[str, Any],
+) -> None:
+    """Render service-level Palliative Care comparisons without a fake specialty."""
+
+    comparison_rows = _pair_two_period_rows(
+        role_activity_trend(dataset, current, previous, role_context),
+        category_key="Serie",
+        value_key="Eventos",
+    )
+    comparison_figure = build_dumbbell_figure(
+        comparison_rows,
+        label_key="Serie",
+        comparison_key="Comparación",
+        current_key="Actual",
+        axis_title="Derivaciones",
+    )
+    render_chart_card(
+        comparison_figure,
+        comparison_rows,
+        title="¿Cómo cambió la actividad ambulatoria del servicio?",
+        subtitle=(
+            "Comparación Q2 versus Q1 a nivel de servicio. Las inasistencias nuevas y "
+            "de control conservan conteos separados."
+        ),
+        key="palliative_ambulatory_comparison",
+    )
+    composition_rows = service_referral_type_composition(
+        dataset, current, role_context
+    )
+    composition_figure = build_lollipop_figure(
+        composition_rows,
+        label_key="Tipo de atención derivada",
+        value_key="Derivaciones",
+        axis_title="Derivaciones",
+    )
+    render_chart_card(
+        composition_figure,
+        composition_rows,
+        title="¿Qué tipo de atención concentra la demanda derivada?",
+        subtitle=(
+            "Conteos de consulta nueva, control y teleconsulta. La fuente de servicio no "
+            "contiene diagnóstico ni prestación detallada; esa ausencia no se reemplaza por cero."
+        ),
+        key="palliative_referral_type",
+    )
+
+
+def _render_published_territorial_map(
+    summary: dict[str, Any],
+    *,
+    title: str,
+    subtitle: str,
+    key: str,
+    download_name: str,
+) -> None:
+    """Render one governed map, table, CSV and Top-N from the same aggregate."""
+
+    map_rows = summary["rows"]
+    with st.container(border=True):
+        st.markdown(f"#### {title}")
+        st.caption(subtitle)
+        figure = px.scatter_map(
+            pd.DataFrame(map_rows),
+            lat="Latitud",
+            lon="Longitud",
+            size="Episodios",
+            color="Participación (%)",
+            hover_name="Establecimiento",
+            hover_data={
+                "Código DEIS": True,
+                "Comuna": True,
+                "Episodios": True,
+                "Participación (%)": ":.2f",
+                "Variación": True,
+                "Alcance activo": True,
+                "Fuente territorial": True,
+                "Período actual": True,
+                "Período comparación": True,
+                "Latitud": False,
+                "Longitud": False,
+            },
+            size_max=34,
+            zoom=9.6,
+            map_style="carto-positron",
+            color_continuous_scale=[
+                TOKENS["teal_100"],
+                TOKENS["teal_500"],
+                TOKENS["teal_900"],
+            ],
+        )
+        hospital = hec_marker()
+        figure.add_trace(
+            go.Scattermap(
+                lat=[hospital["Latitud"]],
+                lon=[hospital["Longitud"]],
+                mode="markers",
+                marker={
+                    "size": HEC_MARKER_SIZE,
+                    "color": "#111827",
+                    "symbol": HEC_MARKER_SYMBOL,
+                },
+                hovertemplate="Hospital El Carmen · destino contextual<extra></extra>",
+                name="Hospital El Carmen",
+            )
+        )
+        apply_plotly_theme(
+            figure, height=360, margin={"l": 0, "r": 0, "t": 5, "b": 0}
+        )
+        st.plotly_chart(
+            figure,
+            width="stretch",
+            config=PLOTLY_CONFIG,
+            key=key,
+        )
+        public_rows = [
+            {
+                field: value
+                for field, value in row.items()
+                if field not in {"Latitud", "Longitud"}
+            }
+            for row in map_rows
+        ]
+        with st.expander("Tabla accesible y descarga de orígenes publicables"):
+            st.dataframe(public_rows, hide_index=True, width="stretch")
+            st.download_button(
+                "Descargar orígenes agregados (CSV)",
+                rows_to_csv(public_rows),
+                file_name=download_name,
+                mime="text/csv",
+                key=f"download_{key}",
+            )
+
+    top_rows = [
+        {"Origen": row["Establecimiento"], "Episodios": row["Episodios"]}
+        for row in map_rows[:8]
+    ]
+    remainder = sum(row["Episodios"] for row in map_rows[8:])
+    if remainder:
+        top_rows.append(
+            {"Origen": "Otros orígenes publicables", "Episodios": remainder}
+        )
+    figure = build_lollipop_figure(
+        top_rows,
+        label_key="Origen",
+        value_key="Episodios",
+        axis_title="Episodios",
+    )
+    render_chart_card(
+        figure,
+        top_rows,
+        title="¿Qué establecimientos concentran el agregado territorial publicable?",
+        subtitle=(
+            "Top 8 más el resto publicable, derivado exactamente del agregado del mapa."
+        ),
+        key=f"{key}_top_origins",
+    )
+
+
+def render_palliative_territorial_prototype(
+    dataset: CandidateDataset,
+    current: tuple[date, date],
+    previous: tuple[date, date],
+    role_context: dict[str, Any],
+) -> None:
+    """Render a service-level map without fabricating an analytical specialty."""
+
+    service_name = service_label(role_context["service_id"])
+    st.subheader("Origen territorial a nivel de servicio")
+    st.caption(
+        f"El mapa representa derivaciones al servicio {service_name}, no a una "
+        "especialidad ni a un profesional. El servicio no tiene una especialidad "
+        "analítica configurada y no se inventa una para habilitar la vista."
+    )
+    summary = territorial_scope_summary(
+        dataset, current, previous, role_context, minimum_cell_n=10
+    )
+    render_badges(
+        "Supresión geográfica n < 10 preservada",
+        f"{summary['service_referrals']} derivaciones del servicio en el período",
+        source="DERIVACIONES simuladas — alcance de servicio",
+    )
+    if not summary["rows"]:
+        render_compact_metric_cards(
+            [
+                MetricCard(
+                    label="Mapa territorial",
+                    value="No publicable",
+                    subtitle=(
+                        f"{summary['origin_cells']} celdas de origen; "
+                        f"{summary['suppressed_cell_count']} quedan bajo n = 10"
+                    ),
+                )
+            ]
+        )
+        st.info(
+            "El servicio sí tiene derivaciones deterministas, pero ninguna celda de "
+            "establecimiento alcanza el umbral geográfico en el trimestre seleccionado. "
+            "Por ello no se muestran mapa, ranking de orígenes ni controles inutilizables."
+        )
+        composition_rows = service_referral_status_composition(
+            dataset, current, role_context
+        )
+        composition_figure = build_lollipop_figure(
+            composition_rows,
+            label_key="Resultado ambulatorio",
+            value_key="Derivaciones",
+            axis_title="Derivaciones",
+        )
+        render_chart_card(
+            composition_figure,
+            composition_rows,
+            title="Alternativa válida: resultado ambulatorio no geográfico",
+            subtitle=(
+                "Estados agregados del servicio sin revelar celdas geográficas "
+                "suprimidas ni atribuir actividad a pacientes o profesionales."
+            ),
+            key="palliative_territorial_fallback",
+        )
+        return
+    map_key = (
+        "palliative_service_origin_map"
+        if role_context["service_id"] == "alivio_dolor_cuidados_paliativos"
+        else f"service_level_origin_map_{role_context['service_id']}"
+    )
+    _render_published_territorial_map(
+        summary,
+        title=f"Derivaciones al servicio {service_name} por establecimiento",
+        subtitle=(
+            "Agregación a nivel de servicio y establecimiento, con n ≥ 10. "
+            "Tamaño = episodios; color = participación dentro del servicio."
+        ),
+        key=map_key,
+        download_name=f"hec_{role_context['service_id']}_origins.csv",
+    )
+
+
+def render_diabetology_activity_prototype(
+    dataset: CandidateDataset,
+    current: tuple[date, date],
+    previous: tuple[date, date],
+    role_context: dict[str, Any],
+) -> None:
+    """Render the bounded Diabetology professional activity prototype."""
+
+    comparison_rows = _pair_two_period_rows(
+        role_activity_trend(dataset, current, previous, role_context),
+        category_key="Serie",
+        value_key="Eventos",
+    )
+    comparison_figure = build_dumbbell_figure(
+        comparison_rows,
+        label_key="Serie",
+        comparison_key="Comparación",
+        current_key="Actual",
+        axis_title="Actividades",
+    )
+    render_chart_card(
+        comparison_figure,
+        comparison_rows,
+        title="¿Cómo cambió la actividad clínica frente al trimestre anterior?",
+        subtitle=(
+            "Programación, actividad completada e inasistencia conservan conteos "
+            "separados. Dos períodos constituyen una comparación, no una tendencia."
+        ),
+        key="diabetology_activity_comparison",
+    )
+    composition_rows = role_activity_composition(dataset, current, role_context)[:8]
+    composition_figure = build_lollipop_figure(
+        composition_rows,
+        label_key="Tipo de actividad",
+        value_key="Eventos",
+        axis_title="Actividades",
+    )
+    render_chart_card(
+        composition_figure,
+        composition_rows,
+        title="¿Qué actividades componen el trabajo clínico del período?",
+        subtitle="Tipos de actividad mutuamente identificados, ordenados por volumen.",
+        key="diabetology_activity_composition",
+    )
+
+
+def render_diabetology_origin_context(
+    dataset: CandidateDataset,
+    current: tuple[date, date],
+    previous: tuple[date, date],
+    role_context: dict[str, Any],
+) -> None:
+    """Render the governed specialty map without professional attribution."""
+
+    render_origin_map(dataset, current, previous, role_context)
+
+
 def render_role_activity_analytics(
     dataset: CandidateDataset,
     current: tuple[date, date],
@@ -221,24 +705,23 @@ def render_role_activity_analytics(
 ) -> None:
     role_id = role_context["role_id"]
     title_by_role = {
-        "director": "Tendencia institucional de demanda validada",
-        "medical_director": "Tendencia clínico-operacional institucional",
-        "service_chief_clinical": "Tendencia ambulatoria del servicio",
-        "service_chief_surgical": "Tendencia quirúrgica del servicio",
-        "professional_clinical": "Tendencia de actividad clínica del perfil simulado",
-        "professional_surgical": "Tendencia de actividad quirúrgica del perfil simulado",
+        "director": "Comparación institucional de demanda validada",
+        "medical_director": "Comparación clínico-operacional institucional",
+        "service_chief_clinical": "Comparación ambulatoria del servicio",
+        "service_chief_surgical": "Comparación quirúrgica del servicio",
+        "professional_clinical": "Comparación de actividad clínica del perfil simulado",
+        "professional_surgical": "Comparación de actividad quirúrgica del perfil simulado",
     }
     trend = role_activity_trend(dataset, current, previous, role_context)
     if not trend:
         st.warning("No hay agregados de actividad disponibles para este contexto.")
         return
-    trend_figure = px.bar(
-        pd.DataFrame(trend),
-        x="Período",
-        y="Eventos",
-        color="Serie",
-        barmode="group",
-        color_discrete_sequence=PALETTE,
+    trend_figure = build_grouped_two_period_bar_figure(
+        trend,
+        period_key="Período",
+        series_key="Serie",
+        value_key="Eventos",
+        axis_title="Eventos",
     )
     _chart_and_table(
         trend_figure,
@@ -252,12 +735,27 @@ def render_role_activity_analytics(
         st.caption("No hay composición publicable para el período seleccionado.")
         return
     category = next(key for key in composition[0] if key != "Eventos")
-    composition_figure = px.bar(
-        pd.DataFrame(composition),
-        x="Eventos",
-        y=category,
-        orientation="h",
-        color_discrete_sequence=[PALETTE[0]],
+    category_color_map = None
+    if category == "Especialidad":
+        category_color_map = {
+            label: (
+                COMPARISON_COLOR
+                if label == "Servicios sin especialidad analítica"
+                else SPECIALTY_PALETTE[index % len(SPECIALTY_PALETTE)]
+            )
+            for index, label in enumerate(
+                sorted(
+                    (str(row[category]) for row in composition),
+                    key=str.casefold,
+                )
+            )
+        }
+    composition_figure = build_horizontal_category_bar_figure(
+        composition,
+        label_key=category,
+        value_key="Eventos",
+        axis_title="Eventos",
+        color_map=category_color_map,
     )
     _chart_and_table(
         composition_figure,
@@ -267,19 +765,111 @@ def render_role_activity_analytics(
     )
 
 
+def render_surgical_territorial_map(
+    dataset: CandidateDataset,
+    current: tuple[date, date],
+    previous: tuple[date, date],
+    role_context: dict[str, Any],
+) -> None:
+    """Render surgical territorial demand independently from ambulatory referrals."""
+
+    st.subheader("Origen territorial de la demanda quirúrgica")
+    st.caption(
+        "Esta vista agrega casos de CIRUGIAS por establecimiento de origen dentro del "
+        "servicio o especialidad seleccionados. Permanece separada de la red "
+        "ambulatoria y nunca atribuye casos a un profesional simulado."
+    )
+    procedure_options = surgical_procedure_options(
+        dataset, current, role_context
+    )
+    procedure_labels = {
+        item["procedure_code"]: item["label_es"] for item in procedure_options
+    }
+    selected_procedure = st.selectbox(
+        "Procedimiento incluido en el mapa",
+        [None, *procedure_labels],
+        format_func=lambda value: (
+            "Todos los procedimientos"
+            if value is None
+            else procedure_labels[value]
+        ),
+        key=(
+            f"surgical_map_procedure_{role_context['role_id']}_"
+            f"{role_context.get('professional_lens') or 'service'}_"
+            f"{role_context.get('service_id')}_{role_context.get('specialty_id') or 'all'}"
+        ),
+    )
+    map_context = {**role_context, "procedure_code": selected_procedure}
+    summary = territorial_scope_summary(
+        dataset, current, previous, map_context, minimum_cell_n=10
+    )
+    render_badges(
+        "Supresión geográfica n < 10 preservada",
+        f"{summary['service_referrals']} casos quirúrgicos en el período",
+        source=f"CIRUGIAS simuladas — {summary['scope_label']}",
+    )
+    if not summary["rows"]:
+        render_compact_metric_cards(
+            [
+                MetricCard(
+                    label="Mapa territorial quirúrgico",
+                    value="No disponible",
+                    subtitle=(
+                        "La carga no contiene celdas publicables para este alcance; "
+                        "la ausencia no se presenta como cero"
+                    ),
+                )
+            ]
+        )
+        return
+    context_key = (
+        f"{role_context['role_id']}_{role_context.get('professional_lens') or 'service'}_"
+        f"{role_context.get('service_id')}_{role_context.get('specialty_id') or 'all'}_"
+        f"{selected_procedure or 'all'}"
+    )
+    _render_published_territorial_map(
+        summary,
+        title="Casos quirúrgicos por establecimiento de origen",
+        subtitle=(
+            f"{summary['scope_label']} · "
+            f"{procedure_labels.get(selected_procedure, 'Todos los procedimientos')}. "
+            "Tamaño = casos publicables; color = "
+            "participación dentro del alcance quirúrgico activo."
+        ),
+        key=f"surgical_origin_map_{context_key}",
+        download_name="hec_origenes_quirurgicos_agregados.csv",
+    )
+
+
 def render_origin_map(
     dataset: CandidateDataset,
     current: tuple[date, date],
     previous: tuple[date, date],
     role_context: dict[str, Any],
 ) -> None:
+    role_id = role_context["role_id"]
+    if role_id in {"service_chief_surgical", "professional_surgical"}:
+        render_surgical_territorial_map(
+            dataset, current, previous, role_context
+        )
+        return
+    service_id = role_context.get("service_id")
+    if (
+        role_id == "service_chief_clinical"
+        and service_id
+        and role_context.get("specialty_id") is None
+        and not specialty_choices(service_id)
+    ):
+        render_palliative_territorial_prototype(
+            dataset, current, previous, role_context
+        )
+        return
     st.subheader("Red de derivación hacia el HEC")
     st.caption(
         "Análisis agregado de datos completamente simulados. Una burbuja representa un "
         "establecimiento DEIS y nunca una persona; se suprimen celdas con n < 10. "
         "El marcador del Hospital El Carmen es contextual y no representa demanda."
     )
-    role_id = role_context["role_id"]
     is_director = role_id in {"director", "medical_director"}
     context_key = f"{role_id}_{role_context.get('professional_lens') or 'institutional'}"
     institutional_context = dict(role_context)
@@ -398,7 +988,10 @@ def render_origin_map(
             )
     map_context["referral_diagnosis_id"] = selected_diagnosis_id
     map_context["map_mode"] = mode
-    rows = origin_bubbles(dataset, current, previous, map_context)
+    territorial_summary = territorial_scope_summary(
+        dataset, current, previous, map_context, minimum_cell_n=10
+    )
+    rows = territorial_summary["rows"]
     if not rows:
         st.warning("No hay celdas geográficas publicables para los filtros actuales.")
         return
@@ -461,6 +1054,7 @@ def render_origin_map(
                 "Código DEIS": True,
                 "Comuna": True,
                 "Episodios": True,
+                "Episodios comparación": True,
                 "Participación (%)": ":.2f",
                 "Abiertos": True,
                 "Variación": True,
@@ -473,6 +1067,8 @@ def render_origin_map(
                 "Participación de especialidad en centro (%)": ":.2f",
                 "Período actual": True,
                 "Período comparación": True,
+                "Alcance activo": True,
+                "Fuente territorial": True,
                 "Latitud": False,
                 "Longitud": False,
             },
@@ -498,6 +1094,11 @@ def render_origin_map(
                 name="Hospital El Carmen",
             )
         )
+        apply_plotly_theme(
+            figure,
+            height=540,
+            margin={"l": 0, "r": 0, "t": 10, "b": 0},
+        )
         figure.update_layout(
             margin={"l": 0, "r": 0, "t": 10, "b": 0},
             legend_title_text="",
@@ -506,11 +1107,12 @@ def render_origin_map(
         st.plotly_chart(
             figure,
             width="stretch",
+            config=PLOTLY_CONFIG,
             key=f"referral_origin_map_{context_key}_{mode}_{selected_specialty_id}_{selected_diagnosis_id}_{color_mode}",
         )
     except Exception as exc:  # tile/render failures must not hide the evidence table
         st.warning(f"El mapa no pudo representarse; la tabla sigue disponible. ({exc})")
-    with st.expander("Tabla accesible y descargable del mapa", expanded=True):
+    with st.expander("Tabla accesible y descargable del mapa", expanded=False):
         table_rows = [
             {key: value for key, value in row.items() if key not in {"Latitud", "Longitud"}}
             for row in rows
@@ -544,6 +1146,7 @@ def render_origin_map(
             "Aumento": "#B42318",
             "Estable": "#667085",
             "Disminución": "#0B6B69",
+            "Comparación no publicable": "#98A2A3",
         },
     )
     _chart_and_table(
@@ -603,7 +1206,7 @@ def render_origin_map(
         [
             {
                 "Volumen actual": selected_map_row["Episodios"],
-                "Variación Q2 vs Q1": selected_map_row["Variación"],
+                "Variación vs comparación": selected_map_row["Variación"],
                 "Tendencia": selected_map_row["Tendencia"],
             }
         ],
@@ -705,7 +1308,13 @@ def render_origin_map(
         "Contexto ambulatorio de consulta nueva y control; la lista quirúrgica se "
         "mantiene separada."
     )
-    st.dataframe(queue_context, hide_index=True, width="stretch")
+    if queue_context:
+        st.dataframe(queue_context, hide_index=True, width="stretch")
+    else:
+        st.info(
+            "El desglose por cola no es publicable con n ≥ 10 para este "
+            "establecimiento y alcance. No se reemplaza por cero."
+        )
     if role_id.startswith("professional_"):
         st.info(
             "Esta vista describe la red agregada de la especialidad del perfil simulado. "

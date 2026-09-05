@@ -63,6 +63,30 @@ map/table/center reconciliation mismatch. It also fails if `111101` appears in
 any packaged origin field, external aggregate, accessible table, or external
 CSV.
 
+## Territorial coverage closure
+
+The territorial source is governed by role instead of reusing the institutional
+ambulatory map everywhere. Director, Medical Director, configured clinical
+specialties, clinical professionals, and the clinical mixed lens use the
+external ambulatory waiting-list network. Surgical chiefs, surgical
+professionals, and the surgical mixed lens use `CIRUGIAS`, with optional
+procedure filtering and no individual attribution. Clinical services without
+an analytical specialty use service-level `DERIVACIONES`; this is the only
+valid scope for Palliative Care and Hospital de Día.
+
+The seed-617 generator concentrates a controlled share of simulated service
+referrals among valid public DEIS establishments without increasing total
+volume. Surgical origins are also allocated deterministically so each supported
+procedure has a publishable cell in both Q1 and Q2. The rule n < 10 remains
+strict for current cells, comparison values, and geographic drill-downs.
+
+`scripts/audit_territorial_coverage.py` exhaustively evaluates all 74 default
+role contexts in Q1 and Q2, plus every surgical procedure-period combination.
+It verifies source and scope, public coordinates, suppression, absence of
+professional attribution, map/table/CSV reconciliation, meaningful signature
+changes, mixed-lens independence, Palliative Care without a fabricated
+specialty, and deterministic generation.
+
 ## Interpretation limits
 
 - All operational, profile, and referral-diagnosis data are simulated.
