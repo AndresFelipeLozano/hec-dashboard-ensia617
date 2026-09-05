@@ -69,10 +69,16 @@ class StreamlitAppTests(unittest.TestCase):
     def test_entrypoint_loads_with_academic_simulation_disclaimer(self):
         at = self.app()
         self.assertEqual(len(at.exception), 0)
-        self.assertIn("HEC | Apoyo a decisiones por rol", [item.value for item in at.title])
-        combined = " ".join(item.value for item in [*at.caption, *at.info])
+        rendered = " ".join(
+            item.value for item in at.markdown if isinstance(item.value, str)
+        )
+        self.assertIn("Tablero de gestión HEC", rendered)
+        combined = " ".join(
+            item.value for item in [*at.caption, *at.info, *at.markdown]
+            if isinstance(item.value, str)
+        )
         self.assertIn("Demostración académica", combined)
-        self.assertIn("Datos completamente simulados", combined)
+        self.assertIn("datos completamente simulados", combined.casefold())
         self.assertEqual(len(at.get("json")), 0)
         self.assert_footer(at)
 
@@ -119,6 +125,112 @@ class StreamlitAppTests(unittest.TestCase):
         self.assertEqual(len(at.exception), 0)
         self.assertIn("Visión institucional — Director", [item.value for item in at.header])
         self.assertLessEqual(len(at.metric), 6)
+
+    def test_director_prototype_has_role_tabs_and_isolated_inpatient_history(self):
+        at = self.select_role("Directivo", "Director")
+        self.open_callable_page(at, "dashboard")
+        self.assertEqual(
+            [item.label for item in at.get("tab")],
+            [
+                "Resumen ejecutivo",
+                "Acceso ambulatorio",
+                "Hospitalización",
+                "Red territorial",
+                "Métodos y calidad",
+            ],
+        )
+        self.assertIn("Hospitalización y camas", [item.value for item in at.subheader])
+        inpatient_selector = at.selectbox(key="inpatient_trend_director")
+        self.assertEqual(inpatient_selector.value, "inpatient_occupancy_pct")
+        rendered = " ".join(
+            item.value for item in at.markdown if isinstance(item.value, str)
+        )
+        self.assertIn("Curated inpatient reference — 2025", rendered)
+        self.assertIn("Período fijo: enero–diciembre de 2025", rendered)
+        self.assertIn("Referencia descriptiva · sin meta ni delta", rendered)
+        self.assertNotIn("Curated inpatient reference — Q2 2026", rendered)
+        inpatient_cards = next(
+            item.value
+            for item in at.markdown
+            if isinstance(item.value, str) and "Ocupación de camas" in item.value
+        )
+        self.assertEqual(inpatient_cards.count('class="hec-metric-card"'), 4)
+
+    def test_non_directorial_dashboard_does_not_invoke_inpatient_component(self):
+        at = self.select_role("Jefe de Servicio", "Clínico")
+        self.open_callable_page(at, "dashboard")
+        self.assertNotIn("Hospitalización y camas", [item.value for item in at.subheader])
+        self.assertFalse(
+            any(
+                item.key and item.key.startswith("inpatient_trend_")
+                for item in at.selectbox
+            )
+        )
+
+    def test_palliative_prototype_is_service_level_with_publishable_map(self):
+        at = self.app()
+        at.selectbox(key="role_category").set_value("Jefe de Servicio").run()
+        at.selectbox(key="role_variant").set_value("Clínico").run()
+        at.selectbox(key="role_service_id").set_value(
+            "alivio_dolor_cuidados_paliativos"
+        ).run()
+        self.assertNotIn("role_specialty_id", [item.key for item in at.selectbox])
+        next(button for button in at.button if button.label == "Entrar al dashboard").click().run()
+        self.open_callable_page(at, "dashboard")
+        self.assertEqual(len(at.exception), 0)
+        self.assertEqual(
+            [item.label for item in at.get("tab")],
+            [
+                "Resumen del servicio",
+                "Comparación ambulatoria",
+                "Origen territorial",
+                "Datos y métodos",
+            ],
+        )
+        self.assertTrue(
+            any(
+                item.id.endswith("-palliative_service_origin_map")
+                for item in at.get("plotly_chart")
+            )
+        )
+        content = " ".join(
+            item.value
+            for item in [*at.markdown, *at.caption, *at.info]
+            if isinstance(item.value, str)
+        )
+        self.assertIn("Derivaciones al servicio", content)
+        self.assertIn("no a una especialidad ni a un profesional", content)
+        self.assertNotIn("No publicable", content)
+
+    def test_diabetology_prototype_has_bounded_role_specific_tabs(self):
+        at = self.app()
+        at.selectbox(key="role_category").set_value("Profesional").run()
+        at.selectbox(key="role_variant").set_value("Clínico").run()
+        at.selectbox(key="role_prof_specialty_clinical").set_value(
+            "diabetologia"
+        ).run()
+        at.selectbox(key="role_prof_profile_clinical_diabetologia").set_value(
+            "SIM-PROF-C-DIABETOLOGIA-A"
+        ).run()
+        next(button for button in at.button if button.label == "Entrar al dashboard").click().run()
+        self.open_callable_page(at, "dashboard")
+        self.assertEqual(len(at.exception), 0)
+        self.assertEqual(
+            [item.label for item in at.get("tab")],
+            [
+                "Resumen clínico",
+                "Actividad comparada",
+                "Origen de la demanda",
+                "Datos y métodos",
+            ],
+        )
+        rendered = " ".join(
+            item.value
+            for item in [*at.markdown, *at.caption, *at.info]
+            if isinstance(item.value, str)
+        )
+        self.assertIn("no constituyen ranking", rendered.casefold())
+        self.assertIn("No atribuye derivaciones", rendered)
 
     def test_medical_director_is_distinct(self):
         at = self.select_role("Directivo", "Director Médico")

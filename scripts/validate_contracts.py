@@ -111,6 +111,7 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
         "ui": config_dir / "ui_contract.json",
         "professional_profiles": config_dir / "professional_profiles.json",
         "referral_diagnoses": config_dir / "referral_diagnoses.json",
+        "inpatient_reference": config_dir / "inpatient_reference.json",
     }
     contracts = {name: load_json(path) for name, path in paths.items()}
     services = contracts["services"]
@@ -119,6 +120,7 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
     ui = contracts["ui"]
     professional_profiles = contracts["professional_profiles"]
     referral_diagnoses = contracts["referral_diagnoses"]
+    inpatient_reference = contracts["inpatient_reference"]
 
     errors: list[str] = []
     unique_count = 0
@@ -152,6 +154,11 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
             "referral_diagnoses.diagnoses",
         ),
         (indicators["indicators"], "indicator_id", "indicators.indicators"),
+        (
+            inpatient_reference["indicators"],
+            "indicator_id",
+            "inpatient_reference.indicators",
+        ),
         (roles["role_views"], "role_id", "role_matrix.role_views"),
         (roles["finding_rules"], "rule_id", "role_matrix.finding_rules"),
         (roles["map_contracts"], "role_id", "role_matrix.map_contracts"),
@@ -171,10 +178,93 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
     simulated_professional_ids = namespaces["professional_profiles.profiles"]
     diagnosis_ids = namespaces["referral_diagnoses.diagnoses"]
     indicator_ids = namespaces["indicators.indicators"]
+    inpatient_indicator_ids = namespaces["inpatient_reference.indicators"]
     role_ids = namespaces["role_matrix.role_views"]
     rule_ids = namespaces["role_matrix.finding_rules"]
     map_role_ids = namespaces["role_matrix.map_contracts"]
     ui_role_ids = namespaces["ui.view_contracts"]
+
+    expected_inpatient_indicators = {
+        "inpatient_occupancy_pct",
+        "inpatient_average_beds",
+        "inpatient_average_length_of_stay_days",
+        "inpatient_discharges_total",
+        "inpatient_crude_lethality_pct",
+    }
+    errors.extend(
+        require_value(
+            inpatient_indicator_ids,
+            expected_inpatient_indicators,
+            "inpatient_reference indicator coverage",
+        )
+    )
+    inpatient_roles = set(inpatient_reference.get("allowed_role_ids", []))
+    checked, found_errors = validate_references(
+        inpatient_roles, role_ids, "inpatient_reference allowed roles"
+    )
+    reference_count += checked
+    errors.extend(found_errors)
+    errors.extend(
+        require_value(
+            inpatient_roles,
+            {"director", "medical_director"},
+            "inpatient_reference role isolation",
+        )
+    )
+    errors.extend(
+        require_value(
+            inpatient_reference.get("establishment_code"),
+            "111101",
+            "inpatient_reference HEC code",
+        )
+    )
+    errors.extend(
+        require_value(
+            inpatient_reference.get("observation_period", {}).get("performance_year"),
+            2025,
+            "inpatient_reference performance year",
+        )
+    )
+    errors.extend(
+        require_value(
+            inpatient_reference.get("observation_period", {}).get("comparison_period"),
+            None,
+            "inpatient_reference comparison period",
+        )
+    )
+    errors.extend(
+        require_value(
+            inpatient_reference.get("calculation_policy", {}).get(
+                "cross_source_comparison_allowed"
+            ),
+            False,
+            "inpatient_reference cross-source comparison",
+        )
+    )
+    errors.extend(
+        require_value(
+            inpatient_reference.get("calculation_policy", {}).get(
+                "traffic_light_without_validated_target_allowed"
+            ),
+            False,
+            "inpatient_reference traffic-light policy",
+        )
+    )
+    for indicator in inpatient_reference["indicators"]:
+        errors.extend(
+            require_value(
+                indicator.get("classification"),
+                "descriptive_context",
+                f"{indicator.get('indicator_id')} classification",
+            )
+        )
+        errors.extend(
+            require_value(
+                indicator.get("target"),
+                None,
+                f"{indicator.get('indicator_id')} target",
+            )
+        )
 
     reference_sets = [
         (
@@ -813,6 +903,7 @@ def validate_contracts(repo_root: Path) -> dict[str, int]:
         "view_limits": len(ui["view_contracts"]),
         "safety_controls": len(false_invariants) + len(true_invariants) + 4,
         "indicators": len(indicator_ids),
+        "inpatient_indicators": len(inpatient_indicator_ids),
         "roles": len(role_ids),
         "units": len(unit_ids),
         "specialties": len(specialty_ids),
@@ -838,6 +929,7 @@ def main() -> int:
         "PASS contracts: "
         f"{counts['contract_files']} files; "
         f"{counts['indicators']} indicators; "
+        f"{counts['inpatient_indicators']} inpatient reference indicators; "
         f"{counts['roles']} roles; "
         f"{counts['units']} units; "
         f"{counts['specialties']} specialties; "

@@ -1,0 +1,91 @@
+{
+  "reference_contract_version": "1.0.0",
+  "dataset_id": "hec-inpatient-reference-2025-v1",
+  "status": "curated_historical_reference",
+  "allowed_role_ids": [
+    "director",
+    "medical_director"
+  ],
+  "establishment_code": "111101",
+  "annual_file": "data/reference/hec_inpatient_2025.csv",
+  "monthly_file": "data/reference/hec_inpatient_monthly_2025.csv",
+  "manifest_file": "data/reference/hec_inpatient_2025_manifest.json",
+  "observation_period": {
+    "performance_year": 2025,
+    "period_start": "2025-01-01",
+    "period_end": "2025-12-31",
+    "comparison_period": null
+  },
+  "source_class": "curated_historical_reference",
+  "source_badge": "Curated inpatient reference — 2025",
+  "calculation_policy": {
+    "rounding_decimals": 2,
+    "missing_values": "unavailable",
+    "zero_denominator": "zero_denominator",
+    "monthly_ratios": "recalculate_from_monthly_primitives",
+    "cross_source_comparison_allowed": false,
+    "traffic_light_without_validated_target_allowed": false
+  },
+  "indicators": [
+    {
+      "indicator_id": "inpatient_occupancy_pct",
+      "display_name_es": "Ocupación de camas",
+      "calculation": "ratio",
+      "numerator_field": "occupied_bed_days",
+      "denominator_field": "available_bed_days",
+      "scale": 100,
+      "unit": "percentage",
+      "classification": "descriptive_context",
+      "target": null,
+      "explanation_es": "Días cama ocupados sobre días cama disponibles. Medida descriptiva sin meta HEC configurada."
+    },
+    {
+      "indicator_id": "inpatient_average_beds",
+      "display_name_es": "Promedio de camas disponibles",
+      "calculation": "calendar_average",
+      "numerator_field": "available_bed_days",
+      "denominator_field": "calendar_days",
+      "scale": 1,
+      "unit": "beds",
+      "classification": "descriptive_context",
+      "target": null,
+      "explanation_es": "Días cama disponibles divididos por los días calendario del período."
+    },
+    {
+      "indicator_id": "inpatient_average_length_of_stay_days",
+      "display_name_es": "Estada promedio",
+      "calculation": "ratio",
+      "numerator_field": "total_stay_days",
+      "denominator_field": "discharges",
+      "scale": 1,
+      "unit": "days",
+      "classification": "descriptive_context",
+      "target": null,
+      "explanation_es": "Días de estada sobre egresos. Medida descriptiva sin ajuste por complejidad."
+    },
+    {
+      "indicator_id": "inpatient_discharges_total",
+      "display_name_es": "Egresos hospitalarios",
+      "calculation": "count",
+      "numerator_field": "discharges",
+      "denominator_field": null,
+      "scale": 1,
+      "unit": "count",
+      "classification": "descriptive_context",
+      "target": null,
+      "explanation_es": "Total de egresos hospitalarios registrados en el período."
+    },
+    {
+      "indicator_id": "inpatient_crude_lethality_pct",
+      "display_name_es": "Letalidad hospitalaria bruta",
+      "calculation": "ratio",
+      "numerator_field": "death_discharges",
+      "denominator_field": "discharges",
+      "scale": 100,
+      "unit": "percentage",
+      "classification": "descriptive_context",
+      "target": null,
+      "explanation_es": "Egresos por defunción sobre egresos totales. Es una medida bruta, no ajustada por riesgo, no apta para rankings ni inferencias causales."
+    }
+  ]
+}

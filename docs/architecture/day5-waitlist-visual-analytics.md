@@ -121,6 +121,7 @@ Run the closure checks with:
     ./.venv/bin/python scripts/audit_day4_coverage.py
     ./.venv/bin/python scripts/audit_day5.py
     ./.venv/bin/python scripts/audit_day5_map.py
+    ./.venv/bin/python scripts/audit_territorial_coverage.py
     ./.venv/bin/python -m unittest discover -s tests -p 'test_*.py' -q
 
 `audit_day5.py` verifies 52 specialty-period contexts, 54

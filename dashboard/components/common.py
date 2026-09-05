@@ -3,16 +3,29 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Any, MutableMapping
+from html import escape
+from contextlib import contextmanager
+from dataclasses import dataclass
+from typing import Any, Iterator, MutableMapping, Sequence
 
 import streamlit as st
 
 from hec_dashboard.app_config import role_label, service_label, specialty_label
 from hec_dashboard.app_state import Keys, reset_role
 from hec_dashboard.presentation import KpiPresentation
+from dashboard.components.design import render_design_system
 
 
 FOOTER_TEXT = "Desarrollo propuesto en la asignatura Tecnología de la Información, Magíster en Administración de Salud, FEN."
+
+
+@dataclass(frozen=True)
+class MetricCard:
+    """Presentation-only content for the shared responsive card grid."""
+
+    label: str
+    value: str
+    subtitle: str
 
 
 def render_footer() -> None:
@@ -55,10 +68,16 @@ def _period_text(value: tuple[date, date] | None) -> str:
 
 
 def render_app_frame(state: MutableMapping[str, Any]) -> None:
-    st.title("HEC | Apoyo a decisiones por rol")
-    st.caption(
-        "Demostración académica ENSIA617 · Datos completamente simulados · "
-        "No corresponde a autenticación ni a un sistema institucional productivo."
+    render_design_system()
+    st.markdown(
+        """
+        <header class="hec-app-banner">
+            <p class="hec-app-kicker">Hospital El Carmen</p>
+            <h1 class="hec-app-title">Tablero de gestión HEC</h1>
+            <p class="hec-app-subtitle">Apoyo a decisiones por rol · Demostración académica ENSIA617 · Los módulos operacionales usan datos completamente simulados.</p>
+        </header>
+        """,
+        unsafe_allow_html=True,
     )
     metadata = state.get(Keys.ACTIVE_DATASET_METADATA) or {}
     context = state.get(Keys.ROLE_CONTEXT) or {}
@@ -100,8 +119,9 @@ def render_app_frame(state: MutableMapping[str, Any]) -> None:
 
 def render_simulation_notice() -> None:
     st.caption(
-        "**Datos completamente simulados.** No contienen identificadores reales, "
-        "direcciones de pacientes ni detalle a nivel de paciente."
+        "**Datos operacionales completamente simulados.** No contienen identificadores "
+        "reales, direcciones de pacientes ni detalle a nivel de paciente. Las referencias "
+        "históricas curadas, cuando están disponibles, se identifican y separan por fuente."
     )
 
 
@@ -125,6 +145,78 @@ def render_kpi_cards(cards: list[KpiPresentation]) -> None:
                     f"Estado: {card.status_label_es}. "
                     f"n válido: {card.valid_n}. {card.explanation_es}"
                 )
+
+
+def render_compact_metric_cards(cards: Sequence[MetricCard]) -> None:
+    """Render an adaptive, neutral card grid using escaped static HTML."""
+
+    if not cards:
+        st.caption("No hay indicadores disponibles para este contexto.")
+        return
+    markup = ['<div class="hec-metric-grid" role="list">']
+    for card in cards:
+        markup.append(
+            '<article class="hec-metric-card" role="listitem">'
+            f'<div class="hec-metric-label">{escape(card.label)}</div>'
+            f'<div class="hec-metric-value">{escape(card.value)}</div>'
+            f'<div class="hec-metric-subtitle">{escape(card.subtitle)}</div>'
+            "</article>"
+        )
+    markup.append("</div>")
+    st.markdown("".join(markup), unsafe_allow_html=True)
+
+
+def render_compact_kpi_cards(
+    cards: Sequence[KpiPresentation], *, show_interpretation: bool = True
+) -> None:
+    """Adapt governed operational KPI results to the shared compact card grid."""
+
+    available = [card for card in cards if card.is_available]
+    render_compact_metric_cards(
+        [
+            MetricCard(
+                label=card.label_es,
+                value=card.value_text,
+                subtitle=(
+                    f"vs. período anterior: {card.delta_text} · n {card.valid_n}"
+                    if card.delta_text
+                    else f"{card.status_label_es} · n válido {card.valid_n}"
+                ),
+            )
+            for card in available
+        ]
+    )
+    if show_interpretation:
+        render_interpretation(list(cards))
+
+
+def render_badges(*labels: str, source: str | None = None) -> None:
+    """Render compact source/quality context without traffic-light semantics."""
+
+    badges = [
+        f'<span class="hec-badge">{escape(label)}</span>'
+        for label in labels
+        if label
+    ]
+    if source:
+        badges.insert(
+            0,
+            f'<span class="hec-badge hec-badge--source">{escape(source)}</span>',
+        )
+    st.markdown(
+        f'<div class="hec-badge-row">{"".join(badges)}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+@contextmanager
+def chart_card(title: str, decision_cue: str) -> Iterator[None]:
+    """Provide consistent chart-card anatomy for shared Streamlit/Plotly views."""
+
+    with st.container(border=True):
+        st.markdown(f"#### {title}")
+        st.caption(decision_cue)
+        yield
 
 
 def render_interpretation(cards: list[KpiPresentation]) -> None:

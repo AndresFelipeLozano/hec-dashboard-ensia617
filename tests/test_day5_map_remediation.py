@@ -408,13 +408,13 @@ class Day5MapRemediationTests(unittest.TestCase):
         self.assertEqual(metrics["internal_waitlist_records"], 1)
         self.assertEqual(metrics["external_network_records"], 6239)
 
-    def test_ui_adds_hec_destination_trace_once(self):
+    def test_each_map_adds_one_hec_destination_trace(self):
         source = (REPO_ROOT / "dashboard/components/visuals.py").read_text(
             encoding="utf-8"
         )
-        self.assertEqual(source.count('name="Hospital El Carmen"'), 1)
-        self.assertIn('"size": HEC_MARKER_SIZE', source)
-        self.assertIn('"symbol": HEC_MARKER_SYMBOL', source)
+        self.assertEqual(source.count('name="Hospital El Carmen"'), 2)
+        self.assertEqual(source.count('"size": HEC_MARKER_SIZE'), 2)
+        self.assertEqual(source.count('"symbol": HEC_MARKER_SYMBOL'), 2)
 
     def test_map_table_and_csv_are_identical(self):
         table = [
@@ -432,10 +432,11 @@ class Day5MapRemediationTests(unittest.TestCase):
         composition = diagnosis_composition_by_establishment(
             self.dataset, Q2, context
         )
-        self.assertEqual(
+        self.assertLessEqual(
             sum(row["Episodios"] for row in composition),
             len(scoped_waitlist_rows(self.dataset, Q2, context)),
         )
+        self.assertTrue(all(row["Episodios"] >= 10 for row in composition))
 
     def test_no_patient_coordinate_or_identity_field_exists(self):
         columns = {

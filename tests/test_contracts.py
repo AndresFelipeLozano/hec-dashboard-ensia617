@@ -21,8 +21,9 @@ from validate_contracts import (  # noqa: E402
 class ContractTests(unittest.TestCase):
     def test_real_project_contracts_validate_completely(self):
         counts = validate_contracts(REPO_ROOT)
-        self.assertEqual(counts["contract_files"], 6)
+        self.assertEqual(counts["contract_files"], 7)
         self.assertEqual(counts["indicators"], 41)
+        self.assertEqual(counts["inpatient_indicators"], 5)
         self.assertEqual(counts["roles"], 7)
         self.assertEqual(counts["units"], 30)
         self.assertEqual(counts["specialties"], 26)
@@ -87,6 +88,7 @@ class ContractTests(unittest.TestCase):
                 "ui_contract.json",
                 "professional_profiles.json",
                 "referral_diagnoses.json",
+                "inpatient_reference.json",
             ):
                 shutil.copy2(REPO_ROOT / "config" / name, config / name)
             path = config / "professional_profiles.json"

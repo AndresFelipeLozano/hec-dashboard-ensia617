@@ -34,8 +34,8 @@
     "LISTA_ESPERA_AMB": 6240
   },
   "artifact_checksums_sha256": {
-    "derivaciones_simuladas.csv": "6e9b1c6678e3a128ee5764d0cefbe1c105ce7c3b6afe23594c014e116045240e",
-    "cirugias_simuladas.csv": "c5151163537710dd900fed6f91e8950cad5e09597c12153b1c8da637ae4286d8",
+    "derivaciones_simuladas.csv": "aaa2724abba37dcdb01a244d71ec9368cc1472aa00920c789da7654463e0d306",
+    "cirugias_simuladas.csv": "45321089649a6f280cd531b4d6205306df72aa818710cef3499a398b1a209e86",
     "actividad_profesional_simulada.csv": "c462b51e5bc6314d57ec933e468d6990be9e82e701554d9f48c6ed944e2988db",
     "lista_espera_ambulatoria_simulada.csv": "0a92d90ad2dd9f3b1a7ed42a4220ac289241f057bc8ec837f20775fa4ea56af7"
   }
